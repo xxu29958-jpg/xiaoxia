@@ -1,0 +1,6 @@
+name: astrbot_plugin_ada_companion
+display_name: 小夏管理中心
+author: local
+version: 1.8.0
+description: Shared QQ/WeChat memory, models, memes, interactive browser and Windows desktop controls.
+astrbot_version: '>=4.29.1'

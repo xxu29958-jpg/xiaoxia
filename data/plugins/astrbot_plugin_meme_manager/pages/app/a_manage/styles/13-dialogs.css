@@ -1,0 +1,124 @@
+
+@media (max-width: 960px), (pointer: coarse) {
+  .selection-dock {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  #selection-dock-summary {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  #selection-dock-exit {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+  #selection-dock-move,
+  #selection-dock-pack {
+    grid-row: 2;
+    width: 100%;
+  }
+  #selection-dock-delete {
+    grid-row: 3;
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .move-action-dock {
+    width: calc(100vw - 24px);
+  }
+  .has-selection-dock {
+    padding-bottom: calc(260px + env(safe-area-inset-bottom));
+  }
+  .move-result,
+  .selection-dock {
+    gap: 8px;
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+.drag-target-tray.hidden,
+.move-result.hidden,
+.selection-dock.hidden {
+  display: none;
+}
+
+#pack-transfer-dialog,
+#create-pack-dialog {
+  width: min(620px, calc(100vw - 28px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  border: 1px solid #c8e1d6;
+  border-radius: 18px;
+  color: #234a3f;
+  background: var(--bg, #fff);
+  overflow-y: auto;
+}
+#pack-transfer-dialog::backdrop,
+#create-pack-dialog::backdrop {
+  background: #102f3980;
+}
+#pack-transfer-dialog h2 {
+  margin: 0 0 12px;
+}
+#pack-transfer-fields,
+#create-pack-fields {
+  border: 0;
+  padding: 0;
+  margin: 20px 0;
+  min-width: 0;
+}
+#pack-transfer-fields label,
+#create-pack-fields label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+#pack-transfer-fields label[hidden] {
+  display: none;
+}
+#pack-transfer-dialog select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+.pack-transfer-row {
+  padding: 14px;
+  border: 1px solid #d4e5df;
+  border-radius: 12px;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+.pack-transfer-row.conflict {
+  border-color: #d99f4b;
+  background: #fff8ec;
+}
+.pack-transfer-row p {
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+.pack-transfer-row select {
+  margin-top: 10px;
+}
+.pack-transfer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.pack-transfer-actions button {
+  min-height: 44px;
+}
+#pack-transfer-confirm {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  #pack-transfer-dialog {
+    padding: 16px;
+  }
+  #pack-transfer-confirm {
+    width: 100%;
+  }
+}

@@ -1,0 +1,147 @@
+/* ============================================================
+   记忆面板 · 我会牢牢记住你 · UI v2
+   设计令牌 / 骨架 / 组件
+   ============================================================ */
+
+:root {
+  --font-sans: "Sarasa Gothic SC", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 22px;
+  --sp-6: 30px;
+
+  --rail-w: 236px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- 深色（默认） ---------- */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b0d12;
+  --bg-rail: #08090d;
+  --surface: #101319;
+  --surface-2: #151a23;
+  --surface-3: #1b2130;
+  --surface-hover: #1a2030;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+  --text: #f2f5fa;
+  --text-2: #98a3b8;
+  --text-3: #6c7789;
+  --accent: #7c6cf0;
+  --accent-2: #a99bff;
+  --accent-soft: rgba(124, 108, 240, 0.14);
+  --accent-line: rgba(124, 108, 240, 0.34);
+  --shadow: 0 18px 44px rgba(0, 0, 0, 0.44);
+  --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.32);
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --star: #ffffff;
+  --space-1: #070a11;
+  --space-2: #0d1220;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+}
+
+/* ---------- 浅色 ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f7fa;
+  --bg-rail: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f6fa;
+  --surface-3: #eaeef6;
+  --surface-hover: #eef1f8;
+  --border: rgba(16, 24, 40, 0.09);
+  --border-strong: rgba(16, 24, 40, 0.16);
+  --text: #101319;
+  --text-2: #55607a;
+  --text-3: #8a93a8;
+  --accent: #6a58e8;
+  --accent-2: #8b7bff;
+  --accent-soft: rgba(106, 88, 232, 0.1);
+  --accent-line: rgba(106, 88, 232, 0.3);
+  --shadow: 0 16px 40px rgba(16, 24, 40, 0.1);
+  --shadow-sm: 0 4px 14px rgba(16, 24, 40, 0.07);
+  --grid-line: rgba(16, 24, 40, 0.05);
+  --star: #1a2033;
+  --space-1: #eef1f7;
+  --space-2: #e4e9f4;
+  --ok: #059669;
+  --warn: #d97706;
+  --danger: #dc2626;
+}
+
+/* ---------- 语义色（不随主题反转） ---------- */
+:root {
+  --c-private: #a99bff;
+  --c-private-soft: rgba(169, 155, 255, 0.14);
+  --c-group: #2dd4bf;
+  --c-group-soft: rgba(45, 212, 191, 0.14);
+  --c-personal: #fb923c;
+  --c-personal-soft: rgba(251, 146, 60, 0.14);
+  --c-relation: #f472b6;
+  --c-relation-soft: rgba(244, 114, 182, 0.14);
+  --c-fact: #60a5fa;
+  --c-fact-soft: rgba(96, 165, 250, 0.14);
+  --c-gold: #fcd34d;
+  --c-gold-soft: rgba(252, 211, 77, 0.14);
+  --c-external: #7dd3fc;
+  --c-external-soft: rgba(125, 211, 252, 0.14);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+h1, h2, h3, h4, p, figure { margin: 0; }
+button { font: inherit; color: inherit; }
+input, select, textarea { font: inherit; color: inherit; }
+
+::selection { background: var(--accent-soft); color: var(--text); }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); background-clip: padding-box; }
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 600;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }

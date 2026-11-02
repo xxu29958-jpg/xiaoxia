@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>小夏 · 管理中心</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <p class="eyebrow">COMPANION</p>
+        <h1>小夏的管理中心</h1>
+        <p>QQ 和微信是同一个她，设置共同生效。</p>
+      </div>
+      <button id="refresh">刷新状态</button>
+    </header>
+    <p id="notice" role="status" aria-live="polite">正在连接机器人…</p>
+    <nav aria-label="管理导航">
+      <a href="#overview">概况</a><a href="#conversation">聊天状态</a
+      ><a href="#gallery">表情包</a><a href="#memory">记忆</a
+      ><a href="#browser">浏览器</a><a href="#desktop">桌面操作</a>
+    </nav>
+    <main>
+      <section id="overview" class="cards">
+        <article>
+          <h2>连接状态</h2>
+          <div id="connections"></div>
+          <a href="/#/platforms" target="_blank" rel="noopener"
+            >管理 QQ / 微信连接 ↗</a
+          ><a href="http://127.0.0.1:5099/" target="_blank" rel="noopener"
+            >QQ 桌面接入管理 ↗</a
+          >
+        </article>
+        <article>
+          <h2>聊天模型</h2>
+          <label for="models">QQ、微信共同使用</label
+          ><select id="models"></select
+          ><button id="model-save">切换模型</button>
+          <p class="hint">
+            ChatGPT 三档共用账号额度；DeepSeek 是独立备用。切换保留记忆。
+          </p>
+        </article>
+        <article>
+          <h2>主动找你</h2>
+          <p id="initiative"></p>
+          <button id="proactive"></button>
+          <p class="hint">每天合计最多 4 次，23:00–09:00 不打扰。</p>
+          <a
+            href="/#/extension/plugins/astrbot_plugin_ada_companion"
+            target="_blank"
+            rel="noopener"
+            >更多设置 ↗</a
+          >
+        </article>
+      </section>
+      <section id="conversation">
+        <h2>聊到哪里了</h2>
+        <p id="conversation-state" role="status"></p>
+        <p class="hint">
+          两边共用待续话题。已经聊完或不想再提的事，可以在这里结束。
+        </p>
+        <div id="topics"></div>
+        <h3>最近逛到的东西</h3>
+        <p class="hint">
+          只参考最近 7 天保存的笔记和收藏；值得分享才主动说。已用素材 30
+          天内不重复，不分享会保留收藏。
+        </p>
+        <div id="discoveries"></div>
+      </section>
+      <section id="gallery">
+        <div class="section-head">
+          <div>
+            <h2>表情包</h2>
+            <p id="gallery-status"></p>
+          </div>
+          <div>
+            <button id="memes"></button><button id="reindex">校验索引</button>
+          </div>
+        </div>
+        <p class="hint">
+          最近发过的 8 张在 24
+          小时内避开；禁用的图片持续排除。点“恢复使用”可撤回禁用。
+        </p>
+        <div class="filters">
+          <label for="filter">查找图片</label
+          ><input
+            id="filter"
+            type="search"
+            placeholder="猫、开心、晚安…"
+          /><label><input id="blocked-only" type="checkbox" />只看禁用</label
+          ><a
+            href="/#/plugin-view/meme_manager/app"
+            target="_blank"
+            rel="noopener"
+            >导入、上传和编辑图库 ↗</a
+          >
+        </div>
+        <div id="images" class="gallery"></div>
+      </section>
+      <section id="memory">
+        <div class="section-head">
+          <div>
+            <h2>共享记忆</h2>
+            <p id="memory-status"></p>
+          </div>
+          <a
+            href="/#/plugin-view/astrbot_plugin_memory_companion/记忆面板"
+            target="_blank"
+            rel="noopener"
+            >完整记忆管理 ↗</a
+          >
+        </div>
+        <button id="memory-load">查看核心偏好</button>
+        <div id="core"></div>
+        <p class="hint">
+          此处修改核心偏好。完整记忆、历史检索和清理使用上面的记忆管理入口。
+        </p>
+      </section>
+      <section id="browser">
+        <div class="section-head">
+          <div>
+            <h2>她的浏览器</h2>
+            <p id="browser-state"></p>
+          </div>
+          <div>
+            <button id="browser-switch"></button
+            ><button id="browser-stop">停止浏览</button>
+          </div>
+        </div>
+        <p id="browser-url"></p>
+        <p id="browser-usage" class="hint"></p>
+        <h3>最近操作</h3>
+        <div id="operations"></div>
+        <h3>收藏夹</h3>
+        <div id="bookmarks"></div>
+      </section>
+      <section id="desktop">
+        <div class="section-head">
+          <div>
+            <h2>电脑软件与 QQ</h2>
+            <p id="desktop-state"></p>
+          </div>
+          <div>
+            <button id="desktop-switch"></button
+            ><button id="desktop-stop">停止桌面操作</button>
+          </div>
+        </div>
+        <p id="desktop-window"></p>
+        <p class="hint">
+          可以说“打开计算器”“看看 QQ
+          窗口”“在这个窗口输入……”。她先看截图再操作；你换了窗口会要求重新观察。聊天里说“停止操作”也会立即停止。登录、验证码由你完成。
+        </p>
+        <p id="desktop-usage" class="hint"></p>
+        <div id="desktop-operations"></div>
+      </section>
+    </main>
+    <footer>所有操作均返回实际结果。语音尚未配置密钥，当前关闭。</footer>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

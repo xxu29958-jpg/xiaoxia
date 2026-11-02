@@ -1,0 +1,33 @@
+
+/* ============================================================
+   紧凑布局
+   简洁管理界面（data-ui-mode="standard"）整体偏松：22/30px 的内容边距、
+   16px 的卡片间距、236px 的侧栏，一屏能放的信息太少。整体收紧约 25%，
+   只动留白与字号，不动配色、不动信息层级。
+
+   **刻意用 :not([data-ui-mode="cinema"]) 圈起来。**
+   放映馆/终端模式（70 处 data-ui-mode="cinema" 规则）有自己的空间语言，
+   压它会毁掉三维终端那套效果，所以这一段对那个模式完全不生效。
+   ============================================================ */
+html:not([data-ui-mode="cinema"]) { --rail-w: 202px; }
+
+html:not([data-ui-mode="cinema"]) .content { padding: 14px 20px 30px; }
+html:not([data-ui-mode="cinema"]) .topbar { padding: 13px 20px 11px; gap: 16px; }
+html:not([data-ui-mode="cinema"]) .topbar-copy h1 { font-size: 19px; }
+html:not([data-ui-mode="cinema"]) .topbar-hint { font-size: 12px; margin-top: 2px; }
+html:not([data-ui-mode="cinema"]) .topbar-search { height: 30px; min-width: 200px; padding: 0 10px; }
+html:not([data-ui-mode="cinema"]) .btn { height: 29px; padding: 0 12px; }
+html:not([data-ui-mode="cinema"]) .btn.is-sm { height: 25px; padding: 0 10px; }
+
+html:not([data-ui-mode="cinema"]) .rail-brand { padding: 14px 14px 11px; gap: 9px; }
+html:not([data-ui-mode="cinema"]) .nav-item { padding: 7px 9px; gap: 9px; }
+
+html:not([data-ui-mode="cinema"]) .grid { gap: 11px; }
+html:not([data-ui-mode="cinema"]) .card { padding: 12px 14px; }
+html:not([data-ui-mode="cinema"]) .card-head { margin-bottom: 9px; gap: 10px; }
+html:not([data-ui-mode="cinema"]) .row-list { gap: 6px; }
+html:not([data-ui-mode="cinema"]) .row { padding: 7px 11px; gap: 10px; }
+html:not([data-ui-mode="cinema"]) .link-item { padding: 8px 10px; gap: 9px; }
+html:not([data-ui-mode="cinema"]) .kpi-row { gap: 9px; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+html:not([data-ui-mode="cinema"]) .kpi { padding: 10px 12px 11px; }
+html:not([data-ui-mode="cinema"]) .badge { height: 18px; padding: 0 7px; }

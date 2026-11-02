@@ -1,0 +1,23 @@
+{
+  "index_tts": {
+    "repository": "https://github.com/index-tts/index-tts.git",
+    "revision": "d9e41aac89fd00b3d71497fddb287b7f24613712",
+    "local_changes_included": true
+  },
+  "seed_vc": {
+    "repository": "https://github.com/Plachtaa/seed-vc.git",
+    "revision": "51383efd921027683c89e5348211d93ff12ac2a8",
+    "local_changes_included": true
+  },
+  "soulx_singer": {
+    "repository": "https://github.com/Soul-AILab/SoulX-Singer.git",
+    "revision": "81aeb3ae772c70093c3de74dc23c92d983801ae4",
+    "local_changes_included": true
+  },
+  "astrbot": {
+    "repository": "https://github.com/AstrBotDevs/AstrBot",
+    "upstream_revision": "dffe922",
+    "local_revision": "cf1e314e13e3b37da0ace77a346e97ff413b4fc4",
+    "local_changes_included": true
+  }
+}

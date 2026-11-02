@@ -1,0 +1,68 @@
+import { createApi } from "./modules/api.js";
+import { createCollection } from "./modules/collection.js";
+import { createPackTransfer } from "./modules/packTransfer.js";
+import { createVectors } from "./modules/vectors.js";
+import { createPackImport } from "./modules/packImport.js";
+import { createPackCatalog } from "./modules/packCatalog.js";
+import { createLibrary } from "./modules/library.js";
+import { createWidgets } from "./modules/widgets.js";
+import { createThumbnails } from "./modules/thumbnails.js";
+import { createSemanticPreview } from "./modules/semanticPreview.js";
+import { createSemanticEdit } from "./modules/semanticEdit.js";
+import { createImagePreview } from "./modules/imagePreview.js";
+import { createDialogs } from "./modules/dialogs.js";
+import { createLayout } from "./modules/layout.js";
+import { createClipboard } from "./modules/clipboard.js";
+import { createContextMenu } from "./modules/contextMenu.js";
+import { createDrag } from "./modules/drag.js";
+import { createUpload } from "./modules/upload.js";
+import { createMove } from "./modules/move.js";
+import { createSync } from "./modules/sync.js";
+import { createSelection } from "./modules/selection.js";
+import { createDanger } from "./modules/danger.js";
+import { createMutations } from "./modules/mutations.js";
+import { createCategories } from "./modules/categories.js";
+import { createState } from "./modules/state.js";
+import { createBindings } from "./modules/bindings.js";
+
+async function initApp() {
+  const app = { state: {}, dom: {} };
+  app.api = createApi(app);
+  app.collection = createCollection(app);
+  app.packTransfer = createPackTransfer(app);
+  app.vectors = createVectors(app);
+  app.packImport = createPackImport(app);
+  app.packCatalog = createPackCatalog(app);
+  app.library = createLibrary(app);
+  app.widgets = createWidgets(app);
+  app.thumbnails = createThumbnails(app);
+  app.semanticPreview = createSemanticPreview(app);
+  app.semanticEdit = createSemanticEdit(app);
+  app.imagePreview = createImagePreview(app);
+  app.dialogs = createDialogs(app);
+  app.layout = createLayout(app);
+  app.clipboard = createClipboard(app);
+  app.contextMenu = createContextMenu(app);
+  app.drag = createDrag(app);
+  app.upload = createUpload(app);
+  app.move = createMove(app);
+  app.sync = createSync(app);
+  app.selection = createSelection(app);
+  app.danger = createDanger(app);
+  app.mutations = createMutations(app);
+  app.categories = createCategories(app);
+  app.bootstrapState = createState(app);
+  app.bindings = createBindings(app);
+  await app.api.initialize0();
+  await app.collection.initialize1();
+  await app.bootstrapState.initialize2();
+  await app.api.initialize3();
+  await app.mutations.initialize4();
+  await app.bindings.initialize5();
+  await app.sync.initialize6();
+  await app.categories.initialize7();
+  await app.bindings.initialize8();
+}
+
+
+initApp().catch((error) => window.MemeUI.showPageError(error));

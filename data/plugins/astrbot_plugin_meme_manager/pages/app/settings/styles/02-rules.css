@@ -1,0 +1,397 @@
+
+
+#mode-workflow-steps {
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  gap: 14px;
+  margin-left: 10px;
+  padding-left: 26px;
+  border-left: 2px solid var(--brand);
+}
+
+#mode-workflow-steps > li::before {
+  content: "";
+  position: absolute;
+  left: -33px;
+  top: 26px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+#mode-workflow-steps > li:not(:last-child)::after {
+  content: none;
+}
+
+.mode-workflow-row {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.mode-workflow-branches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+  position: relative;
+}
+
+.mode-workflow-branches::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 30px;
+  width: 18px;
+  border-top: 2px solid var(--line);
+}
+
+.mode-workflow-branch {
+  flex: 1 1 170px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.mode-workflow-branch > summary {
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 650;
+  cursor: pointer;
+  min-height: 24px;
+}
+
+.mode-workflow-branch .collection-workflow-links {
+  padding-top: 6px;
+}
+
+.workflow-node,
+button.workflow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 7px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: none;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+button.workflow-node {
+  background: var(--panel);
+  border-color: var(--brand);
+  cursor: pointer;
+}
+
+button.workflow-node:hover {
+  background: var(--brand-soft);
+  box-shadow: inset 0 0 0 1px var(--brand);
+  transform: none;
+}
+
+button.workflow-node:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.workflow-node strong {
+  font-size: 14px;
+}
+
+.workflow-node span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.workflow-node small {
+  color: var(--brand-strong);
+  font-size: 12px;
+  margin-top: auto;
+}
+
+.collection-workflow-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  width: 100%;
+}
+
+.collection-workflow-links button {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px;
+  color: var(--brand-strong);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.collection-workflow-links button:hover,
+.collection-workflow-links button:focus-visible {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.workflow-fallback {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.config-card {
+  scroll-margin-top: 20px;
+}
+
+@media (max-width: 1100px) {
+  .workflow-steps {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workflow-steps > li:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: auto;
+    left: 50%;
+    bottom: -23px;
+    transform: translateX(-50%);
+  }
+
+  #mode-workflow-steps > li:not(:last-child)::after {
+    content: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .mode-workflow-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .mode-workflow-branches::before {
+    top: -8px;
+    left: 18px;
+    width: 0;
+    height: 8px;
+    border-top: 0;
+    border-left: 2px solid var(--line);
+  }
+}
+
+@media (max-width: 560px) {
+  .mode-workflow {
+    padding: 18px;
+  }
+}
+
+.selection-mode-panel fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.selection-mode-panel legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.selection-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.selection-mode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.selection-mode-card:hover {
+  border-color: var(--brand);
+}
+
+.selection-mode-card.selected {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  box-shadow: inset 0 0 0 1px var(--brand);
+}
+
+.selection-mode-card:focus-within {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.selection-mode-card input[type="radio"] {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin: 3px 0 0;
+  padding: 0;
+  accent-color: var(--brand);
+}
+
+.selection-mode-card strong,
+.selection-mode-card small {
+  display: block;
+}
+
+.selection-mode-card strong {
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.selection-mode-card small {
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.selection-mode-status {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--brand-strong);
+}
+
+.selection-mode-panel > .hint {
+  margin-top: 10px;
+}
+
+#selection-mode-readiness {
+  margin-top: 14px;
+}
+
+#selection-mode-readiness .hint {
+  margin: 6px 0;
+}
+
+.config-mode-inactive {
+  color: var(--warn);
+}
+
+@media (max-width: 560px) {
+  .selection-mode-panel {
+    padding: 18px;
+  }
+  .selection-mode-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.config-card-header {
+  position: relative;
+  padding: 24px 24px 24px 44px;
+  border-bottom: 1px solid #c9e0d5;
+  border-radius: 15px 15px 0 0;
+  background: #e0f0e8;
+}
+
+.config-card-header::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  bottom: 26px;
+  left: 24px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--brand);
+}
+
+.config-card-header h3 {
+  color: var(--brand-strong);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.config-card-description {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.config-card-body {
+  padding: 0 24px;
+}
+
+.config-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 0.85fr);
+  align-items: start;
+  gap: 18px 26px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.config-field:first-child {
+  border-top: 0;
+}
+
+.config-field label {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+  cursor: pointer;
+}
+
+.config-field-hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.config-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.config-control input,
+.config-control select,
+.config-control textarea {
+  min-width: 0;
+  width: 100%;
+  font-size: 13px;
+}
+
+#plugin-config-form .config-control input[type="number"] {
+  max-width: 150px;
+  margin-left: auto;
+}

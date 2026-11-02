@@ -1,0 +1,7 @@
+name: astrbot_plugin_local_network
+display_name: 本机网络兼容
+desc: Prefer IPv6, retry inbound WeChat media through the mainland gateway, and report missing or unsupported content honestly.
+author: Local
+version: 0.2.1
+astrbot_version: ">=4.29.0"
+

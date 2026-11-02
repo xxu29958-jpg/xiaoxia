@@ -1,0 +1,131 @@
+{
+  "browser_enabled": {
+    "type": "bool",
+    "description": "独立的公开网页浏览器总开关",
+    "hint": "真实 Chrome 和 Playwright MCP：正文、截图、点击、输入、键盘、拖动、小游戏、收藏及随手记。只接公开 HTTPS；不购买、发帖、上传或下载附件。每 24 小时 30 次打开、300 次操作，单次 60 秒。",
+    "default": true
+  },
+  "chat_replyer_enabled": {
+    "type": "bool",
+    "description": "原生聊天表达与话题延续",
+    "hint": "在原生回复中同时组织聊天、近期话题和表情意图，保留工具与记忆上下文，普通聊天只生成一次。",
+    "default": false
+  },
+  "temper_enabled": {
+    "type": "bool",
+    "description": "附加逐轮表达提示",
+    "hint": "根据最近回复追加表达提醒。小夏的性格由角色卡决定；当前使用自由表达，保持关闭即可。",
+    "default": false
+  },
+  "bili_discovery_enabled": {
+    "type": "bool",
+    "description": "小夏主动阅读兴趣内容",
+    "hint": "在现有主动聊天时机读取 B站公开字幕；读不到时，读机核、鸟类科普或星露谷的公开订阅内容。新发现存入随手记供聊天使用，沿用每天4次及免打扰设置。",
+    "default": false
+  },
+  "bili_topics": {
+    "type": "list",
+    "description": "刷 B站的公开兴趣关键词",
+    "hint": "每项1–80字。只填可公开的主题；不会拿私人聊天或记忆生成搜索词。也可以直接说“刷一轮B站，找科普视频”。",
+    "default": [
+      "科普",
+      "独立游戏",
+      "生活趣事"
+    ]
+  },
+  "public_network_fallback_proxy": {
+    "type": "string",
+    "description": "公开素材下载的大陆备用出口",
+    "hint": "外网代理失败时使用。默认是独立绑定物理网卡的本机直连服务，不改变 ChatGPT 模型线路。留空可禁用回退。",
+    "default": "http://127.0.0.1:17898"
+  },
+  "online_meme_enabled": {
+    "type": "bool",
+    "description": "允许 Ada 按聊天需要从公开网页收藏新表情",
+    "hint": "先看图、分类、去重，再加入现有语义图库；不自动收集你的私人照片。",
+    "default": true
+  },
+  "online_meme_daily_limit": {
+    "type": "int",
+    "description": "每天在线收藏尝试上限",
+    "hint": "默认 10 次，最多 30 次；失败也计数，防止反复调用。每次回复最多尝试一张，总收藏上限 200 张。",
+    "default": 10
+  },
+  "wechat_target": {
+    "type": "string",
+    "description": "固定微信私聊会话",
+    "default": ""
+  },
+  "owner_sessions": {
+    "type": "list",
+    "description": "本人的私聊账号（控制权限及跨平台记忆关联）",
+    "hint": "同一个人的完整私聊会话。两端共用工具、核心偏好、长期记忆、原始聊天时间线（可分页）、收藏夹与待续话题。旧通道可只作为历史来源保留；其他人及群聊不混入。",
+    "default": []
+  },
+  "provider_id": {
+    "type": "string",
+    "description": "主动聊天模型",
+    "default": "chatgpt-companion"
+  },
+  "proactive_enabled": {
+    "type": "bool",
+    "description": "启用主动聊天（QQ/微信共享每天 4 次上限，23–09 点免打扰）",
+    "hint": "默认微信。私聊说“QQ也找我”可增加QQ；“以后只在QQ找我”切换渠道。选择会保存，每次只联系一边。",
+    "default": true
+  },
+  "voice_enabled": {
+    "type": "bool",
+    "description": "启用小夏本地语音和歌曲／戏曲演唱",
+    "default": false
+  },
+  "cloud_api_key": {
+    "type": "string",
+    "description": "百炼 API Key（北京地域）",
+    "hint": "仅在此本机表单填写，不要发到聊天。语音文本会发送到百炼合成。",
+    "secret": true,
+    "default": ""
+  },
+  "cloud_workspace_id": {
+    "type": "string",
+    "description": "百炼北京工作空间 ID（Workspace ID）",
+    "hint": "复制工作空间 ID，不是账号 ID、名称或网址。",
+    "default": ""
+  },
+  "cloud_voice": {
+    "type": "string",
+    "description": "温柔音色（CosyVoice v3 Flash）",
+    "hint": "longanrou_v3 = 龙安柔；longyingtao_v3 = 龙应桃；longyingling_v3 = 龙应聆。",
+    "options": [
+      "longanrou_v3",
+      "longyingtao_v3",
+      "longyingling_v3"
+    ],
+    "default": "longanrou_v3"
+  },
+  "voice_monthly_limit": {
+    "type": "int",
+    "description": "每月语音字符上限（仅约束 Ada）",
+    "hint": "默认 50000 字，按当前每万字 1 元约 5 元。失败请求保守计入，上海时间每月重新计数；不代表云账号账单上限。",
+    "default": 50000
+  },
+  "ffmpeg_path": {
+    "type": "string",
+    "description": "微信 MP3 编码器路径",
+    "default": "ffmpeg"
+  },
+  "browser_node": {
+    "type": "string",
+    "description": "浏览器 MCP 的 Node.js 可执行文件",
+    "default": "node"
+  },
+  "voice_key_file": {
+    "type": "string",
+    "description": "本机语音服务密钥文件",
+    "default": ".runtime/voice/service.key"
+  },
+  "voice_base_url": {
+    "type": "string",
+    "description": "本机语音服务地址",
+    "default": "http://127.0.0.1:6190"
+  }
+}

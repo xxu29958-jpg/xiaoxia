@@ -1,0 +1,48 @@
+
+
+/* ============================================================
+   响应式
+   ============================================================ */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 64px minmax(0, 1fr); }
+  .rail-brand .brand-copy,
+  .nav-label,
+  .nav-chevron,
+  .theme-toggle-label,
+  .rail-status span:last-child { display: none; }
+  .nav-item { justify-content: center; padding: 10px 0; }
+  .nav-subs-inner { padding-left: 0; }
+  .nav-sub { justify-content: center; padding: 8px 0; font-size: 0; gap: 0; }
+  .nav-sub::before { left: 50%; transform: translate(-50%, 0); top: 5px; }
+  .topbar { padding: 16px 18px 14px; flex-wrap: wrap; }
+  .topbar-tools { width: 100%; }
+  .topbar-search { flex: 1; min-width: 0; }
+  .content { padding: 16px 18px 40px; }
+  .starmap-canvas { height: 480px; }
+  .cinema-console { min-height: calc(100vh - 92px); }
+  .cinema-console-head { padding: 20px 18px 17px; }
+  .cinema-console-head h2 { font-size: 23px; }
+  .cinema-console-head p { max-width: 230px; }
+  .cinema-readout { min-width: 96px; }
+  .cinema-grid { grid-template-columns: 1fr; }
+  .cinema-sidebar, .cinema-inspector { border: 0; border-bottom: 1px solid rgba(89, 96, 75, 0.18); }
+  .cinema-sidebar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; padding: 12px 10px; }
+  .cinema-sidebar .terminal-label { grid-column: 1 / -1; }
+  .cinema-category { margin: 0; padding: 8px 5px; display: block; border-left: 0; border-bottom: 2px solid transparent; }
+  .cinema-category.is-active { border-left: 0; border-bottom-color: var(--terminal-cyan); }
+  .cinema-category span { text-align: center; }.cinema-category em { display: block; margin-top: 3px; text-align: center; }
+  .cinema-side-foot { display: none; }
+  .cinema-main { padding: 16px 12px 12px; }
+  .cinema-scene { height: 220px; margin-left: -2px; margin-right: -2px; }
+  .cinema-toolbar { align-items: stretch; flex-direction: column; gap: 10px; }
+  .cinema-search { width: 100%; }
+  .archive-array { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); max-height: 460px; }
+  .cinema-inspector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; padding: 16px 18px 20px; }
+  .cinema-inspector .terminal-label { grid-column: 1 / -1; }
+  .telemetry-orbit { width: 100px; height: 100px; margin: 8px auto; }.orbit-core { width: 56px; height: 56px; }.orbit-core span { font-size: 15px; }.orbit-core small { font-size: 7px; }
+  .inspector-note { margin-top: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinema-console, .orbit-ring, .pulse-dot { animation: none; }
+}

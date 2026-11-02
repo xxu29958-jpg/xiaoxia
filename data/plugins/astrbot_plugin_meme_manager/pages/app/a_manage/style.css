@@ -1,0 +1,14 @@
+/* Ordered component styles; preserve cascade order. */
+@import url("./styles/01-base.css");
+@import url("./styles/02-controls.css");
+@import url("./styles/03-category.css");
+@import url("./styles/04-preview.css");
+@import url("./styles/05-layout.css");
+@import url("./styles/06-selection.css");
+@import url("./styles/07-semantic-status.css");
+@import url("./styles/08-semantic-editor.css");
+@import url("./styles/09-pack-transfer.css");
+@import url("./styles/10-compact-layout.css");
+@import url("./styles/11-semantic-library.css");
+@import url("./styles/12-collection.css");
+@import url("./styles/13-dialogs.css");

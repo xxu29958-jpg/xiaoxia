@@ -1,0 +1,142 @@
+
+/* ============================================================
+   开场动画
+   首屏直接把「我会牢牢记住你」给出来，再淡出交给面板。
+   两条硬约束：
+   1. 永远不吃点击 —— pointer-events 恒为 none，JS 挂了也不会把人拦在门外。
+   2. 不依赖 JS 收尾 —— 动画自身在最后一帧把 visibility 置 hidden，
+      所以就算脚本全废，遮罩也一定会自己消失。
+   ============================================================ */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 42%, var(--surface) 0%, var(--bg) 62%, var(--bg) 100%);
+  animation: intro-veil 2s var(--ease) forwards;
+}
+.intro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 78%);
+  opacity: 0;
+  animation: intro-grid 2s var(--ease) forwards;
+}
+.intro-inner { position: relative; text-align: center; padding: 0 24px; }
+.intro-mark {
+  width: 34px;
+  height: 2px;
+  margin: 0 auto 20px;
+  background: var(--accent);
+  opacity: 0;
+  animation: intro-mark 2s var(--ease-out) forwards;
+}
+.intro-title {
+  margin: 0;
+  font-size: clamp(30px, 7.4vw, 60px);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.24;
+  color: var(--text);
+  opacity: 0;
+  animation: intro-title 2s var(--ease-out) forwards;
+}
+/* 放映机的光从字上扫过去，比单纯淡入更贴「放映馆」这个隐喻。
+   放在 @supports 里：不支持 background-clip:text 的浏览器会保留上面的实色标题，
+   不会因为 -webkit-text-fill-color:transparent 而整行字消失。 */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .intro-title {
+    background-image: linear-gradient(100deg, var(--text) 42%, var(--accent-2) 50%, var(--text) 58%);
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+.intro-sub {
+  margin: 16px 0 0;
+  font: 11px var(--font-mono);
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: var(--text-3);
+  opacity: 0;
+  animation: intro-sub 2s var(--ease) forwards;
+}
+.intro-rule {
+  width: min(240px, 52vw);
+  height: 1px;
+  margin: 22px auto 0;
+  background: var(--border-strong);
+  overflow: hidden;
+}
+.intro-rule i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-line);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: intro-rule 2s var(--ease-out) forwards;
+}
+
+/* 遮罩从第一帧就是**不透明**的。之前是 0% → 9% 淡入，于是面板先露了一脸、
+   再被盖住，用户看到的就是「突然闪一下」。只让里面的字动，幕布不许动。 */
+@keyframes intro-veil {
+  0% { opacity: 1; visibility: visible; }
+  70% { opacity: 1; }
+  92% { opacity: 0; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@keyframes intro-grid {
+  0% { opacity: 0; }
+  18% { opacity: 1; }
+  60% { opacity: 1; }
+  92% { opacity: 0; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@keyframes intro-mark {
+  0%, 6% { opacity: 0; transform: scaleX(0.2); }
+  22% { opacity: 1; transform: scaleX(1); }
+  72% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes intro-title {
+  0%, 8% { opacity: 0; transform: translateY(16px); filter: blur(12px); }
+  34% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  46% { background-position: 130% 0; }
+  78% { opacity: 1; background-position: -30% 0; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes intro-sub {
+  0%, 34% { opacity: 0; transform: translateY(8px); }
+  56% { opacity: 1; transform: translateY(0); }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes shell-reveal {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+/* 只有开场真的播了才做现身动画（脚本会给 body 加 intro-played）。
+   跳过开场时面板必须立刻可用，不能白等 1.3 秒。 */
+.intro-played .shell { animation: shell-reveal 0.52s var(--ease-out) 1.32s both; }
+
+@keyframes intro-rule {
+  0%, 40% { transform: scaleX(0); }
+  66%, 80% { transform: scaleX(1); }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* 用户要求减少动效时直接不播：遮罩一开始就是隐藏的，面板立刻可用 */
+@media (prefers-reduced-motion: reduce) {
+  .intro { display: none; }
+}
