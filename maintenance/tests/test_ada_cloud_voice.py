@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import io
 import math
+import shutil
 import sqlite3
 import struct
 import sys
@@ -12,6 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
+
+from imageio_ffmpeg import get_ffmpeg_exe
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "data/plugins"))
@@ -169,7 +172,11 @@ class CloudVoiceTests(unittest.IsolatedAsyncioTestCase):
 
         from astrbot.api.message_components import File, Plain, Record
 
-        plugin = ResponseMedia({"voice_enabled": True}, self.folder, self.voice)
+        plugin = ResponseMedia(
+            {"voice_enabled": True, "ffmpeg_path": shutil.which("ffmpeg") or get_ffmpeg_exe()},
+            self.folder,
+            self.voice,
+        )
         for platform, component in (("qq_official", Record), ("weixin_oc", File)):
             with self.subTest(platform=platform):
                 extra = {"ada_voice_requested": True}
