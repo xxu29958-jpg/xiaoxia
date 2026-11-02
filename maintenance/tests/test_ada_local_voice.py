@@ -15,6 +15,7 @@ from imageio_ffmpeg import get_ffmpeg_exe
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "data/plugins"))
 from astrbot_plugin_ada_companion.cloud_voice import VoiceError
 from astrbot_plugin_ada_companion.lifecycle import Lifecycle
+from astrbot_plugin_ada_companion.local_voice import LocalVoice
 from astrbot_plugin_ada_companion.main import AdaCompanion
 from astrbot_plugin_ada_companion.prompting import ContextBuilder
 from astrbot_plugin_ada_companion.response_media import ResponseMedia
@@ -24,6 +25,48 @@ from astrbot.core.pipeline.preprocess_stage.stage import PreProcessStage
 from maintenance.tests.test_browser_url_messages import event as native_event
 
 FFMPEG = shutil.which("ffmpeg") or get_ffmpeg_exe()
+
+
+@pytest.mark.asyncio
+async def test_local_voice_passes_context_tone_and_reports_applied_tone(tmp_path):
+    from aiohttp import web
+
+    seen = []
+
+    async def synthesize(request):
+        payload = await request.json()
+        seen.append(payload)
+        return web.Response(
+            body=b"wav", headers={"X-Voice-Emotion": payload.get("emotion", "neutral")}
+        )
+
+    app = web.Application()
+    app.router.add_post("/speech", synthesize)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "127.0.0.1", 0)
+    await site.start()
+    port = site._server.sockets[0].getsockname()[1]
+    key = tmp_path / "key"
+    key.write_text("test-only-key")
+    voice = LocalVoice(
+        {"voice_key_file": str(key), "voice_base_url": f"http://127.0.0.1:{port}"}
+    )
+    try:
+        assert await voice.synthesize("真来啊？那我等你。", emotion="happy") == b"wav"
+        assert seen[-1] == {
+            "text": "真来啊？那我等你。",
+            "mode": "speech",
+            "emotion": "happy",
+        }
+        assert voice.last["emotion"] == "happy"
+        await voice.synthesize("行，晚点说。")
+        assert "emotion" not in seen[-1]
+        assert voice.last["emotion"] == "neutral"
+        await voice.synthesize("晚风轻轻吹", mode="singing", emotion="happy")
+        assert seen[-1] == {"text": "晚风轻轻吹", "mode": "singing"}
+    finally:
+        await runner.cleanup()
 
 
 def builder(origin):

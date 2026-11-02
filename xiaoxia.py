@@ -213,6 +213,22 @@ def main():
     p = commands.add_parser("speak")
     p.add_argument("text")
     p.add_argument("--output", type=Path, default=PROJECT / "outputs/speech.wav")
+    p.add_argument(
+        "--emotion",
+        default="neutral",
+        choices=[
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "afraid",
+            "disgusted",
+            "melancholic",
+            "surprised",
+            "calm",
+        ],
+    )
+    p.add_argument("--emotion-strength", type=float, default=0.08)
     p = commands.add_parser("hear")
     p.add_argument("source", type=Path)
     p = commands.add_parser("sing")
@@ -277,7 +293,14 @@ def main():
     else:
         headers["Content-Type"] = "application/json"
         if args.command == "speak":
-            route, data = "/speech", {"text": args.text}
+            route, data = (
+                "/speech",
+                {
+                    "text": args.text,
+                    "emotion": args.emotion,
+                    "emotion_strength": args.emotion_strength,
+                },
+            )
         else:
             is_url = args.source.startswith(("https://", "http://"))
             route, data = (
@@ -310,6 +333,7 @@ def main():
                         "request_seconds": round(time.perf_counter() - started, 3),
                         "audio_seconds": response.headers.get("X-Audio-Seconds"),
                         "engine": response.headers.get("X-Voice-Engine"),
+                        "emotion": response.headers.get("X-Voice-Emotion"),
                     },
                     ensure_ascii=False,
                 )

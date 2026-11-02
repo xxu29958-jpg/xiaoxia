@@ -78,7 +78,10 @@ class ResponseMedia:
             return
         try:
             async with self.voice_lock:
-                audio = await self.voice.synthesize(text)
+                emotion = event.get_extra("ada_voice_emotion")
+                audio = await self.voice.synthesize(
+                    text, **({"emotion": emotion} if emotion else {})
+                )
                 result.chain.append(
                     await self.audio_files.create(
                         audio, text, event.get_platform_name()

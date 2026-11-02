@@ -9,6 +9,11 @@
 | `POST /v1/audio/transcriptions` | multipart 字段 `file` | JSON `{"text":"识别结果"}` |
 | `POST /cover` | 以下 JSON | 完整演唱 WAV，含伴奏时混回原伴奏 |
 
+说话可传 `{"text":"真来啊？那我等你。","emotion":"happy","emotion_strength":0.08}`。
+`emotion` 支持 `neutral`（默认，沿用参考语气）、`happy`、`angry`、`sad`、`afraid`、`disgusted`、`melancholic`、`surprised`、`calm`；强度范围 0–1，默认 0.08。这是轻度情绪控制的待试听起点，不代表自然度已通过验收。音色参考始终保持 QQ 那条 4 秒录音。
+
+聊天中的语气由现有一次回复结合上下文给出，不增加情绪分类模型调用；字段不进入用户文字或长期对话记录。响应头 `X-Voice-Emotion` 返回引擎实际采用的语气；旧服务没有该响应头时不能据此认定情绪控制已生效。
+
 ```json
 {
   "source_path": "C:/Music/演唱音源.mp3",

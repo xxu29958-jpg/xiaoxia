@@ -49,6 +49,9 @@ cd xiaoxia
 # 说话
 .\.venvs\bot\Scripts\python.exe xiaoxia.py speak "嗯，我听着呢。" --output outputs\说话.wav
 
+# 带一点开心的语气，仍使用相同 QQ 音色
+.\.venvs\bot\Scripts\python.exe xiaoxia.py speak "真来啊？那我等你。" --emotion happy --output outputs\开心.wav
+
 # 听懂一条录音
 .\.venvs\bot\Scripts\python.exe xiaoxia.py hear 我的录音.wav
 

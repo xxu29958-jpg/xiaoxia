@@ -58,6 +58,12 @@ class ChatReplyer:
             return
         if not event.get_extra("ada_native_reply"):
             req.system_prompt = (req.system_prompt or "") + REPLY_STYLE
+            if event.get_extra("ada_voice_requested"):
+                req.system_prompt += (
+                    '\n本轮语音另加 "voice_emotion"：neutral、happy、angry、sad、afraid、'
+                    "disgusted、melancholic、surprised 或 calm。根据前后文选你此刻说这句话的语气，"
+                    "不是照抄对方的心情；普通接话用 neutral。语气字段不写进 reply。\n"
+                )
             event.set_extra("ada_native_reply", True)
             event.set_extra("ada_reply_started", time.monotonic())
 
@@ -72,6 +78,7 @@ class ChatReplyer:
             return
         original = response.completion_text or ""
         event.set_extra("ada_reply_reaction", {"action": "skip"})
+        event.set_extra("ada_voice_emotion", None)
         try:
             decision = json.loads(
                 re.sub(r"^\x60{3}(?:json)?\s*|\s*\x60{3}$", "", original.strip())
@@ -81,6 +88,18 @@ class ChatReplyer:
                 raise ValueError("Native reply contained no spoken text")
             response.completion_text = text
             event.set_extra("ada_spoken_reply", text)
+            emotion = decision.get("voice_emotion")
+            if isinstance(emotion, str) and emotion in {
+                "happy",
+                "angry",
+                "sad",
+                "afraid",
+                "disgusted",
+                "melancholic",
+                "surprised",
+                "calm",
+            }:
+                event.set_extra("ada_voice_emotion", emotion)
             event.set_extra(
                 "ada_reply_reaction", decision.get("reaction") or {"action": "skip"}
             )
@@ -114,6 +133,7 @@ class ChatReplyer:
                     time.monotonic() - event.get_extra("ada_reply_started"), 2
                 ),
                 "extra_model_calls": 0,
+                "voice_emotion": event.get_extra("ada_voice_emotion") or "neutral",
             }
         except (ValueError, KeyError, TypeError, AttributeError) as exc:
             self.last = {

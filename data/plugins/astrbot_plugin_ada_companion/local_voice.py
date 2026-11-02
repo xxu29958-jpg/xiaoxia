@@ -19,12 +19,15 @@ class LocalVoice:
             **self.last,
         }
 
-    async def synthesize(self, text: str, mode: str = "speech") -> bytes:
+    async def synthesize(
+        self, text: str, mode: str = "speech", *, emotion: str = "neutral"
+    ) -> bytes:
         """Generate audio using the fixed local voice profile.
 
         Args:
             text: Words to say.
             mode: Speech or a short original Mandarin song.
+            emotion: The speaker's contextual tone, from the same chat generation.
 
         Returns:
             PCM WAV bytes from the local service.
@@ -37,6 +40,9 @@ class LocalVoice:
             .read_text(encoding="utf-8")
             .strip()
         )
+        payload = {"text": text, "mode": mode}
+        if mode == "speech" and emotion != "neutral":
+            payload["emotion"] = emotion
         try:
             async with aiohttp.ClientSession(
                 trust_env=False, timeout=aiohttp.ClientTimeout(total=120)
@@ -47,7 +53,7 @@ class LocalVoice:
                     )
                     + "/speech",
                     headers={"Authorization": "Bearer " + key},
-                    json={"text": text, "mode": mode},
+                    json=payload,
                 ) as response:
                     if response.status != 200:
                         raise VoiceError(f"local_voice_http_{response.status}")
@@ -55,6 +61,7 @@ class LocalVoice:
                     self.last = {
                         "model": response.headers.get("X-Voice-Engine", "local"),
                         "mode": mode,
+                        "emotion": response.headers.get("X-Voice-Emotion", "neutral"),
                         "generation_seconds": float(
                             response.headers.get("X-Generation-Seconds", "0")
                         ),

@@ -69,6 +69,18 @@ app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 class Speech(BaseModel):
     text: str = Field(min_length=1, max_length=650)
     mode: Literal["speech", "singing"] = "speech"
+    emotion: Literal[
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "afraid",
+        "disgusted",
+        "melancholic",
+        "surprised",
+        "calm",
+    ] = "neutral"
+    emotion_strength: float = Field(default=0.08, ge=0, le=1)
 
 
 class Cover(BaseModel):
@@ -107,10 +119,13 @@ def speech(body: Speech):
         started = time.perf_counter()
         if body.mode == "speech":
             speech_active.set()
+        payload = {"text": text}
+        if body.mode == "speech":
+            payload.update(emotion=body.emotion, emotion_strength=body.emotion_strength)
         try:
             generated = client.post(
                 f"http://127.0.0.1:{6191 if body.mode == 'speech' else 6192}/speech",
-                json={"text": text},
+                json=payload,
                 timeout=120,
             )
         finally:
@@ -124,6 +139,7 @@ def speech(body: Speech):
             "mode": body.mode,
             "generation_seconds": round(time.perf_counter() - started, 3),
             "audio_seconds": float(generated.headers["X-Audio-Seconds"]),
+            "emotion": generated.headers.get("X-Voice-Emotion", "neutral"),
         }
         return Response(
             generated.content,
@@ -133,6 +149,7 @@ def speech(body: Speech):
                 "X-Generation-Seconds": str(last_synthesis["generation_seconds"]),
                 "X-Audio-Seconds": str(last_synthesis["audio_seconds"]),
                 "X-Voice-Mode": body.mode,
+                "X-Voice-Emotion": last_synthesis["emotion"],
             },
         )
 

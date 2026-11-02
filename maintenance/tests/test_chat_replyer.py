@@ -20,6 +20,67 @@ from maintenance.tests.test_browser_url_messages import event
 
 
 @pytest.mark.asyncio
+async def test_voice_tone_reaches_media_without_leaking_into_spoken_history(tmp_path):
+    from astrbot_plugin_ada_companion.response_media import ResponseMedia
+
+    from astrbot.core.message.components import Record
+
+    incoming = event("webchat", "我还是决定回来陪你聊会儿。", "astrbot")
+    incoming.set_extra("ada_voice_requested", True)
+    context = SimpleNamespace(
+        persona_manager=SimpleNamespace(
+            resolve_selected_persona=AsyncMock(
+                return_value=("Ada", {"prompt": "Ada"}, None, False)
+            )
+        ),
+        llm_generate=AsyncMock(),
+    )
+    replyer = ChatReplyer(
+        context,
+        {"chat_replyer_enabled": True},
+        OwnerMemory(tmp_path / "owners.json", []),
+        None,
+        DialogueState(tmp_path / "dialogue.json"),
+    )
+    request = ProviderRequest(
+        system_prompt="Ada",
+        contexts=[{"role": "assistant", "content": "还以为你走了。"}],
+    )
+    await replyer.prepare(incoming, request)
+    response = LLMResponse(
+        role="assistant",
+        completion_text=json.dumps(
+            {
+                "reply": "那就再待一会儿。",
+                "voice_emotion": "happy",
+                "topic_updates": [],
+                "reaction": None,
+            },
+            ensure_ascii=False,
+        ),
+    )
+    await replyer.compose(incoming, response)
+    voice = SimpleNamespace(synthesize=AsyncMock(return_value=b"audio"))
+    media = ResponseMedia({"voice_enabled": True}, tmp_path, voice)
+    media.audio_files.create = AsyncMock(return_value=Record(file="happy.wav"))
+    incoming.set_result(incoming.plain_result(response.completion_text))
+    await media.decorate(incoming)
+    voice.synthesize.assert_awaited_once_with("那就再待一会儿。", emotion="happy")
+    run = SimpleNamespace(
+        messages=[Message(role="assistant", content=[TextPart(text="envelope")])]
+    )
+    replyer.sync_history(incoming, run)
+    assert run.messages[-1].content[-1].text == "那就再待一会儿。"
+    assert "voice_emotion" in request.system_prompt
+    assert request.contexts[0]["content"] == "还以为你走了。"
+    context.llm_generate.assert_not_awaited()
+    # A later final response on the same event must not inherit an old tone.
+    response.completion_text = '{"reply":"行，晚点说。","voice_emotion":"neutral"}'
+    await replyer.compose(incoming, response)
+    assert incoming.get_extra("ada_voice_emotion") is None
+
+
+@pytest.mark.asyncio
 async def test_native_turn_keeps_memory_tools_and_saves_only_spoken_text(tmp_path):
     incoming = event("webchat", "我现在喝什么？", "astrbot")
     request = ProviderRequest(

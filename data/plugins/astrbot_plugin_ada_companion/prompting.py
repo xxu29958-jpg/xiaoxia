@@ -156,7 +156,7 @@ class ContextBuilder:
         if voice:
             instructions += (
                 "[Voice requested]\nReply in natural spoken sentences, usually one or two, at most 55 English words or 90 Chinese characters. "
-                "Use contractions, varied rhythm and punctuation where meaningful. Keep the intended warmth, not a customer-service announcement. "
+                "Let the spoken phrasing and punctuation carry your actual response to this conversation. "
                 "Do not write acting directions, artificial stutters or sound-effect tags. Do not claim an audio message was already delivered.\n"
             )
             if not self.config.get("voice_enabled", False):

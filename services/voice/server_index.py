@@ -10,6 +10,7 @@ import sys
 import threading
 import time
 from contextlib import asynccontextmanager
+from typing import Literal
 
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["MODELSCOPE_OFFLINE"] = "1"
@@ -84,6 +85,18 @@ app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 class Speech(BaseModel):
     text: str = Field(min_length=1, max_length=650)
+    emotion: Literal[
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "afraid",
+        "disgusted",
+        "melancholic",
+        "surprised",
+        "calm",
+    ] = "neutral"
+    emotion_strength: float = Field(default=0.08, ge=0, le=1)
 
 
 @app.get("/health")
@@ -117,17 +130,37 @@ def speech(body: Speech):
                 engine.semantic_codec,
             ):
                 model.to(engine.device)
+        emotion_options = {}
+        if body.emotion != "neutral" and body.emotion_strength:
+            emotions = (
+                "happy",
+                "angry",
+                "sad",
+                "afraid",
+                "disgusted",
+                "melancholic",
+                "surprised",
+                "calm",
+            )
+            emotion_options = {
+                "emo_vector": [float(name == body.emotion) for name in emotions],
+                "emo_alpha": body.emotion_strength,
+                "use_random": False,
+            }
         rate, samples = engine.infer(
             spk_audio_prompt=str(reference),
             text=text,
             output_path=None,
             num_beams=1,
             verbose=False,
+            **emotion_options,
         )
         last_synthesis = {
             "engine": "IndexTTS-2",
             "generation_seconds": round(time.perf_counter() - started, 3),
             "audio_seconds": round(len(samples) / rate, 3),
+            "emotion": body.emotion if emotion_options else "neutral",
+            "emotion_strength": body.emotion_strength if emotion_options else 0,
         }
         buffer = io.BytesIO()
         # Index returns signed 16-bit PCM, not a normalized float waveform.
@@ -136,6 +169,7 @@ def speech(body: Speech):
             "X-Voice-Engine": "IndexTTS-2",
             "X-Generation-Seconds": str(last_synthesis["generation_seconds"]),
             "X-Audio-Seconds": str(last_synthesis["audio_seconds"]),
+            "X-Voice-Emotion": last_synthesis["emotion"],
         }
     return Response(buffer.getvalue(), media_type="audio/wav", headers=headers)
 
