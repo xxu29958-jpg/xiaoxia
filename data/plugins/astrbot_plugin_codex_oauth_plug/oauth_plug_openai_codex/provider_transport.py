@@ -103,18 +103,25 @@ class ProviderOAuthPlugOpenAICodexTransport:
             raise RuntimeError("OAuth provider is closed")
         if not hasattr(self, "_oauth_stream_clients"):
             self._oauth_stream_clients = set()
-        client = httpx.AsyncClient(
-            trust_env=False,
-            proxy=self.provider_config.get("proxy") or None,
-            timeout=self.timeout if timeout is None else timeout,
-            follow_redirects=follow_redirects,
-        )
-        self._oauth_stream_clients.add(client)
-        try:
-            async with client:
-                yield client
-        finally:
-            self._oauth_stream_clients.discard(client)
+        if not hasattr(self, "_oauth_http_clients"):
+            self._oauth_http_clients = {}
+        proxy = self.provider_config.get("proxy") or None
+        request_timeout = self.timeout if timeout is None else timeout
+        key = (proxy, request_timeout, follow_redirects)
+        client = self._oauth_http_clients.get(key)
+        if client is None:
+            client = httpx.AsyncClient(
+                trust_env=False,
+                proxy=proxy,
+                timeout=request_timeout,
+                follow_redirects=follow_redirects,
+                limits=httpx.Limits(keepalive_expiry=60),
+            )
+            self._oauth_http_clients[key] = client
+            # Provider termination already closes these owned clients. Keeping the
+            # pool between turns avoids a new proxy/TLS handshake for every reply.
+            self._oauth_stream_clients.add(client)
+        yield client
 
     @asynccontextmanager
     async def _open_oauth_stream_client(self):

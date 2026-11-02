@@ -10,15 +10,16 @@ from astrbot.core.agent.message import TextPart
 REPLY_STYLE = """
 [本轮消息格式]
 需要工具时照常调用。最终输出 JSON（工具调用不受此格式约束）：
-{"reply":"实际要发的话","topic_updates":[],"reaction":null}。
+{"reply":"实际要发的话"}。
 reply 保留实际工具结果及选中的表情标记，可以包含代码或长回答。
-topic_updates 用来延续对方提到的近期未完事项，最多两项：
+有近期未完事项需要延续时才加 topic_updates，最多两项：
 {"action":"save|resolve","item_id":"已有id或空","title":"主题",
 "content":"事情及进展，相对日期按当前时间记清","evidence_quote":"本轮对方原话"}。
 新事 save，更新沿用 id，办完、取消或不想再提则 resolve；普通感想不用记一项。
-reaction 通常 null；当下真想配一张表情时，用
+当下真想配一张表情时才加 reaction：
 {"action":"react|requested","shift":true,"evidence":"当前原话或回复的短引用","query":"表情想表达什么"}。
-react 表示本轮新出现的鲜明反应，requested 表示对方正在要图，延续同一情绪用 null。
+react 表示本轮新出现的鲜明反应，requested 表示对方正在要图。
+没有话题更新或新表情反应时，省略对应字段。
 """
 
 

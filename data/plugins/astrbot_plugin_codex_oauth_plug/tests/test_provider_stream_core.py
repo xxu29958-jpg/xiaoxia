@@ -1,11 +1,10 @@
-from oauth_plug_openai_codex import provider_transport
 # Adapted from AstrBot's production OAuth stream regression suite.
 import asyncio
 from unittest.mock import AsyncMock
 
-import pytest
-
 import oauth_plug_openai_codex.provider as oauth_source
+import pytest
+from oauth_plug_openai_codex import provider_transport
 from oauth_plug_openai_codex.provider import ProviderOAuthPlugOpenAICodex
 
 
@@ -216,8 +215,9 @@ class _FakeStreamResponse:
 
 
 class _FakeAsyncClient:
-    def __init__(self, response):
-        self.response = response
+    def __init__(self, *responses):
+        self.responses = iter(responses)
+        self.closed = False
 
     async def __aenter__(self):
         return self
@@ -226,7 +226,10 @@ class _FakeAsyncClient:
         return None
 
     def stream(self, *_args, **_kwargs):
-        return self.response
+        return next(self.responses)
+
+    async def aclose(self):
+        self.closed = True
 
 
 async def _lines(*values):
@@ -388,9 +391,9 @@ async def test_backend_stream_refreshes_401_before_output_and_closes_both_respon
         ),
     )
     provider = _make_provider()
-    clients = iter([_FakeAsyncClient(unauthorized), _FakeAsyncClient(completed)])
+    client = _FakeAsyncClient(unauthorized, completed)
     monkeypatch.setattr(
-        provider_transport.httpx, "AsyncClient", lambda **_kwargs: next(clients)
+        provider_transport.httpx, "AsyncClient", lambda **_kwargs: client
     )
     provider._ensure_fresh_oauth_token = AsyncMock()
     provider._refresh_after_auth_failure = AsyncMock(return_value=True)
@@ -406,6 +409,7 @@ async def test_backend_stream_refreshes_401_before_output_and_closes_both_respon
     provider._refresh_after_auth_failure.assert_awaited_once()
     assert unauthorized.exited is True
     assert completed.exited is True
+    assert client.closed is True
 
 
 @pytest.mark.asyncio

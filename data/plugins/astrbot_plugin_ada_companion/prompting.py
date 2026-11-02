@@ -155,9 +155,9 @@ class ContextBuilder:
         )
         if voice:
             instructions += (
-                "[Voice requested]\nReply in natural spoken sentences, usually one or two, at most 55 English words or 90 Chinese characters. "
-                "Let the spoken phrasing and punctuation carry your actual response to this conversation. "
-                "Do not write acting directions, artificial stutters or sound-effect tags. Do not claim an audio message was already delivered.\n"
+                "[Voice requested]\n这一轮用语音回他，沿用平常的聊天口吻。"
+                "日常接话一句就好；解释时先说清重点，中文90字或英文55词以内。"
+                "只写要说的话，音频随后生成。\n"
             )
             if not self.config.get("voice_enabled", False):
                 instructions += (

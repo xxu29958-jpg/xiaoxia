@@ -122,6 +122,9 @@ async def test_recognized_voice_routes_reply_but_quoted_voice_does_not(
         ("给我哼两句吧", False),
         ("唱首短一点的小曲", False),
         ("别唱歌了，用语音说一句晚安", True),
+        ("语音回我：我回来啦", True),
+        ("语音回复我", True),
+        ("不用语音回我，这条打字", False),
         ("今天听了一首歌", False),
     ],
 )

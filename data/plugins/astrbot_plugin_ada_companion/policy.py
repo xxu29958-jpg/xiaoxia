@@ -23,7 +23,7 @@ def wants_voice(text: str, enabled: bool = False) -> bool:
         return False
     return enabled or bool(
         re.search(
-            r"(?:用|发|来|给我|听).{0,8}语音|语音(?:回复|说|聊)|(?:想听|听听|听一下).{0,6}声音|(?:给我|帮我|请).{0,4}(?:读出来|念出来)|voice (?:note|message|reply)|(?:say|read).{0,100}out loud",
+            r"(?:用|发|来|给我|听).{0,8}语音|语音(?:回复?|说|聊)|(?:想听|听听|听一下).{0,6}声音|(?:给我|帮我|请).{0,4}(?:读出来|念出来)|voice (?:note|message|reply)|(?:say|read).{0,100}out loud",
             lowered,
         )
     )
