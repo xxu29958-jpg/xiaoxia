@@ -67,6 +67,7 @@ async def lifespan(app):
         spk_audio_prompt=str(reference),
         text="嗯，我听着呢。",
         output_path=None,
+        num_beams=1,
         verbose=False,
     )
     # Both prompt features are cached. This encoder is only used when the
@@ -120,6 +121,7 @@ def speech(body: Speech):
             spk_audio_prompt=str(reference),
             text=text,
             output_path=None,
+            num_beams=1,
             verbose=False,
         )
         last_synthesis = {
