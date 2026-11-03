@@ -282,7 +282,9 @@ class ContinuousMessagePlugin(
             )
         item = session.add_item(message_id, raw_text, current_urls, parts=parts)
         self._start_caption_tasks_for_item(event, session, item)
-        delay = self._calc_delay(session)
+        delay = self._calc_delay(
+            session, completed_audio=bool(event.get_extra("voice_input", False))
+        )
         self._reset_timer(session, delay)
         logger.info(
             f"[消息防抖动] 开始收集 | turn_id={session.turn_id} | delay={delay}s | uid={uid}"

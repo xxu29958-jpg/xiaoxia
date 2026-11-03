@@ -147,9 +147,25 @@ class ContinuationPredictor:
             score += min(0.10, item_count * 0.025)
         return max(0.0, min(score, 1.0))
 
-    def delay(self, text: str, has_image: bool = False, item_count: int = 1) -> float:
+    def delay(
+        self,
+        text: str,
+        has_image: bool = False,
+        item_count: int = 1,
+        *,
+        completed_audio: bool = False,
+    ) -> float:
         if not self.enabled:
             return self.base_delay
+        # A submitted recording already has a turn boundary. Reuse the existing
+        # continuation checks when its words still ask us to wait or trail off.
+        if (
+            completed_audio
+            and not has_image
+            and not self._has_strong_continuation_signal(text)
+            and not self._looks_open_ended(text)
+        ):
+            return 0.0
         if self._looks_fast_complete(text, has_image):
             return round(
                 max(self.min_delay, min(self.max_delay, self.fast_complete_delay)), 2

@@ -80,9 +80,14 @@ class ContinuousMessagePluginLifecycle:
             self._timer_coroutine(session, duration)
         )
 
-    def _calc_delay(self, session: TurnSession) -> float:
+    def _calc_delay(
+        self, session: TurnSession, *, completed_audio: bool = False
+    ) -> float:
         tail_text = session.items[-1].text if session.items else ""
         has_image = bool(session.items[-1].images) if session.items else False
         return self.predictor.delay(
-            tail_text, has_image=has_image, item_count=len(session.items)
+            tail_text,
+            has_image=has_image,
+            item_count=len(session.items),
+            completed_audio=completed_audio,
         )

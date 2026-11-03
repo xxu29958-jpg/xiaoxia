@@ -36,6 +36,8 @@ class ContextBuilder:
         event.set_extra("ada_context_prepared", True)
         voice = self._response_intent(event)
         runtime = self._runtime_facts(voice, bool(event.get_extra("voice_input_files")))
+        if event.get_extra("voice_input", False):
+            runtime += "\n[这轮来信]\n他刚发来的是语音，当前消息就是这段语音的内容。\n"
         event.set_extra("ada_runtime_context", runtime)
         instructions = PLATFORM_RULES + runtime
         if event.get_extra("ada_meme_feedback"):
