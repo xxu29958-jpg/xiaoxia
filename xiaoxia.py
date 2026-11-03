@@ -23,7 +23,11 @@ SERVICES = {
     "memory": ("services/memory/server.py", 11435, "/health"),
     "bot": ("main.py", 6185, "/"),
 }
-SPEECH_ENGINES = {"index": "server_index.py", "cosy": "server_cosy.py"}
+SPEECH_ENGINES = {
+    "index": "server_index.py",
+    "cosy": "server_cosy.py",
+    "fish": "server_fish.py",
+}
 SERVICES["index"] = (
     "services/voice/" + SPEECH_ENGINES[CONFIG["speech_engine"]],
     6191,
@@ -145,6 +149,12 @@ def status(names):
 
 def start(names):
     """Start the installed workers with logs and wait for real HTTP readiness."""
+    if CONFIG["speech_engine"] == "fish" and "index" in names and "singing" in names:
+        # The singer moves its score model off the GPU after warm-up; give it
+        # that space before loading the resident 4B speech model.
+        start([name for name in names if name != "index"])
+        start(["index"])
+        return
     initialize()
     env = dict(
         os.environ,
@@ -286,18 +296,32 @@ def main():
         return
     if args.command == "voice-engine":
         if not path("python_" + args.engine).is_file():
+            if args.engine == "fish":
+                raise RuntimeError(
+                    "Fish environment missing; set python_fish as described in docs/voice-api.md"
+                )
             option = "WithCosy" if args.engine == "cosy" else "WithIndex"
-            raise RuntimeError(
-                f"Speech environment missing; run setup.ps1 -{option}"
-            )
-        model_config = "cosyvoice3.yaml" if args.engine == "cosy" else "config.yaml"
+            raise RuntimeError(f"Speech environment missing; run setup.ps1 -{option}")
+        model_config = {
+            "cosy": "cosyvoice3.yaml",
+            "index": "config.yaml",
+            "fish": "config.json",
+        }[args.engine]
         if not (path(args.engine + "_models") / model_config).is_file():
+            if args.engine == "fish":
+                raise RuntimeError(
+                    "Fish model missing; set fish_models as described in docs/voice-api.md"
+                )
             raise RuntimeError(
                 "Speech model missing; run tools/download_models.py --only "
                 + args.engine
                 + "_models"
             )
+        restart_gateway = False
         if args.engine != CONFIG["speech_engine"]:
+            restart_gateway = status(["gateway"])["gateway"].get("status") == "ready"
+            if restart_gateway:
+                stop(["gateway"])
             stop(["index"])
             if status(["index"])["index"].get("status") == "ready":
                 raise RuntimeError(
@@ -315,6 +339,8 @@ def main():
                 "/health",
             )
         start(["index"])
+        if restart_gateway:
+            start(["gateway"])
         print(json.dumps(status(["index"]), ensure_ascii=False, indent=2))
         return
     if args.command in {"start", "stop", "status"}:

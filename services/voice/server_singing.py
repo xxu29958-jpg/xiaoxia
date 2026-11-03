@@ -76,6 +76,21 @@ class Cover(BaseModel):
     duration_seconds: float | None = Field(default=None, gt=0)
 
 
+class SpeechConversion(BaseModel):
+    source_path: str
+
+
+@app.post("/convert-speech", dependencies=[Depends(authenticate)])
+def convert_speech(body: SpeechConversion):
+    """Reuse the resident converter without retaining each chat in the song library."""
+    with (
+        lock,
+        tempfile.TemporaryDirectory(prefix="speech-vc-", dir=ROOT / "temp") as temp,
+    ):
+        report = cover_engine.convert(Path(body.source_path), Path(temp), acapella=True)
+        return Response(Path(report["output"]).read_bytes(), media_type="audio/wav")
+
+
 @app.get("/health")
 def health():
     return {

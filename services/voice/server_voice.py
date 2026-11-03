@@ -8,7 +8,7 @@ import secrets
 import tempfile
 import threading
 import time
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, nullcontext
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -22,7 +22,7 @@ from fastapi.responses import Response
 from funasr import AutoModel
 from pydantic import BaseModel, Field
 
-from services.runtime import PROJECT, path, voice_profile
+from services.runtime import CONFIG, PROJECT, path, voice_profile
 
 ROOT = path("voice_state")
 KEY = (ROOT / "service.key").read_text(encoding="utf-8").strip()
@@ -117,8 +117,12 @@ def speech(body: Speech):
         raise HTTPException(422, "Text is empty")
     with lock:
         started = time.perf_counter()
-        if body.mode == "speech":
+        if body.mode == "speech" and CONFIG["speech_engine"] != "fish":
             speech_active.set()
+        if body.mode == "singing" and CONFIG["speech_engine"] == "fish":
+            client.post(
+                "http://127.0.0.1:6191/release-gpu", timeout=60
+            ).raise_for_status()
         payload = {"text": text}
         if body.mode == "speech":
             payload.update(emotion=body.emotion, emotion_strength=body.emotion_strength)
@@ -158,9 +162,16 @@ def speech(body: Speech):
 def cover(body: Cover):
     """Forward a complete performance without occupying the speech request lock."""
     global last_cover
-    generated = client.post(
-        "http://127.0.0.1:6192/cover", json=body.model_dump(), timeout=3600
-    )
+    # The 4B speech model shares one 16 GB GPU with performance conversion.
+    # Finish one complete request before lending its memory to the singer.
+    with lock if CONFIG["speech_engine"] == "fish" else nullcontext():
+        if CONFIG["speech_engine"] == "fish":
+            client.post(
+                "http://127.0.0.1:6191/release-gpu", timeout=60
+            ).raise_for_status()
+        generated = client.post(
+            "http://127.0.0.1:6192/cover", json=body.model_dump(), timeout=3600
+        )
     if generated.status_code != 200:
         return Response(
             generated.content,
