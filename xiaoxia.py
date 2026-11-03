@@ -50,6 +50,9 @@ def initialize():
         else {}
     )
     changed = not CONFIG_FILE.exists()
+    if "speech_engine" not in local:
+        local["speech_engine"] = CONFIG["speech_engine"]
+        changed = True
     if CONFIG["ffmpeg"] == "ffmpeg":
         encoder = shutil.which("ffmpeg")
         if not encoder:
@@ -283,8 +286,9 @@ def main():
         return
     if args.command == "voice-engine":
         if not path("python_" + args.engine).is_file():
+            option = "WithCosy" if args.engine == "cosy" else "WithIndex"
             raise RuntimeError(
-                "Speech environment missing; run setup.ps1 -WithCosy for CosyVoice3"
+                f"Speech environment missing; run setup.ps1 -{option}"
             )
         model_config = "cosyvoice3.yaml" if args.engine == "cosy" else "config.yaml"
         if not (path(args.engine + "_models") / model_config).is_file():

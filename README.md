@@ -7,7 +7,7 @@
 ## 当前能做什么
 
 - **听**：SenseVoiceSmall 本地识别语音，并将原始录音保留给后续演唱调用。
-- **说**：默认 IndexTTS-2，可安装并切换 CosyVoice3；两者使用同一 QQ 参考。QQ 普通语音使用语音消息，微信发送可播放的 MP3 附件。
+- **说**：默认使用用户已认可“仍像她，而且更自然”的 CosyVoice3；也可选装 IndexTTS-2。两者使用同一 QQ 参考。QQ 普通语音使用语音消息，微信发送可播放的 MP3 附件。
 - **唱**：保留所给歌曲／戏曲演唱的旋律、节奏和时长，将人声转换为小夏参考声线，再混回伴奏。可选任意起点和片段时长，也可处理完整录音。
 - **聊天调用**：上传演唱音频后，可以直接要求“小夏，用你的声音唱这个，完整唱”或“只唱从 56 秒开始的 10 秒”。完整作品通过音频附件交付。
 - **独立复用**：命令行和本机 HTTP API 都能听、说、唱，不必通过聊天软件。
@@ -18,7 +18,7 @@
 
 ## 安装和启动
 
-目前实际运行平台为 Windows 11、NVIDIA GPU。验证机器为 RTX 5070 Ti 16 GB；模型约 15 GiB，另需 Python 环境和生成音频空间。其他硬件性能尚未验证。
+目前实际运行平台为 Windows 11、NVIDIA GPU。验证机器为 RTX 5070 Ti 16 GB；默认模型约 13 GiB，另需 Python 环境和生成音频空间。其他硬件性能尚未验证。
 
 准备 [uv](https://docs.astral.sh/uv/getting-started/installation/) 和 [Node.js](https://nodejs.org/)，在 PowerShell 执行：
 
@@ -43,16 +43,17 @@ cd xiaoxia
 
 运行日志位于 `.runtime/logs`。聊天数据位于 `data`，模型位于 `models`，本机配置、密钥、聊天记录和生成音频均不提交到 Git。
 
-CosyVoice3 是可直接运行的备选说话后端，额外下载约 5.1 GiB 模型并创建独立环境。安装后可用以下命令切换；切换只重启说话服务，不更换参考音色或聊天模型：
+新安装默认准备 CosyVoice3 的独立环境和模型。已有配置明确选择 `index` 时，安装沿用该选择；可用以下命令安装并切换说话后端。切换只重启说话服务，继续使用同一参考音色和聊天模型：
 
 ```powershell
 .\setup.ps1 -WithCosy
 .\.venvs\bot\Scripts\python.exe xiaoxia.py voice-engine cosy
-# 切回原来的后端
+# 需要使用 IndexTTS-2 时，再安装它的环境和模型
+.\setup.ps1 -WithIndex
 .\.venvs\bot\Scripts\python.exe xiaoxia.py voice-engine index
 ```
 
-CosyVoice3 使用零样本参考和轻度情绪指令，数字、时间和金额由随依赖安装的离线 WeText 处理。首次安装需要联网，日常合成不需要下载资源。两种后端的自然度仍需结合真实聊天试听判断；更快或识别更准不等于听感已通过。
+CosyVoice3 使用零样本参考和轻度情绪指令，数字、时间和金额由随依赖安装的离线 WeText 处理。首次安装需要联网，日常合成不需要下载资源。用户已认可 CosyVoice 候选的声音底色，日常情绪、各类演唱和完整聊天体验仍在打磨；更快或识别更准不等于整体验收通过。
 
 ## 直接听、说、唱
 

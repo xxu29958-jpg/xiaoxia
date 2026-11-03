@@ -1,6 +1,7 @@
 """Resident CosyVoice3 worker using Xiaoxia's shared reference and voice API."""
 
 import asyncio
+import gc
 import hashlib
 import io
 import os
@@ -75,6 +76,11 @@ def load():
             engine.frontend._extract_text_token(prefix + "<|endofprompt|>" + transcript)
         )
         engine.frontend.spk2info[emotion] = cached
+    # All requests reuse the fixed QQ speaker features. These sessions only
+    # encode reference audio, so their model weights are no longer needed.
+    engine.frontend.speech_tokenizer_session = None
+    engine.frontend.campplus_session = None
+    gc.collect()
     # The pinned WeText wheel includes its FSTs; load them before serving audio.
     engine.frontend.text_normalize("明天18:30见。", split=False)
     with torch.inference_mode():

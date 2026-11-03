@@ -24,7 +24,12 @@ def main():
     parser.add_argument(
         "--include-cosy",
         action="store_true",
-        help="Also install the optional CosyVoice3 speech model",
+        help="Also install CosyVoice3 when another speech engine is selected",
+    )
+    parser.add_argument(
+        "--include-index",
+        action="store_true",
+        help="Also install IndexTTS-2 when another speech engine is selected",
     )
     args = parser.parse_args()
     items = json.loads((ROOT / "models.manifest.json").read_text(encoding="utf-8"))
@@ -35,7 +40,13 @@ def main():
     for item in items:
         if args.only and item["component"] != args.only:
             continue
-        if item["component"] == "cosy_models" and not (args.only or args.include_cosy):
+        if item["component"] == "cosy_models" and not (
+            args.only or args.include_cosy or CONFIG["speech_engine"] == "cosy"
+        ):
+            continue
+        if item["component"] in {"index_models", "index_aux"} and not (
+            args.only or args.include_index or CONFIG["speech_engine"] == "index"
+        ):
             continue
         target = path(item["component"]) / item["file"]
         if target.exists():

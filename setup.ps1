@@ -1,10 +1,17 @@
-param([switch]$SkipModels, [switch]$WithCosy)
+param([switch]$SkipModels, [switch]$WithCosy, [switch]$WithIndex)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 Get-Command uv -ErrorAction Stop | Out-Null
 Get-Command npm -ErrorAction Stop | Out-Null
-$xiaoxiaComponents = @('bot', 'gateway', 'index', 'singing', 'memory')
-if ($WithCosy) { $xiaoxiaComponents += 'cosy' }
+$xiaoxiaSpeechEngine = 'cosy'
+$xiaoxiaConfigPath = if ($env:XIAOXIA_CONFIG) { $env:XIAOXIA_CONFIG } else { Join-Path $PSScriptRoot 'xiaoxia.local.json' }
+if (Test-Path -LiteralPath $xiaoxiaConfigPath) {
+    $xiaoxiaConfig = Get-Content -LiteralPath $xiaoxiaConfigPath -Raw | ConvertFrom-Json
+    if ($xiaoxiaConfig.speech_engine) { $xiaoxiaSpeechEngine = $xiaoxiaConfig.speech_engine }
+}
+$xiaoxiaComponents = @('bot', 'gateway', $xiaoxiaSpeechEngine, 'singing', 'memory')
+if ($WithCosy -and 'cosy' -notin $xiaoxiaComponents) { $xiaoxiaComponents += 'cosy' }
+if ($WithIndex -and 'index' -notin $xiaoxiaComponents) { $xiaoxiaComponents += 'index' }
 foreach ($xiaoxiaComponent in $xiaoxiaComponents) {
     $xiaoxiaVersion = if ($xiaoxiaComponent -in @('bot', 'memory')) { '3.12' } else { '3.11' }
     $xiaoxiaEnv = Join-Path $PSScriptRoot ".venvs/$xiaoxiaComponent"
@@ -41,6 +48,7 @@ try {
 if (-not $SkipModels) {
     $xiaoxiaModelArgs = @()
     if ($WithCosy) { $xiaoxiaModelArgs += '--include-cosy' }
+    if ($WithIndex) { $xiaoxiaModelArgs += '--include-index' }
     & $xiaoxiaPython tools/download_models.py @xiaoxiaModelArgs
     if ($LASTEXITCODE -ne 0) { throw 'Model download failed.' }
 }

@@ -11,7 +11,7 @@ CONFIG = {
     "voice_state": ".runtime/voice",
     "memory_state": ".runtime/memory",
     "voice_profile": "assets/voices/profile.json",
-    "speech_engine": "index",
+    "speech_engine": "cosy",
     "index_repo": "vendor/index_tts",
     "index_models": "models/index-tts",
     "index_aux": "models/index-aux",
