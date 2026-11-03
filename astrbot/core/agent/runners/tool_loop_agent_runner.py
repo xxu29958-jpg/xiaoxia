@@ -521,6 +521,8 @@ class ToolLoopAgentRunner(BaseAgentRunner[TContext]):
         if include_model:
             # For primary provider we keep explicit model selection if provided.
             payload["model"] = self.req.model
+        if self.req.response_format is not None:
+            payload["response_format"] = self.req.response_format
         if self.streaming:
             stream = self.provider.text_chat_stream(**payload)
             try:
@@ -1518,6 +1520,7 @@ class ToolLoopAgentRunner(BaseAgentRunner[TContext]):
                         model=self.req.model,
                         session_id=self.req.session_id,
                         extra_user_content_parts=self.req.extra_user_content_parts,
+                        response_format=self.req.response_format,
                         # tool_choice="required",
                         abort_signal=self._abort_signal,
                         request_max_retries=self.request_max_retries,
@@ -1550,6 +1553,7 @@ class ToolLoopAgentRunner(BaseAgentRunner[TContext]):
                             model=self.req.model,
                             session_id=self.req.session_id,
                             extra_user_content_parts=self.req.extra_user_content_parts,
+                            response_format=self.req.response_format,
                             # tool_choice="required",
                             abort_signal=self._abort_signal,
                             request_max_retries=self.request_max_retries,

@@ -58,6 +58,19 @@ class ChatReplyer:
         if persona_id != "Ada" or not persona:
             return
         if not event.get_extra("ada_native_reply"):
+            req.response_format = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "ada_reply",
+                    "strict": False,
+                    "schema": {
+                        "type": "object",
+                        "properties": {"reply": {"type": "string"}},
+                        "required": ["reply"],
+                        "additionalProperties": True,
+                    },
+                },
+            }
             req.system_prompt = (req.system_prompt or "") + REPLY_STYLE
             if event.get_extra("ada_voice_requested"):
                 req.system_prompt += (

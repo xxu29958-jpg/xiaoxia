@@ -53,6 +53,16 @@ class ProviderOAuthPlugOpenAICodexRequest:
                     continue
                 params[key] = value
 
+        response_format = payloads.get("response_format")
+        if response_format is not None:
+            text = dict(params.get("text") or {})
+            text["format"] = (
+                {"type": "json_schema", **response_format["json_schema"]}
+                if response_format.get("type") == "json_schema"
+                else response_format
+            )
+            params["text"] = text
+
         request_search_mode = str(oauth_web_search or "inherit").strip().lower()
         if request_search_mode not in {"inherit", "disabled", "cached", "live"}:
             raise ValueError(

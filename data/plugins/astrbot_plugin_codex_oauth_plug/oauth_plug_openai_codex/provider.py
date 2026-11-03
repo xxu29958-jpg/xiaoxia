@@ -262,7 +262,7 @@ class ProviderOAuthPlugOpenAICodex(
             *args,
             **kwargs,
         )
-        for key in ("reasoning_effort", "reasoning"):
+        for key in ("reasoning_effort", "reasoning", "response_format"):
             if kwargs.get(key) is not None:
                 payloads[key] = kwargs[key]
         if kwargs.get("oauth_web_search") is not None:
