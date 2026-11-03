@@ -29,5 +29,14 @@
     "repository": "https://github.com/shivammehta25/Matcha-TTS",
     "revision": "dd9105b34bf2be2230f4aa1e4769fb586a3c824e",
     "local_changes_included": false
+  },
+  "fish_speech": {
+    "repository": "https://github.com/fishaudio/fish-speech.git",
+    "revision": "0f8a12e8a651062fdee9c33a894bdccd3a8513f1",
+    "local_changes_included": false,
+    "archive_url": "https://codeload.github.com/fishaudio/fish-speech/zip/0f8a12e8a651062fdee9c33a894bdccd3a8513f1",
+    "archive_sha256": "24487df7d512e991d5834c26bf74ce138ea64bb695eb61285a1136423cead549",
+    "archive_root": "fish-speech-0f8a12e8a651062fdee9c33a894bdccd3a8513f1",
+    "install_path": ".runtime/sources/fish_speech"
   }
 }

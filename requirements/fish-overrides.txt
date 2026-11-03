@@ -1,0 +1,4 @@
+# Matches the explicit protobuf override in fish-speech@0f8a12e8 pyproject.toml.
+# descript-audiotools 0.7.2 still declares protobuf<3.20. This incompatibility is
+# retained explicitly for the existing Fish candidate, not treated as a clean pip check.
+protobuf==5.29.6

@@ -114,11 +114,31 @@ def required_tests(changes: list) -> dict:
     quality_changed = any(
         c.path.startswith(("tools/quality/", "quality/")) for c in changes
     )
+    installation_paths = {
+        "setup.ps1",
+        "services/runtime.py",
+        "tools/download_models.py",
+        "vendor/sources.json",
+    }
+    installation = [
+        c.path
+        for c in changes
+        if c.path in installation_paths
+        or c.path.startswith(
+            (
+                "tools/installation/",
+                "tests/installation/",
+                "requirements/fish",
+                "models-manifests/",
+            )
+        )
+    ]
     other_code = [
         c.path
         for c in changes
         if Path(c.path).suffix in SOURCE
         and not c.path.startswith(("tools/quality/", "quality/"))
+        and c.path not in installation
     ]
     frontend = [
         c.path
@@ -128,6 +148,7 @@ def required_tests(changes: list) -> dict:
     ]
     return {
         "quality_contracts": quality_changed,
+        "installation_contracts": bool(installation),
         "unmapped_code_changes": other_code,
         "frontend_checks_required": frontend,
     }
@@ -160,6 +181,22 @@ def run(repo: Path, base: str) -> dict:
                     "discover",
                     "-s",
                     "quality/tests",
+                    "-v",
+                ],
+            )
+        )
+    if tests["installation_contracts"] and not checks["secrets"]:
+        commands.append(
+            execute(
+                repo,
+                [
+                    sys.executable,
+                    "-B",
+                    "-m",
+                    "unittest",
+                    "discover",
+                    "-s",
+                    "tests/installation",
                     "-v",
                 ],
             )

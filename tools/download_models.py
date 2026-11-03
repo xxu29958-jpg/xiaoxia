@@ -13,6 +13,29 @@ sys.path.insert(0, str(ROOT))
 from services.runtime import CONFIG, path  # noqa: E402
 
 
+def selected_models(root: Path, only: str | None, engines: set[str]) -> list[dict]:
+    items = json.loads((root / "models.manifest.json").read_text(encoding="utf-8"))
+    for manifest in sorted((root / "models-manifests").glob("*.json")):
+        items.extend(json.loads(manifest.read_text(encoding="utf-8")))
+    if only and only not in {item["component"] for item in items}:
+        raise ValueError(f"Unknown model component: {only}")
+    engine_components = {
+        "cosy_models": "cosy",
+        "index_models": "index",
+        "index_aux": "index",
+        "fish_models": "fish",
+    }
+    return [
+        item
+        for item in items
+        if (
+            item["component"] == only
+            if only
+            else engine_components.get(item["component"]) in engines | {None}
+        )
+    ]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -31,23 +54,24 @@ def main():
         action="store_true",
         help="Also install IndexTTS-2 when another speech engine is selected",
     )
+    parser.add_argument(
+        "--include-fish",
+        action="store_true",
+        help="Also install pinned Fish S2 weights",
+    )
     args = parser.parse_args()
-    items = json.loads((ROOT / "models.manifest.json").read_text(encoding="utf-8"))
+    engines = {CONFIG["speech_engine"]}
+    engines.update(
+        engine
+        for engine in ("cosy", "index", "fish")
+        if getattr(args, "include_" + engine)
+    )
+    items = selected_models(ROOT, args.only, engines)
     proxy = CONFIG["download_proxy"]
     opener = urllib.request.build_opener(
         urllib.request.ProxyHandler({"https": proxy} if proxy else {})
     )
     for item in items:
-        if args.only and item["component"] != args.only:
-            continue
-        if item["component"] == "cosy_models" and not (
-            args.only or args.include_cosy or CONFIG["speech_engine"] == "cosy"
-        ):
-            continue
-        if item["component"] in {"index_models", "index_aux"} and not (
-            args.only or args.include_index or CONFIG["speech_engine"] == "index"
-        ):
-            continue
         target = path(item["component"]) / item["file"]
         if target.exists():
             with target.open("rb") as source:

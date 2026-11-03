@@ -1,4 +1,4 @@
-param([switch]$SkipModels, [switch]$WithCosy, [switch]$WithIndex)
+param([switch]$SkipModels, [switch]$WithCosy, [switch]$WithIndex, [switch]$WithFish)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 Get-Command uv -ErrorAction Stop | Out-Null
@@ -12,8 +12,10 @@ if (Test-Path -LiteralPath $xiaoxiaConfigPath) {
 $xiaoxiaComponents = @('bot', 'gateway', $xiaoxiaSpeechEngine, 'singing', 'memory')
 if ($WithCosy -and 'cosy' -notin $xiaoxiaComponents) { $xiaoxiaComponents += 'cosy' }
 if ($WithIndex -and 'index' -notin $xiaoxiaComponents) { $xiaoxiaComponents += 'index' }
+if ($WithFish -and 'fish' -notin $xiaoxiaComponents) { $xiaoxiaComponents += 'fish' }
+if ($xiaoxiaSpeechEngine -notin @('cosy', 'index', 'fish')) { throw 'Unknown configured speech engine.' }
 foreach ($xiaoxiaComponent in $xiaoxiaComponents) {
-    $xiaoxiaVersion = if ($xiaoxiaComponent -in @('bot', 'memory')) { '3.12' } else { '3.11' }
+    $xiaoxiaVersion = if ($xiaoxiaComponent -eq 'fish') { '3.11.15' } elseif ($xiaoxiaComponent -in @('bot', 'memory')) { '3.12' } else { '3.11' }
     $xiaoxiaEnv = Join-Path $PSScriptRoot ".venvs/$xiaoxiaComponent"
     $xiaoxiaPython = Join-Path $xiaoxiaEnv 'Scripts/python.exe'
     if (-not (Test-Path -LiteralPath $xiaoxiaPython)) {
@@ -22,6 +24,13 @@ foreach ($xiaoxiaComponent in $xiaoxiaComponents) {
     }
     $xiaoxiaBuildArgs = @()
     if ($xiaoxiaComponent -eq 'cosy') { $xiaoxiaBuildArgs = @('--build-constraint', 'requirements/cosy-build.txt') }
+    if ($xiaoxiaComponent -eq 'fish') {
+        $xiaoxiaBootstrapPython = Join-Path $PSScriptRoot '.venvs/bot/Scripts/python.exe'
+        & $xiaoxiaBootstrapPython -B -m tools.installation.fish
+        if ($LASTEXITCODE -ne 0) { throw 'Pinned Fish source installation failed.' }
+        # The complete lock was resolved with the documented upstream protobuf override.
+        $xiaoxiaBuildArgs = @('--require-hashes', '--no-deps')
+    }
     & uv pip install --python $xiaoxiaPython --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match @xiaoxiaBuildArgs -r "requirements/$xiaoxiaComponent.txt"
     if ($LASTEXITCODE -ne 0) { throw "Dependency install failed: $xiaoxiaComponent" }
 }
@@ -49,6 +58,7 @@ if (-not $SkipModels) {
     $xiaoxiaModelArgs = @()
     if ($WithCosy) { $xiaoxiaModelArgs += '--include-cosy' }
     if ($WithIndex) { $xiaoxiaModelArgs += '--include-index' }
+    if ($WithFish) { $xiaoxiaModelArgs += '--include-fish' }
     & $xiaoxiaPython tools/download_models.py @xiaoxiaModelArgs
     if ($LASTEXITCODE -ne 0) { throw 'Model download failed.' }
 }
