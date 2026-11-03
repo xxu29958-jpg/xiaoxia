@@ -97,7 +97,7 @@ class IndexTTS2:
 
         self.gpt = UnifiedVoice(**self.cfg.gpt, use_accel=self.use_accel)
         self.gpt_path = os.path.join(self.model_dir, self.cfg.gpt_checkpoint)
-        load_checkpoint(self.gpt, self.gpt_path)
+        load_checkpoint(self.gpt, self.gpt_path, mmap=True)
         self.gpt = self.gpt.to(self.device)
         if self.use_fp16:
             self.gpt.eval().half()
@@ -151,6 +151,7 @@ class IndexTTS2:
             load_only_params=True,
             ignore_modules=[],
             is_distributed=False,
+            mmap=True,
         )
         self.s2mel = s2mel.to(self.device)
         self.s2mel.models['cfm'].estimator.setup_caches(max_batch_size=1, max_seq_length=8192)

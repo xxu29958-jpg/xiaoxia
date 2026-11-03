@@ -584,8 +584,9 @@ def load_checkpoint2(
     ignore_modules=[],
     is_distributed=False,
     load_ema=False,
+    mmap=False,
 ):
-    state = torch.load(path, map_location="cpu")
+    state = torch.load(path, map_location="cpu", mmap=mmap)
     params = state["net"]
     if load_ema and "ema" in state:
         print("Loading EMA")

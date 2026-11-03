@@ -19,8 +19,8 @@ import torch
 import yaml
 
 
-def load_checkpoint(model: torch.nn.Module, model_pth: str) -> dict:
-    checkpoint = torch.load(model_pth, map_location='cpu')
+def load_checkpoint(model: torch.nn.Module, model_pth: str, *, mmap=False) -> dict:
+    checkpoint = torch.load(model_pth, map_location='cpu', mmap=mmap)
     checkpoint = checkpoint['model'] if 'model' in checkpoint else checkpoint
     missing, unexpected = model.load_state_dict(checkpoint, strict=False)
     if missing:

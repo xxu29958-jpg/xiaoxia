@@ -71,9 +71,9 @@ async def lifespan(app):
         num_beams=1,
         verbose=False,
     )
-    # Both prompt features are cached. This encoder is only used when the
-    # reference changes, which this fixed-profile worker does through restart.
-    engine.semantic_model.to("cpu")
+    # Both prompt features are cached. This fixed-profile worker changes the
+    # reference through restart, so its reference encoder is no longer needed.
+    engine.semantic_model = None
     torch.cuda.empty_cache()
     startup_seconds = round(time.perf_counter() - started, 3)
     print(json.dumps({"event": "index_ready", "seconds": startup_seconds}), flush=True)
