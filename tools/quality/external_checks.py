@@ -29,7 +29,73 @@ def execute(repo: Path, argv: list[str], *, timeout: int = 180) -> dict:
     }
 
 
-def python_checks(repo: Path, files: list[str]) -> list[dict]:
+def runtime_group(path: str) -> str:
+    if path == "services/voice/server_voice.py":
+        return "gateway"
+    if path in {
+        "services/voice/cover_pipeline.py",
+        "services/voice/cover_source.py",
+        "services/voice/server_singing.py",
+    } or path.startswith("tests/media_pipeline/"):
+        return "singing"
+    return "quality"
+
+
+def pyright_checks(
+    repo: Path, files: list[str], runtimes: dict[str, str]
+) -> list[dict]:
+    checks = []
+    for group in sorted({runtime_group(path) for path in files}):
+        selected = [path for path in files if runtime_group(path) == group]
+        interpreter = runtimes.get(group)
+        if not interpreter or not Path(interpreter).is_file():
+            checks.append(
+                {
+                    "command": ["pyright", "--runtime", group, *selected],
+                    "exit_code": 2,
+                    "stdout": "",
+                    "stderr": f"Missing {group} interpreter; supply --{group}-python. "
+                    "No fallback to an unrelated package environment.",
+                }
+            )
+            continue
+        checks.append(
+            execute(
+                repo,
+                [
+                    interpreter,
+                    "-B",
+                    "-c",
+                    "import sys; print(sys.version); "
+                    "raise SystemExit(0 if sys.version_info[:2] == "
+                    + ("(3, 12)" if group == "quality" else "(3, 11)")
+                    + " else 2)",
+                ],
+            )
+        )
+        if checks[-1]["exit_code"]:
+            continue
+        checks.append(
+            execute(
+                repo,
+                [
+                    "node",
+                    str(repo / "quality/node_modules/pyright/index.js"),
+                    "--project",
+                    "pyrightconfig.json",
+                    "--pythonpath",
+                    interpreter,
+                    "--outputjson",
+                    *selected,
+                ],
+            )
+        )
+    return checks
+
+
+def python_checks(
+    repo: Path, files: list[str], runtimes: dict[str, str] | None = None
+) -> list[dict]:
     if not files:
         return []
     # Explicit file arguments include tracked plugin/test code despite Git ignores.
@@ -52,21 +118,8 @@ def python_checks(repo: Path, files: list[str]) -> list[dict]:
             }
         )
         return checks
-    checks.append(
-        execute(
-            repo,
-            [
-                "node",
-                str(pyright),
-                "--project",
-                "pyrightconfig.json",
-                "--pythonpath",
-                sys.executable,
-                "--outputjson",
-                *files,
-            ],
-        )
-    )
+    interpreters = {"quality": sys.executable, **(runtimes or {})}
+    checks.extend(pyright_checks(repo, files, interpreters))
     return checks
 
 

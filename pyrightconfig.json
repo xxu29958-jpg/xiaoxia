@@ -8,7 +8,9 @@
   "exclude": ["**/node_modules", "**/__pycache__", ".venvs", ".runtime"],
   "executionEnvironments": [
     {"root": "services/memory", "pythonVersion": "3.12", "extraPaths": ["."]},
+    {"root": "services/voice", "pythonVersion": "3.11", "extraPaths": [".", "vendor/soulx_singer"]},
     {"root": "services", "pythonVersion": "3.11", "extraPaths": ["."]},
+    {"root": "tests/media_pipeline", "pythonVersion": "3.11", "extraPaths": [".", "vendor/soulx_singer"]},
     {"root": ".", "pythonVersion": "3.12"}
   ]
 }

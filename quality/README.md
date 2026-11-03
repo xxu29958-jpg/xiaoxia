@@ -14,7 +14,8 @@ uv pip install --python .venvs/quality/Scripts/python.exe -r requirements/qualit
 npm ci --prefix quality --ignore-scripts
 ```
 
-质量环境不加载 GPU、不启动服务、不读取聊天数据库。主程序和独立声音引擎继续使用各自环境。
+质量环境不加载 GPU、不启动生产服务、不读取聊天数据库。HTTP 契约使用临时状态目录和回环测试端口。
+主程序和独立声音引擎继续使用各自环境；缺少匹配解释器时类型检查失败，不换成缺包环境或忽略导入错误。
 
 ## 当前可执行入口
 
@@ -22,6 +23,11 @@ npm ci --prefix quality --ignore-scripts
 # 每次变更的静态检查：--base 使用分支起点／PR 的基线提交。
 # 包含已提交、暂存、未暂存及 Git 未忽略的新文件；返回 0 通过、1 不满足、2 工具错误。
 .venvs/quality/Scripts/python.exe -B -m tools.quality.gate --base <change-base-commit>
+
+# 涉及声音服务／信号处理时，必须提供各自已安装的 Python 3.11 环境。
+# 新建环境或本机已有环境均可；检查只读，不会向它们安装依赖。
+.venvs/quality/Scripts/python.exe -B -m tools.quality.gate --base <change-base-commit> `
+  --gateway-python <gateway-python.exe> --singing-python <singing-python.exe>
 
 # stdout 为 JSON。固定提交，不包含未提交文件；重定向到选定的证据目录。
 .venvs/quality/Scripts/python.exe -B -m tools.quality.inventory --revision HEAD
@@ -55,6 +61,7 @@ npm ci --prefix quality --ignore-scripts
 - 密钥扫描只报告路径／规则／行号，不输出匹配值；当前覆盖私钥头、GitHub token、OpenAI 风格 key 与运行凭据文件名，不宣称能识别所有秘密。发现疑似密钥后不再执行可能回显源内容的 lint/type/test 命令。
 - 引用包单独按哈希和完整文件集合验证；额外塞入源码不能借该路径逃过检查。新增／增长到 10 MiB 以上资产需审查。
 - 当前自动消费者映射覆盖质量工具自身，以及 Fish 源码安装／模型选择的标准库契约测试和 PowerShell 语法检查。Fish 生成锁文件的输入／输出哈希也纳入检查。其他业务代码、前端或脚本变化会显示缺少的检查映射并阻断，必须补对应的真实测试，不允许当作自动跳过。空环境依赖安装、真实模型导入、GPU 服务和完整安装旅程分别保留环境证据，不能由这些快速检查推断通过。
+- 媒体任务映射覆盖真实 SQLite／进程强杀、HTTP 控制与回环 RPC、WAV 读回；信号处理映射使用演唱环境中的 librosa／soundfile 和确定性转换器，覆盖时长、重叠、停顿、尾音、取消及真实 yt-dlp 下载。模型权重与外部聊天渠道不在快速测试内；这些测试不能代替 GPU 合成、插件消费者、发送回执或人工听审。
 - gate 的 JSON 保留基线、HEAD、候选文件哈希、工具退出码和结果；源码在运行期间发生变化时结果作废。命令本身不生成工作树缓存或改写文件，输出由调用者重定向到证据目录。
 
 工具和规则变化后，重新测同一原始提交，保留旧证据，避免把计数器变化误认成产品改善。

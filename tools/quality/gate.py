@@ -112,7 +112,9 @@ def inspect_changes(repo: Path, snapshot: dict, policy: dict) -> dict:
 
 def required_tests(changes: list) -> dict:
     quality_changed = any(
-        c.path.startswith(("tools/quality/", "quality/")) for c in changes
+        c.path.startswith(("tools/quality/", "quality/"))
+        or c.path in {"requirements/quality.txt", "pyrightconfig.json"}
+        for c in changes
     )
     installation_paths = {
         "setup.ps1",
@@ -133,12 +135,35 @@ def required_tests(changes: list) -> dict:
             )
         )
     ]
+    media_paths = {
+        "services/voice/job_api.py",
+        "services/voice/job_execution.py",
+        "services/voice/job_renderer.py",
+        "services/voice/cover_source.py",
+        "services/voice/server_voice.py",
+        "services/voice/server_singing.py",
+        "services/voice/cover_pipeline.py",
+    }
+    media = [
+        c.path
+        for c in changes
+        if c.path in media_paths
+        or c.path.startswith(
+            ("services/jobs/", "tests/media_jobs/", "tests/media_pipeline/")
+        )
+    ]
+    pipeline = any(
+        c.path == "services/voice/cover_pipeline.py"
+        or c.path.startswith("tests/media_pipeline/")
+        for c in changes
+    )
     other_code = [
         c.path
         for c in changes
         if Path(c.path).suffix in SOURCE
         and not c.path.startswith(("tools/quality/", "quality/"))
         and c.path not in installation
+        and c.path not in media
     ]
     frontend = [
         c.path
@@ -149,12 +174,47 @@ def required_tests(changes: list) -> dict:
     return {
         "quality_contracts": quality_changed,
         "installation_contracts": bool(installation),
+        "media_job_contracts": bool(media),
+        "media_pipeline_contracts": pipeline,
         "unmapped_code_changes": other_code,
         "frontend_checks_required": frontend,
     }
 
 
-def run(repo: Path, base: str) -> dict:
+def contract_checks(repo: Path, tests: dict, runtimes: dict[str, str]) -> list[dict]:
+    checks = []
+    for flag, folder, interpreter in (
+        ("quality_contracts", "quality/tests", sys.executable),
+        ("installation_contracts", "tests/installation", sys.executable),
+        ("media_job_contracts", "tests/media_jobs", sys.executable),
+        (
+            "media_pipeline_contracts",
+            "tests/media_pipeline",
+            runtimes.get("singing", ""),
+        ),
+    ):
+        if not tests[flag]:
+            continue
+        if not interpreter or not Path(interpreter).is_file():
+            checks.append(
+                {
+                    "command": ["unittest", folder],
+                    "exit_code": 2,
+                    "stdout": "",
+                    "stderr": "Missing required test interpreter.",
+                }
+            )
+            continue
+        checks.append(
+            execute(
+                repo,
+                [interpreter, "-B", "-m", "unittest", "discover", "-s", folder, "-v"],
+            )
+        )
+    return checks
+
+
+def run(repo: Path, base: str, runtimes: dict[str, str] | None = None) -> dict:
     started = time.monotonic()
     policy = json.loads((repo / "quality/policy.json").read_text(encoding="utf-8"))
     snapshot = capture(repo, base)
@@ -167,40 +227,11 @@ def run(repo: Path, base: str) -> dict:
         for c in snapshot["changes"]
         if c.path.endswith(".py") and (repo / c.path).is_file()
     ]
-    commands = [] if checks["secrets"] else python_checks(repo, files)
+    runtimes = runtimes or {}
+    commands = [] if checks["secrets"] else python_checks(repo, files, runtimes)
     tests = required_tests(snapshot["changes"])
-    if tests["quality_contracts"] and not checks["secrets"]:
-        commands.append(
-            execute(
-                repo,
-                [
-                    sys.executable,
-                    "-B",
-                    "-m",
-                    "unittest",
-                    "discover",
-                    "-s",
-                    "quality/tests",
-                    "-v",
-                ],
-            )
-        )
-    if tests["installation_contracts"] and not checks["secrets"]:
-        commands.append(
-            execute(
-                repo,
-                [
-                    sys.executable,
-                    "-B",
-                    "-m",
-                    "unittest",
-                    "discover",
-                    "-s",
-                    "tests/installation",
-                    "-v",
-                ],
-            )
-        )
+    if not checks["secrets"]:
+        commands.extend(contract_checks(repo, tests, runtimes))
     reference = verify_reference_bundle(repo)
     blocked = any(f["blocking"] for f in checks["size"]) or any(
         checks[k] for k in ("complexity", "secrets", "assets")
@@ -237,9 +268,16 @@ def main() -> None:
     parser.add_argument(
         "--base", required=True, help="Immutable predecessor commit or branch base"
     )
+    parser.add_argument("--gateway-python", type=Path)
+    parser.add_argument("--singing-python", type=Path)
     args = parser.parse_args()
     try:
-        report = run(Path.cwd(), args.base)
+        runtimes = {
+            name: str(value.resolve())
+            for name in ("gateway", "singing")
+            if (value := getattr(args, f"{name}_python")) is not None
+        }
+        report = run(Path.cwd(), args.base, runtimes)
     except (
         OSError,
         ValueError,

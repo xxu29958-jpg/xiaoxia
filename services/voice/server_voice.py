@@ -22,7 +22,13 @@ from fastapi.responses import Response
 from funasr import AutoModel
 from pydantic import BaseModel, Field
 
+from services.jobs.runner import JobRunner
+from services.jobs.store import JobStore
 from services.runtime import CONFIG, PROJECT, path, voice_profile
+from services.voice.job_api import JobService
+from services.voice.job_api import router as job_router
+from services.voice.job_execution import runtime_signature
+from services.voice.job_renderer import RemoteCoverRenderer
 
 ROOT = path("voice_state")
 KEY = (ROOT / "service.key").read_text(encoding="utf-8").strip()
@@ -60,10 +66,33 @@ async def lifespan(app):
         json.dumps({"event": "voice_gateway_ready", "recognizer": "SenseVoiceSmall"}),
         flush=True,
     )
-    yield
+    jobs_root = ROOT / "jobs"
+    store = JobStore(jobs_root / "state.sqlite3")
+    signature = runtime_signature(PROJECT)
+    renderer = RemoteCoverRenderer(
+        jobs_root,
+        lock,
+        key=KEY,
+        engine=CONFIG["speech_engine"],
+        reference=profile["reference_sha256"],
+        signature=signature,
+    )
+    runner = JobRunner(store, renderer)
+    app.state.media_jobs = JobService(
+        store, runner, jobs_root, profile["reference_sha256"], signature
+    )
+    runner.start()
+    try:
+        yield
+    finally:
+        app.state.media_jobs = None
+        await asyncio.to_thread(runner.close)
+        if not runner.thread.is_alive():
+            renderer.client.close()
 
 
 app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
+app.include_router(job_router(authenticate))
 
 
 class Speech(BaseModel):
@@ -123,7 +152,7 @@ def speech(body: Speech):
             client.post(
                 "http://127.0.0.1:6191/release-gpu", timeout=60
             ).raise_for_status()
-        payload = {"text": text}
+        payload: dict[str, str | float] = {"text": text}
         if body.mode == "speech":
             payload.update(emotion=body.emotion, emotion_strength=body.emotion_strength)
         try:
@@ -204,6 +233,9 @@ async def transcriptions(
     model: Annotated[str, Form()] = "ada-sensevoice",
 ):
     global last_recognition
+    active_recognizer = recognizer
+    if active_recognizer is None:
+        raise HTTPException(503, "recognizer_not_ready")
     audio = await file.read()
     with tempfile.NamedTemporaryFile(
         suffix=Path(file.filename or "audio.wav").suffix,
@@ -217,7 +249,7 @@ async def transcriptions(
         def recognize():
             started = time.perf_counter()
             with recognition_lock, torch.inference_mode():
-                result = recognizer.generate(
+                result = active_recognizer.generate(
                     input=str(path), language="auto", use_itn=True, disable_pbar=True
                 )
             text = re.sub(
