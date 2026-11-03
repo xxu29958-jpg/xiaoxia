@@ -128,8 +128,10 @@ class CoverPipeline:
             vocals = stems["Vocals"]
             backing = stems["Instrumental"]
             separation_seconds = time.perf_counter() - separated_at
-        sf.write(output / "source-vocals.wav", vocals.T, rate, subtype="PCM_16")
-        sf.write(output / "instrumental.wav", backing.T, rate, subtype="PCM_16")
+        # Separated stems can exceed full scale even when the input mix does not.
+        # Preserve these peaks until the final mix gain, instead of clipping them.
+        sf.write(output / "source-vocals.wav", vocals.T, rate, subtype="FLOAT")
+        sf.write(output / "instrumental.wav", backing.T, rate, subtype="FLOAT")
 
         # Bound the F0 extractor as well as diffusion; the upstream CLI only chunks
         # the latter. Overlap keeps sustained vowels intact at window boundaries.
@@ -146,7 +148,7 @@ class CoverPipeline:
             folder = output / "windows" / f"{number:04d}"
             folder.mkdir(parents=True, exist_ok=True)
             source_window = folder / "source.wav"
-            sf.write(source_window, mono[start:end], rate, subtype="PCM_16")
+            sf.write(source_window, mono[start:end], rate, subtype="FLOAT")
             torch.manual_seed(42)
             at = time.perf_counter()
             args = dict(
@@ -191,7 +193,7 @@ class CoverPipeline:
         peak = float(np.abs(result).max())
         if peak > 0.98:
             result *= 0.98 / peak
-        sf.write(output / "xiaxia-vocals.wav", converted, rate, subtype="PCM_16")
+        sf.write(output / "xiaxia-vocals.wav", converted, rate, subtype="FLOAT")
         sf.write(output / "xiaxia-cover.wav", result.T, rate, subtype="PCM_16")
         report = {
             "engine": "Mel-Band Roformer + Seed-VC" if not acapella else "Seed-VC",

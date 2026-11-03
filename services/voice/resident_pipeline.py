@@ -44,8 +44,9 @@ class SingingPipeline:
         }
         self.seed_models = seed.load_models(SimpleNamespace(**self.seed_args))
         seed.load_models = lambda args: self.seed_models
+        # The cover mixer and speech endpoint apply the final playback gain.
         seed.torchaudio.save = lambda path, wave, rate: sf.write(
-            path, wave.detach().cpu().numpy().T, rate, subtype="PCM_16"
+            path, wave.detach().cpu().numpy().T, rate, subtype="FLOAT"
         )
 
         sys.path.insert(0, str(SOUL))
