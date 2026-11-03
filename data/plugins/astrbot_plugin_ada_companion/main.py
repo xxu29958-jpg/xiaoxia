@@ -118,6 +118,15 @@ class AdaCompanion(Star):
         self.job = None
 
     async def initialize(self):
+        personas = self.context.persona_manager
+        if not any(persona.persona_id == "Ada" for persona in personas.personas):
+            await personas.create_persona(
+                persona_id="Ada",
+                system_prompt=Path(__file__)
+                .with_name("persona.md")
+                .read_text(encoding="utf-8")
+                .strip(),
+            )
         self.public_browser.maintenance_task = asyncio.create_task(
             self.public_browser.maintain()
         )

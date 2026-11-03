@@ -70,6 +70,7 @@ def initialize():
         from astrbot.core.config.default import DEFAULT_CONFIG
 
         config = copy.deepcopy(DEFAULT_CONFIG)
+        config["agent_runner"]["config"]["persona"]["persona_id"] = "Ada"
         key = (path("voice_state") / "service.key").read_text().strip()
         config["provider_sources"].append(
             {

@@ -29,4 +29,6 @@
 
 新安装的 `xiaoxia.py init` 只创建缺失配置，不替换已有账号配置。已有实例需要在“小夏管理中心”配置 `voice_key_file`，并让识别提供商指向 `http://127.0.0.1:6190/v1`。微信发送方式为 MP3 文件，QQ 普通说话为语音消息，长作品为文件。
 
+新安装默认选择 `Ada`。小夏插件首次启动时从 `data/plugins/astrbot_plugin_ada_companion/persona.md` 创建人设；已有的 `Ada` 人设保留原内容，后续在管理界面的“人格设定”中编辑。接入已有 AstrBot 时，可在 Agent Runner 中选择 `Ada`。
+
 聊天模型、QQ／微信登录和本人私聊会话在管理界面配置。主动聊天提供商应选中自己已配置的模型。记忆和表情检索可使用本地 `http://127.0.0.1:11435/v1`，模型名 `ada-e5-small`，密钥读取 `memory_state/local-key.txt`。
