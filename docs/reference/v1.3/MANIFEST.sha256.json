@@ -1,0 +1,132 @@
+{
+  "version": "1.3",
+  "date": "2026-11-04",
+  "scope": "all bundle files except manifest itself",
+  "files": [
+    {
+      "path": "README_CODEX_REFERENCE.md",
+      "bytes": 4585,
+      "sha256": "c63fcdf4ff445c333906bf71a9beeff58e86ab360e9d6223814744ed7d6a5c6f"
+    },
+    {
+      "path": "architecture/Xiaoxia_Architecture_v1.3.pdf",
+      "bytes": 111239,
+      "sha256": "90bee802ab23dd9630b633aac9b2a7077a0bee12abbd617540376b6c1ea5a71a"
+    },
+    {
+      "path": "architecture/Xiaoxia_Architecture_v1.3.png",
+      "bytes": 269547,
+      "sha256": "accbf35ceec4635cff425514328822c3123eb5ac004fb23c9a3c021a9b264d9d"
+    },
+    {
+      "path": "architecture/Xiaoxia_Engineering_Architecture_v1.3.mmd",
+      "bytes": 1110,
+      "sha256": "87e46371d3dab188588b58b59b67bf5d2eda5c3da388152b60d28dbd7a33ddb2"
+    },
+    {
+      "path": "architecture/Xiaoxia_Engineering_Architecture_v1.3.png",
+      "bytes": 236503,
+      "sha256": "548687769faa918ac169f9f16e82c9ef857619acb9f38c90394364b178bd279e"
+    },
+    {
+      "path": "architecture/Xiaoxia_Performance_Architecture_v1.3.png",
+      "bytes": 239315,
+      "sha256": "f2e261e17035c992e2bacba1bb7fe5253e564f013d7fa5233187bbdccb6e49b0"
+    },
+    {
+      "path": "contract/Xiaoxia_Project_Contract_v1.3.md",
+      "bytes": 93409,
+      "sha256": "13d329bab9a84f90eebf94373e25e98a6a062428964f9f02b4ae10002e019170"
+    },
+    {
+      "path": "contract/Xiaoxia_Project_Contract_v1.3.pdf",
+      "bytes": 264598,
+      "sha256": "e4bad8ec7a676568f84fec85a029375fabf814f55553b3bfdeafa6e6c7c529a2"
+    },
+    {
+      "path": "engineering/Xiaoxia_Engineering_Standards_v1.3.md",
+      "bytes": 57076,
+      "sha256": "a8171228e5b085fa2db085919232d4dccf702dc66af0ca64dc7adc1cb61e5b1d"
+    },
+    {
+      "path": "engineering/Xiaoxia_Engineering_Standards_v1.3.pdf",
+      "bytes": 192058,
+      "sha256": "fd22be781c97a1deee878066e3df3dab341565f1d762c7cf2a0206705f09f10f"
+    },
+    {
+      "path": "engineering/Xiaoxia_Quality_Acceptance_v1.3.csv",
+      "bytes": 2200,
+      "sha256": "8fea94e347919b419e6d562319e9a88f423a9a92bf57ea1f80b055484cec2241"
+    },
+    {
+      "path": "engineering/Xiaoxia_Quality_Matrix_v1.3.csv",
+      "bytes": 3179,
+      "sha256": "96a51b14ef35c5b2d836dc853f00f6f236dbc5870e22d3d81c5c3e36a70e1681"
+    },
+    {
+      "path": "engineering/Xiaoxia_Quality_Rules_v1.3.json",
+      "bytes": 3771,
+      "sha256": "cf1ddc8df950f6422830fa8b60ba6ada49ddedf40a20025d153d549321593746"
+    },
+    {
+      "path": "engineering/quality_policy.example.json",
+      "bytes": 4191,
+      "sha256": "838e218e94a943600420cd4ac6023ce983f0a60fc2adc79a4781d3dab4e71453"
+    },
+    {
+      "path": "index/Xiaoxia_Paper_Index.csv",
+      "bytes": 24501,
+      "sha256": "c81712212b2c5111da235858f32bad38af0feb9684719a8729e5cb5fe853ff29"
+    },
+    {
+      "path": "index/Xiaoxia_Paper_Index.json",
+      "bytes": 143573,
+      "sha256": "e3e11888a6964578b234a4fd1d9080d48771c1593dbfbf1ada2c9f3a747ef648"
+    },
+    {
+      "path": "index/Xiaoxia_Paper_Index.md",
+      "bytes": 26837,
+      "sha256": "77e89e19622fc3f08b8bb9b0d1321d995d16b6d79ef994ea9b3d641b54ed215a"
+    },
+    {
+      "path": "index/Xiaoxia_Specialty_Sources_v1.2.json",
+      "bytes": 25658,
+      "sha256": "b916fe5b18f4ecc9a57c5c6fa60426db660381bb50ddbefe3742359a07b4963e"
+    },
+    {
+      "path": "index/Xiaoxia_Specialty_Sources_v1.2.md",
+      "bytes": 16533,
+      "sha256": "153df89605a7a78b575295321a5687944b50870de2e968538722a56741996dfc"
+    },
+    {
+      "path": "research/Xiaoxia_All_Project_Research.md",
+      "bytes": 48807,
+      "sha256": "d803cbc02783add9643844385d81913638a9692d6d01ffe137babee07b258d9d"
+    },
+    {
+      "path": "research/Xiaoxia_Cognitive_Mechanisms.md",
+      "bytes": 28200,
+      "sha256": "81e8476d724d382d8747c81c93ae2f6aaf2ba68feb264979a7e99a2c96c06354"
+    },
+    {
+      "path": "research/Xiaoxia_Research_Reference_v1.1.pdf",
+      "bytes": 457146,
+      "sha256": "5ed2dc51906bfe9d0f9daa8564875356ed9eabc4ddc1e40a02ee07f3bbd7a8d4"
+    },
+    {
+      "path": "research/Xiaoxia_Singing_Opera_Foundation_v1.2.md",
+      "bytes": 65687,
+      "sha256": "695c625e4a0a4baacb55acad0e893705719adcc58b0e0015952dc87032888a83"
+    },
+    {
+      "path": "research/Xiaoxia_Singing_Opera_Foundation_v1.2.pdf",
+      "bytes": 221103,
+      "sha256": "bd6e4ebdccd0f2c4a3ac8dd1d5a2f463f6f6d5f3c92763d868c1f1c0afae6353"
+    },
+    {
+      "path": "research/Xiaoxia_Speech_Chat_Research.md",
+      "bytes": 44424,
+      "sha256": "f3b89579c3b5c7181da90855132eca3ec26a62098fcb3b06bea6184937852f26"
+    }
+  ]
+}

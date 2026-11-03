@@ -1,4 +1,9 @@
 * text=auto eol=lf
+
+# Preserve the received reference bundle byte-for-byte against its SHA-256 manifest.
+# Source Markdown hard breaks and CSV CRLF are part of that immutable input.
+docs/reference/v1.3/** -text -whitespace
+*.pdf binary
 *.ps1 text eol=crlf
 *.wav binary
 *.mp3 binary

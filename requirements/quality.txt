@@ -1,0 +1,2 @@
+# Quality tools are isolated from the bot and GPU worker environments.
+ruff==0.15.22
