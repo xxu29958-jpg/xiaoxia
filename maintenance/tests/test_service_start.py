@@ -1,12 +1,13 @@
 """Physical Windows process ownership and concurrent launcher verification."""
 
-from pathlib import Path
 import socket
 import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 
+import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "runtime" / "service-start.ps1"
 FLAGS = subprocess.CREATE_NO_WINDOW
@@ -22,9 +23,9 @@ def quote(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
-def driver(folder, entry, port, *, name, executable=None):
+def driver(folder, entry, port, *, name, executable=None, unbuffered=False):
     path = folder / (name + ".ps1")
-    arguments = f'"{entry}" {port}'
+    arguments = ("-u " if unbuffered else "") + f'"{entry}" {port}'
     path.write_text(
         "$ErrorActionPreference='Stop'\n. " + quote(SCRIPT) + "\n"
         f"Start-OwnedService -Name {quote(name)} -Executable {quote(executable or sys._base_executable)} "
@@ -157,7 +158,8 @@ def test_early_exit_is_failure_and_not_a_ready_service(tmp_path):
     assert "is listening" not in out
 
 
-def test_shutdown_runs_cleanup_and_refuses_a_different_entry(tmp_path):
+@pytest.mark.parametrize("unbuffered", [False, True])
+def test_shutdown_runs_cleanup_and_refuses_a_different_entry(tmp_path, unbuffered):
     entry = tmp_path / "service.py"
     entry.write_text(
         "import asyncio,os,sys\nfrom pathlib import Path\n"
@@ -170,20 +172,37 @@ def test_shutdown_runs_cleanup_and_refuses_a_different_entry(tmp_path):
         encoding="utf-8",
     )
     port = free_port()
-    launch = start(driver(tmp_path, entry, port, name="shutdown-" + str(port), executable=sys.executable))
+    launch = start(
+        driver(
+            tmp_path,
+            entry,
+            port,
+            name="shutdown-" + str(port),
+            executable=sys.executable,
+            unbuffered=unbuffered,
+        )
+    )
     try:
         out, err = launch.communicate(timeout=30)
         assert launch.returncode == 0, out + err
         pid = int(entry.with_suffix(".started").read_text())
         stop_script = SCRIPT.with_name("graceful_stop.py")
         command = [sys.executable, str(stop_script), str(pid), sys.executable]
-        rejected = subprocess.run(command + [str(tmp_path / "other.py")],
-            capture_output=True, creationflags=FLAGS, timeout=15)
+        rejected = subprocess.run(
+            command + [str(tmp_path / "other.py")],
+            capture_output=True,
+            creationflags=FLAGS,
+            timeout=15,
+        )
         assert rejected.returncode != 0
         with socket.create_connection(("127.0.0.1", port), timeout=2):
             pass
-        stopped = subprocess.run(command + [str(entry), "--timeout", "10"],
-            capture_output=True, creationflags=FLAGS, timeout=20)
+        stopped = subprocess.run(
+            command + [str(entry), "--timeout", "10"],
+            capture_output=True,
+            creationflags=FLAGS,
+            timeout=20,
+        )
         assert stopped.returncode == 0, stopped.stderr.decode(errors="replace")
         assert entry.with_suffix(".closed").read_text() == "clean"
         with socket.socket() as connection:

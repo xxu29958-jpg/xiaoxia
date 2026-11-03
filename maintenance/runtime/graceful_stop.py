@@ -24,19 +24,22 @@ def is_owned(process, executable, entry):
         try:
             if Path(process.exe()).resolve() == executable:
                 arguments = process.cmdline()[1:]
+                entry_arguments = (
+                    arguments[1:] if arguments[:1] == ["-u"] else arguments
+                )
                 if (
-                    arguments
-                    and (Path(process.cwd()) / arguments[0]).resolve() == entry
+                    entry_arguments
+                    and (Path(process.cwd()) / entry_arguments[0]).resolve() == entry
                 ):
                     return True
                 # A venv stub forwards the same arguments to a different binary.
                 # An ordinary parent merely having a service child is not owned.
                 for child in process.children():
                     if (
-                        arguments
+                        entry_arguments
                         and Path(child.exe()).resolve() != executable
                         and child.cmdline()[1:] == arguments
-                        and (Path(child.cwd()) / arguments[0]).resolve() == entry
+                        and (Path(child.cwd()) / entry_arguments[0]).resolve() == entry
                     ):
                         return True
                 # Workers can use the same interpreter with their own entry.
