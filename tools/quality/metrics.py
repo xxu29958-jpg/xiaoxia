@@ -45,6 +45,8 @@ def symbols(tree: ast.AST, prefix: str = "") -> list[dict]:
             continue
         name = f"{prefix}.{child.name}" if prefix else child.name
         start = min([child.lineno, *(d.lineno for d in child.decorator_list)])
+        if child.end_lineno is None:
+            raise ValueError(f"Parsed definition has no end location: {name}")
         result.append(
             {
                 "name": name,

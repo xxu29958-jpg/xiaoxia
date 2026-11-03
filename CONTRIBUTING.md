@@ -43,43 +43,17 @@
 - 将布局重设计与新增功能尽量拆成独立 PR。新增功能优先沿用现有页面结构；确需调整已有入口时，在 PR 中说明原因和受影响的流程，避免连续、无关的页面重排。
 - 提交前运行 `cd docs && pnpm run docs:build`，并按更新后的步骤核对相关 WebUI 页面。在 PR 中写明核对的页面和验证结果。
 
-##### Core
+##### 当前工程检查入口
 
-我们使用 Ruff 作为代码格式化和静态分析工具。在提交代码之前，请运行以下命令以确保代码符合规范：
+先按 [quality/README.md](quality/README.md) 安装隔离的 Python／Node 质量工具。在仓库根目录执行只读检查：
 
-```bash
-ruff format .
-ruff check .
+```powershell
+.venvs/quality/Scripts/python.exe -B -m tools.quality.gate --base <本次变更的基线提交>
 ```
 
-如果您使用 VSCode，可以安装 `Ruff` 插件。
+入口保存原始退出码，检查失败返回非零；不运行服务、不下载模型，也不改写源码。原文中的 `make pr-test-*` 没有对应 Makefile，已由实际入口替换。当前入口覆盖静态变更检查和质量工具的确定性测试；其他业务消费者测试与前端检查仍须按变更登记和执行，缺少映射时不能报通过。G2/G3、实际安装、恢复、GPU 和听审单独留证。
 
-##### PR 功能完整性验证（推荐）
-
-如果您希望在本地做一套接近 CI 的完整验证，可使用：
-
-```bash
-make pr-test-neo
-```
-
-该命令会执行：
-- `uv sync --group dev`
-- `ruff format --check .` 与 `ruff check .`
-- Neo 相关关键测试
-- `main.py` 启动 smoke test（检测 `http://localhost:6185`）
-
-需要全量验证时可使用：
-
-```bash
-make pr-test-full
-```
-
-如果只想快速重复执行（跳过依赖同步和 dashboard 构建）：
-
-```bash
-make pr-test-full-fast
-```
-
+格式修复是单独的显式操作，使用已固定版本的 `ruff format <具体文件>`；检查使用 `ruff format --check`，不要把修复或生产启动混进快速检查。
 
 ## Contributing Guide
 
@@ -122,37 +96,14 @@ We use the `fix/` prefix for bug fixes and the `feat/` prefix for new features. 
 - Keep layout redesigns and feature additions in separate PRs where practical. Prefer the existing page structure for new features. Explain necessary navigation changes and affected workflows in the PR to avoid repeated, unrelated rearrangements.
 - Before submitting, run `cd docs && pnpm run docs:build` and check the affected WebUI pages against the updated steps. Include the checked pages and validation results in the PR.
 
-##### Core
+##### Executable quality checks
 
-We use Ruff as our code formatter and static analysis tool. Before submitting your code, please run the following commands to ensure your code adheres to the style guidelines:
+Install the isolated Python and Node tools as described in [quality/README.md](quality/README.md), then run:
 
-```bash
-ruff format .
-ruff check .
+```powershell
+.venvs/quality/Scripts/python.exe -B -m tools.quality.gate --base <change-base-commit>
 ```
 
-##### PR completeness checks (recommended)
+This read-only entry point preserves command exit codes and never starts production services, downloads models, or rewrites source files. The old `make pr-test-*` instructions had no corresponding Makefile and have been replaced. The current entry covers static change checks and deterministic quality-tool tests. Product consumer tests and frontend checks must be mapped and executed for the affected changes; unmapped code changes cannot report success. G2/G3, installation, recovery, GPU, and perceptual acceptance require their own evidence.
 
-To run a local validation flow close to CI, use:
-
-```bash
-make pr-test-neo
-```
-
-This command runs:
-- `uv sync --group dev`
-- `ruff format --check .` and `ruff check .`
-- Neo-related critical tests
-- a startup smoke test against `http://localhost:6185`
-
-For full validation, use:
-
-```bash
-make pr-test-full
-```
-
-For faster repeated runs (skip dependency sync and dashboard build), use:
-
-```bash
-make pr-test-full-fast
-```
+Use `ruff format --check` for checks. Formatting fixes are separate explicit operations on named files with the pinned Ruff version.

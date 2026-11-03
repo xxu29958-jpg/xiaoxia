@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tools.quality.changes import changed_paths
 from tools.quality.inventory import collect
 from tools.quality.metrics import physical_lines, python_metrics, threshold
 from tools.quality.ownership import file_kind, responsibility
@@ -109,6 +110,34 @@ class GitIsolationTests(unittest.TestCase):
             self.assertEqual(index_before, (root / ".git/index").read_bytes())
             self.assertEqual(before, git("status", "--porcelain=v2"))
             self.assertEqual(source.read_text(), "value = 2\n")
+
+    def test_untracked_rename_retains_its_committed_predecessor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+
+            def git(*args):
+                return subprocess.check_output(["git", "-C", directory, *args])
+
+            git("init", "-q")
+            git("config", "core.autocrlf", "true")
+            original = root / "original.py"
+            original.write_bytes(b"value = 1\r\n")
+            git("add", "original.py")
+            git(
+                "-c",
+                "user.name=Quality test",
+                "-c",
+                "user.email=quality@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            )
+            original.rename(root / "renamed.py")
+            changes = changed_paths(root, "HEAD")
+            self.assertEqual(
+                [(c.path, c.previous_path) for c in changes],
+                [("renamed.py", "original.py")],
+            )
 
 
 if __name__ == "__main__":
