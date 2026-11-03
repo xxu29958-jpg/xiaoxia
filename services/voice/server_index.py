@@ -120,7 +120,7 @@ def speech(body: Speech):
     text = body.text.strip()
     if not text:
         raise HTTPException(422, "Text is empty")
-    with lock:
+    with lock, torch.inference_mode():
         started = time.perf_counter()
         if next(engine.gpt.parameters()).device.type != "cuda":
             for model in (
