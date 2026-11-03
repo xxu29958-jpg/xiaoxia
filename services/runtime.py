@@ -17,7 +17,7 @@ CONFIG = {
     "index_aux": "models/index-aux",
     "cosy_repo": "vendor/cosyvoice",
     "cosy_models": "models/cosyvoice3",
-    "fish_repo": "vendor/fish_speech",
+    "fish_repo": ".runtime/sources/fish_speech",
     "fish_models": "models/fish-s2",
     "seed_repo": "vendor/seed_vc",
     "seed_models": "models/seed-vc",

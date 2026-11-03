@@ -18,8 +18,11 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
+from services.jobs.store import JobError
 from services.runtime import CONFIG, PROJECT, path
 from services.voice.cover_pipeline import CoverPipeline
+from services.voice.cover_source import prepare_source
+from services.voice.job_execution import JobExecution, runtime_signature
 from services.voice.resident_pipeline import SingingPipeline
 from services.voice.singing_score import write_score
 
@@ -32,6 +35,7 @@ lock = threading.Lock()
 last_synthesis = {}
 startup_seconds = None
 reference_sha256 = None
+RUNTIME_SIGNATURE = runtime_signature(PROJECT)
 
 
 def authenticate(authorization: str | None = Header(default=None)):
@@ -83,6 +87,8 @@ class SpeechConversion(BaseModel):
 @app.post("/convert-speech", dependencies=[Depends(authenticate)])
 def convert_speech(body: SpeechConversion):
     """Reuse the resident converter without retaining each chat in the song library."""
+    if cover_engine is None:
+        raise HTTPException(503, "singing_not_ready")
     with (
         lock,
         tempfile.TemporaryDirectory(prefix="speech-vc-", dir=ROOT / "temp") as temp,
@@ -100,6 +106,8 @@ def health():
         "project": str(PROJECT),
         "reference_sha256": reference_sha256,
         "startup_seconds": startup_seconds,
+        "job_protocol": "cover-v1",
+        "runtime_signature": RUNTIME_SIGNATURE,
         "busy": lock.locked(),
         "last_synthesis": last_synthesis,
         "capabilities": ["original_score", "full_performance_conversion"],
@@ -110,6 +118,8 @@ def health():
 def sing(body: Lyrics):
     global last_synthesis
     started = time.perf_counter()
+    if engine is None:
+        raise HTTPException(503, "singing_not_ready")
     with lock, tempfile.TemporaryDirectory(prefix="song-", dir=ROOT / "temp") as temp:
         folder = Path(temp)
         try:
@@ -145,52 +155,28 @@ def sing(body: Lyrics):
 
 
 @app.post("/cover", dependencies=[Depends(authenticate)])
-def cover(body: Cover):
-    """Return a complete song or opera performance in the shared voice."""
+def cover(
+    body: Cover,
+    x_job_id: str | None = Header(default=None),
+    x_job_token: str | None = Header(default=None),
+):
+    """Return a complete performance while honoring a durable claim when supplied."""
     global last_synthesis
-    output = ROOT / "songs" / uuid.uuid4().hex
-    source = Path(body.source_path)
-    download_seconds = 0.0
-    if body.source_url:
-        from yt_dlp import YoutubeDL
-        from yt_dlp.utils import DownloadError
-
-        output.mkdir(parents=True)
-        download_started = time.perf_counter()
-        try:
-            with YoutubeDL(
-                {
-                    "format": "bestaudio/best",
-                    "noplaylist": True,
-                    "outtmpl": str(output / "source.%(ext)s"),
-                    "ffmpeg_location": CONFIG["ffmpeg"],
-                    "proxy": CONFIG["download_proxy"] or None,
-                    "quiet": True,
-                    "socket_timeout": 20,
-                    "retries": 1,
-                    "fragment_retries": 1,
-                }
-            ) as downloader:
-                info = downloader.extract_info(body.source_url, download=True)
-                source = Path(downloader.prepare_filename(info))
-                (output / "source-page.json").write_text(
-                    json.dumps(
-                        {
-                            "url": body.source_url,
-                            "title": info.get("title"),
-                            "uploader": info.get("uploader"),
-                            "duration": info.get("duration"),
-                        },
-                        ensure_ascii=False,
-                        indent=2,
-                    ),
-                    encoding="utf-8",
-                )
-        except DownloadError as exc:
-            raise HTTPException(422, "source_unavailable") from exc
-        download_seconds = time.perf_counter() - download_started
-    if not source.is_file():
-        raise HTTPException(404, "Source audio was not found")
+    if cover_engine is None:
+        raise HTTPException(503, "singing_not_ready")
+    try:
+        control = JobExecution(ROOT / "jobs", x_job_id, x_job_token)
+        control.validate(body.model_dump(), reference_sha256 or "", RUNTIME_SIGNATURE)
+        output = (
+            ROOT / "jobs" / "backend" / x_job_id / x_job_token
+            if x_job_id and x_job_token
+            else ROOT / "songs" / uuid.uuid4().hex
+        )
+        source, download_seconds = prepare_source(
+            body.model_dump(), output, CONFIG, control
+        )
+    except JobError as error:
+        raise HTTPException(409 if x_job_id else 422, str(error)) from error
     with lock:
         try:
             report = cover_engine.convert(
@@ -200,7 +186,11 @@ def cover(body: Cover):
                 pitch=body.pitch,
                 start_seconds=body.start_seconds,
                 duration_seconds=body.duration_seconds,
+                checkpoint=control.checkpoint,
             )
+            control.checkpoint("finalizing")
+        except JobError as exc:
+            raise HTTPException(409, str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
         report["source_url"] = body.source_url
@@ -222,6 +212,7 @@ def cover(body: Cover):
             "X-Generation-Seconds": str(report["generation_seconds"]),
             "X-Audio-Seconds": str(report["audio_seconds"]),
             "X-Result-Path": report["output"],
+            "X-Job-Control": "cover-v1",
         },
     )
 

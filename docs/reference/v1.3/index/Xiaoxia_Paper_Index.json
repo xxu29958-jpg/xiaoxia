@@ -1,0 +1,3068 @@
+{
+  "title": "小夏论文参考目录",
+  "version": "1.1",
+  "date": "2026-11-04",
+  "usage_policy": "项目交付是不变量。论文、方法、算法、模型、参数、架构和实验设计均为可替换参考；Codex 可以改进、组合、替换或放弃，以实际交付效果和证据选择路线。",
+  "counts": {
+    "project_report": 53,
+    "cognitive_report": 16,
+    "speech_chat_report": 28,
+    "reference_records": 97,
+    "unique_references": 91
+  },
+  "dedup_method": "按完整标题大小写及标点规范化归并；版本不同的同一论文不重复计数。每条保留来源报告编号与原版本链接。",
+  "references": [
+    {
+      "group": "全项目",
+      "source_id": "G01",
+      "title": "Cognitive Architectures for Language Agents",
+      "year_venue": "2023／TMLR 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/2309.02427",
+      "reading_sections": "§4 记忆、行动与决策；§5 案例；§6 讨论。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G01"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G01",
+          "title": "Cognitive Architectures for Language Agents",
+          "year_venue": "2023／TMLR 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/2309.02427",
+          "reading_sections": "§4 记忆、行动与决策；§5 案例；§6 讨论。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G02",
+      "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+      "year_venue": "2022／ICLR 2023",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2210.03629",
+      "reading_sections": "方法；§3 问答及事实核查；环境任务与错误分析。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G02"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G02",
+          "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+          "year_venue": "2022／ICLR 2023",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2210.03629",
+          "reading_sections": "方法；§3 问答及事实核查；环境任务与错误分析。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G03",
+      "title": "Lost in the Middle: How Language Models Use Long Contexts",
+      "year_venue": "TACL 2024",
+      "landing_url": "",
+      "fulltext_url": "https://aclanthology.org/2024.tacl-1.9.pdf",
+      "reading_sections": "§2 实验设置与结果；§3 检索；§4–5 分析。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G03"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G03",
+          "title": "Lost in the Middle: How Language Models Use Long Contexts",
+          "year_venue": "TACL 2024",
+          "landing_url": "",
+          "fulltext_url": "https://aclanthology.org/2024.tacl-1.9.pdf",
+          "reading_sections": "§2 实验设置与结果；§3 检索；§4–5 分析。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G04",
+      "title": "Large Language Models Cannot Self-Correct Reasoning Yet",
+      "year_venue": "2023／ICLR 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2310.01798",
+      "reading_sections": "§3 内在纠错实验、提示变体及分析。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G04"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G04",
+          "title": "Large Language Models Cannot Self-Correct Reasoning Yet",
+          "year_venue": "2023／ICLR 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2310.01798",
+          "reading_sections": "§3 内在纠错实验、提示变体及分析。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G05",
+      "title": "CRITIC: Large Language Models Can Self-Correct with Tool-Interactive Critiquing",
+      "year_venue": "ICLR 2024",
+      "landing_url": "",
+      "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/fef126561bbf9d4467dbb8d27334b8fe-Paper-Conference.pdf",
+      "reading_sections": "§3 算法；§4 对照及无工具消融；附录 A 局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G05"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G05",
+          "title": "CRITIC: Large Language Models Can Self-Correct with Tool-Interactive Critiquing",
+          "year_venue": "ICLR 2024",
+          "landing_url": "",
+          "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/fef126561bbf9d4467dbb8d27334b8fe-Paper-Conference.pdf",
+          "reading_sections": "§3 算法；§4 对照及无工具消融；附录 A 局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G06",
+      "title": "Establishing and Maintaining Long-Term Human-Computer Relationships",
+      "year_venue": "TOCHI 2005",
+      "landing_url": "",
+      "fulltext_url": "https://dam-prod.media.mit.edu/x/files/pdfs/04.bickmore-picard-tochi.pdf",
+      "reading_sections": "§4 关系沟通；§6 系统、随机分组、结果；§7 局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G06"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G06",
+          "title": "Establishing and Maintaining Long-Term Human-Computer Relationships",
+          "year_venue": "TOCHI 2005",
+          "landing_url": "",
+          "fulltext_url": "https://dam-prod.media.mit.edu/x/files/pdfs/04.bickmore-picard-tochi.pdf",
+          "reading_sections": "§4 关系沟通；§6 系统、随机分组、结果；§7 局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G07",
+      "title": "AI Companions Reduce Loneliness",
+      "year_venue": "2025 提前发表／JCR 2026 卷期",
+      "landing_url": "",
+      "fulltext_url": "https://www.hbs.edu/ris/Publication%20Files/AI%20Companions%20Reduce%20Loneliness%2011.7.2025_57451c02-8047-4e0d-abfc-55841f64166d.pdf",
+      "reading_sections": "Study 3–5 方法和结果；General Discussion。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G07"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G07",
+          "title": "AI Companions Reduce Loneliness",
+          "year_venue": "2025 提前发表／JCR 2026 卷期",
+          "landing_url": "",
+          "fulltext_url": "https://www.hbs.edu/ris/Publication%20Files/AI%20Companions%20Reduce%20Loneliness%2011.7.2025_57451c02-8047-4e0d-abfc-55841f64166d.pdf",
+          "reading_sections": "Study 3–5 方法和结果；General Discussion。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G08",
+      "title": "How AI and Human Behaviors Shape Psychosocial Effects of Extended Chatbot Use",
+      "year_venue": "2025 年 10 月 v2",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2503.17473v2",
+      "reading_sections": "随机设计；主要结果；Discussion 与 Limitations。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G08"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G08",
+          "title": "How AI and Human Behaviors Shape Psychosocial Effects of Extended Chatbot Use",
+          "year_venue": "2025 年 10 月 v2",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2503.17473v2",
+          "reading_sections": "随机设计；主要结果；Discussion 与 Limitations。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G09",
+      "title": "Sycophantic AI decreases prosocial intentions and promotes dependence",
+      "year_venue": "Science 2026",
+      "landing_url": "",
+      "fulltext_url": "https://s3.amazonaws.com/media.mediapost.com/uploads/science.aec8352.pdf",
+      "reading_sections": "RQ2、RQ3 实验与局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G09"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G09",
+          "title": "Sycophantic AI decreases prosocial intentions and promotes dependence",
+          "year_venue": "Science 2026",
+          "landing_url": "",
+          "fulltext_url": "https://s3.amazonaws.com/media.mediapost.com/uploads/science.aec8352.pdf",
+          "reading_sections": "RQ2、RQ3 实验与局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G10",
+      "title": "Sycophantic AI makes human interaction feel more effortful and less satisfying over time",
+      "year_venue": "2026 年 6 月 v3 预印本",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2605.07912v3",
+      "reading_sections": "Study 4 方法、结果、零结果和开放材料。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G10"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G10",
+          "title": "Sycophantic AI makes human interaction feel more effortful and less satisfying over time",
+          "year_venue": "2026 年 6 月 v3 预印本",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2605.07912v3",
+          "reading_sections": "Study 4 方法、结果、零结果和开放材料。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G11",
+      "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+      "year_venue": "UIST 2023",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2304.03442v2",
+      "reading_sections": "§4；§6.4–6.5；§7–8。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G11"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G11",
+          "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+          "year_venue": "UIST 2023",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2304.03442v2",
+          "reading_sections": "§4；§6.4–6.5；§7–8。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G12",
+      "title": "MemoryBank: Enhancing Large Language Models with Long-Term Memory",
+      "year_venue": "2023／AAAI 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2305.10250v3",
+      "reading_sections": "§2.1–2.3；§4.1–4.2、Table 2。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G12"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G12",
+          "title": "MemoryBank: Enhancing Large Language Models with Long-Term Memory",
+          "year_venue": "2023／AAAI 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2305.10250v3",
+          "reading_sections": "§2.1–2.3；§4.1–4.2、Table 2。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G13",
+      "title": "MemGPT: Towards LLMs as Operating Systems",
+      "year_venue": "2023／阅读 2024 v2",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2310.08560v2",
+      "reading_sections": "§2.1–2.4；§3.1–3.2。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G13"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G13",
+          "title": "MemGPT: Towards LLMs as Operating Systems",
+          "year_venue": "2023／阅读 2024 v2",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2310.08560v2",
+          "reading_sections": "§2.1–2.4；§3.1–3.2。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G14",
+      "title": "A-Mem: Agentic Memory for LLM Agents",
+      "year_venue": "2025 v4",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2502.12110v4",
+      "reading_sections": "§3.1–3.4；§4.1–4.6；附录 B.4。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G14"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G14",
+          "title": "A-Mem: Agentic Memory for LLM Agents",
+          "year_venue": "2025 v4",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2502.12110v4",
+          "reading_sections": "§3.1–3.4；§4.1–4.6；附录 B.4。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G15",
+      "title": "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory",
+      "year_venue": "2025 v1",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2504.19413v1",
+      "reading_sections": "§2.1–2.2；§3；§4.3–4.5；附录算法。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G15"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G15",
+          "title": "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory",
+          "year_venue": "2025 v1",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2504.19413v1",
+          "reading_sections": "§2.1–2.2；§3；§4.3–4.5；附录算法。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G16",
+      "title": "LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory",
+      "year_venue": "ICLR 2025",
+      "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/d813d324dbf0598bbdc9c8e79740ed01-Abstract-Conference.html",
+      "fulltext_url": "https://arxiv.org/html/2410.10813v2",
+      "reading_sections": "§3–5；Tables 3–4；相关附录。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "aliases": [
+        "G16",
+        "P06"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线",
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G16",
+          "title": "LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory",
+          "year_venue": "2024／ICLR 2025",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2410.10813v2",
+          "reading_sections": "§3–5；Tables 3–4；相关附录。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        },
+        {
+          "group": "语音与聊天",
+          "source_id": "P06",
+          "title": "LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory",
+          "year_venue": "ICLR 2025",
+          "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/d813d324dbf0598bbdc9c8e79740ed01-Abstract-Conference.html",
+          "fulltext_url": "https://arxiv.org/html/2410.10813v2",
+          "reading_sections": "§4–5，表 3/4，附录 D/E。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G17",
+      "title": "Evaluating Very Long-Term Conversational Memory of LLM Agents",
+      "year_venue": "LoCoMo／ACL 2024，阅读 v1",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2402.17753v1",
+      "reading_sections": "§3–6；§8 局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G17"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G17",
+          "title": "Evaluating Very Long-Term Conversational Memory of LLM Agents",
+          "year_venue": "LoCoMo／ACL 2024，阅读 v1",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2402.17753v1",
+          "reading_sections": "§3–6；§8 局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G18",
+      "title": "Locomo-Plus: Beyond-Factual Cognitive Memory Evaluation Framework for LLM Agents",
+      "year_venue": "ACL 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.acl-long.1150/",
+      "fulltext_url": "https://aclanthology.org/2026.acl-long.1150.pdf",
+      "reading_sections": "§3–6；Table 1；Limitations；附录 B。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "aliases": [
+        "G18",
+        "P07"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线",
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G18",
+          "title": "Locomo-Plus: Beyond-Factual Cognitive Memory Evaluation Framework for LLM Agents",
+          "year_venue": "ACL 2026",
+          "landing_url": "",
+          "fulltext_url": "https://aclanthology.org/2026.acl-long.1150.pdf",
+          "reading_sections": "§3–6；Table 1；Limitations；附录 B。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        },
+        {
+          "group": "语音与聊天",
+          "source_id": "P07",
+          "title": "Locomo-Plus: Beyond-Factual Cognitive Memory Evaluation Framework for LLM Agents",
+          "year_venue": "ACL 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.acl-long.1150/",
+          "fulltext_url": "https://aclanthology.org/2026.acl-long.1150.pdf",
+          "reading_sections": "§3–6，表 1–3。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G19",
+      "title": "RoleLLM: Benchmarking, Eliciting, and Enhancing Role-Playing Abilities of Large Language Models",
+      "year_venue": "2023／ACL Findings 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2310.00746v2",
+      "reading_sections": "§3–5；Tables 1、6、7。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G19"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G19",
+          "title": "RoleLLM: Benchmarking, Eliciting, and Enhancing Role-Playing Abilities of Large Language Models",
+          "year_venue": "2023／ACL Findings 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2310.00746v2",
+          "reading_sections": "§3–5；Tables 1、6、7。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G20",
+      "title": "Character-LLM: A Trainable Agent for Role-Playing",
+      "year_venue": "EMNLP 2023",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2310.10158v2",
+      "reading_sections": "§3 经历重建与训练；§4；局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G20"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G20",
+          "title": "Character-LLM: A Trainable Agent for Role-Playing",
+          "year_venue": "EMNLP 2023",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2310.10158v2",
+          "reading_sections": "§3 经历重建与训练；§4；局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G21",
+      "title": "InCharacter: Evaluating Personality Fidelity in Role-Playing Agents through Psychological Interviews",
+      "year_venue": "ACL 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2310.17976v3",
+      "reading_sections": "§3–5；人工验证与局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G21"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G21",
+          "title": "InCharacter: Evaluating Personality Fidelity in Role-Playing Agents through Psychological Interviews",
+          "year_venue": "ACL 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2310.17976v3",
+          "reading_sections": "§3–5；人工验证与局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G22",
+      "title": "PersonaGym: Evaluating Persona Agents and LLMs",
+      "year_venue": "EMNLP Findings 2025／v5",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2407.18416v5",
+      "reading_sections": "§2–5；评分示例和偏差检查。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G22"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G22",
+          "title": "PersonaGym: Evaluating Persona Agents and LLMs",
+          "year_venue": "EMNLP Findings 2025／v5",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2407.18416v5",
+          "reading_sections": "§2–5；评分示例和偏差检查。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G23",
+      "title": "EmoCharacter: Evaluating the Emotional Fidelity of Role-Playing Agents in Dialogues",
+      "year_venue": "NAACL 2025 主会",
+      "landing_url": "https://aclanthology.org/2025.naacl-long.316/",
+      "fulltext_url": "https://aclanthology.org/2025.naacl-long.316.pdf",
+      "reading_sections": "§3–5；§7 限制。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "aliases": [
+        "G23",
+        "P04"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线",
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G23",
+          "title": "EmoCharacter: Evaluating the Emotional Fidelity of Role-Playing Agents in Dialogues",
+          "year_venue": "NAACL 2025",
+          "landing_url": "",
+          "fulltext_url": "https://aclanthology.org/2025.naacl-long.316.pdf",
+          "reading_sections": "§3–5；§7 限制。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        },
+        {
+          "group": "语音与聊天",
+          "source_id": "P04",
+          "title": "EmoCharacter: Evaluating the Emotional Fidelity of Role-Playing Agents in Dialogues",
+          "year_venue": "NAACL 2025 主会",
+          "landing_url": "https://aclanthology.org/2025.naacl-long.316/",
+          "fulltext_url": "https://aclanthology.org/2025.naacl-long.316.pdf",
+          "reading_sections": "§3–5，表 2–5。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G24",
+      "title": "Can You Put it All Together: Evaluating Conversational Agents’ Ability to Blend Skills",
+      "year_venue": "ACL 2020 主会，经典基础",
+      "landing_url": "https://aclanthology.org/2020.acl-main.183/",
+      "fulltext_url": "https://aclanthology.org/2020.acl-main.183.pdf",
+      "reading_sections": "§3 数据与训练；§4 实验和人评。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "aliases": [
+        "G24",
+        "P08"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线",
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G24",
+          "title": "Can You Put it All Together: Evaluating Conversational Agents’ Ability to Blend Skills",
+          "year_venue": "BlendedSkillTalk／ACL 2020",
+          "landing_url": "",
+          "fulltext_url": "https://aclanthology.org/2020.acl-main.183.pdf",
+          "reading_sections": "§3 数据与训练；§4 实验和人评。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        },
+        {
+          "group": "语音与聊天",
+          "source_id": "P08",
+          "title": "Can You Put it All Together: Evaluating Conversational Agents’ Ability to Blend Skills",
+          "year_venue": "ACL 2020 主会，经典基础",
+          "landing_url": "https://aclanthology.org/2020.acl-main.183/",
+          "fulltext_url": "https://aclanthology.org/2020.acl-main.183.pdf",
+          "reading_sections": "§3–4，表 4/5/7。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G25",
+      "title": "Recipes for Building an Open-Domain Chatbot",
+      "year_venue": "2020／EACL 2021",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/2004.13637",
+      "reading_sections": "生成策略；ACUTE-Eval；§10.5 失败。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G25"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G25",
+          "title": "Recipes for Building an Open-Domain Chatbot",
+          "year_venue": "2020／EACL 2021",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/2004.13637",
+          "reading_sections": "生成策略；ACUTE-Eval；§10.5 失败。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G26",
+      "title": "Towards Understanding Sycophancy in Language Models",
+      "year_venue": "ICLR 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/2310.13548",
+      "reading_sections": "§3 四类任务；§4 偏好分析与优化；§5–6。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G26"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G26",
+          "title": "Towards Understanding Sycophancy in Language Models",
+          "year_venue": "ICLR 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/2310.13548",
+          "reading_sections": "§3 四类任务；§4 偏好分析与优化；§5–6。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G27",
+      "title": "Principles of Mixed-Initiative User Interfaces",
+      "year_venue": "CHI 1999",
+      "landing_url": "",
+      "fulltext_url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/11/chi99horvitz.pdf",
+      "reading_sections": "设计原则；效用与时机；长期学习。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G27"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G27",
+          "title": "Principles of Mixed-Initiative User Interfaces",
+          "year_venue": "CHI 1999",
+          "landing_url": "",
+          "fulltext_url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/11/chi99horvitz.pdf",
+          "reading_sections": "设计原则；效用与时机；长期学习。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G28",
+      "title": "Proactive Agent: Shifting LLM Agents from Reactive Responses to Active Assistance",
+      "year_venue": "ICLR 2025",
+      "landing_url": "",
+      "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/75c37811e830bf029584b1c6fac17726-Paper-Conference.pdf",
+      "reading_sections": "§3–4；附录 C.5；局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G28"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G28",
+          "title": "Proactive Agent: Shifting LLM Agents from Reactive Responses to Active Assistance",
+          "year_venue": "ICLR 2025",
+          "landing_url": "",
+          "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/75c37811e830bf029584b1c6fac17726-Paper-Conference.pdf",
+          "reading_sections": "§3–4；附录 C.5；局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G29",
+      "title": "After Talking with 1,000 Personas: Learning Preference-Aligned Proactive Assistants from Large-Scale Simulated Persona Interactions",
+      "year_venue": "2026 年 8 月 v3",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2602.04000",
+      "reading_sections": "§5–10；用户研究和局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G29"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G29",
+          "title": "After Talking with 1,000 Personas: Learning Preference-Aligned Proactive Assistants from Large-Scale Simulated Persona Interactions",
+          "year_venue": "2026 年 8 月 v3",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2602.04000",
+          "reading_sections": "§5–10；用户研究和局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G30",
+      "title": "ProMISe: A Proactive Multi-turn Dialogue Dataset for Information-seeking Intent Resolution",
+      "year_venue": "EACL Findings 2024",
+      "landing_url": "",
+      "fulltext_url": "https://aclanthology.org/2024.findings-eacl.124.pdf",
+      "reading_sections": "§3–5；§7；附录 A。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G30"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G30",
+          "title": "ProMISe: A Proactive Multi-turn Dialogue Dataset for Information-seeking Intent Resolution",
+          "year_venue": "EACL Findings 2024",
+          "landing_url": "",
+          "fulltext_url": "https://aclanthology.org/2024.findings-eacl.124.pdf",
+          "reading_sections": "§3–5；§7；附录 A。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G31",
+      "title": "Personalized Topic Selection Model for Topic-Grounded Dialogue",
+      "year_venue": "PETD／ACL Findings 2024",
+      "landing_url": "",
+      "fulltext_url": "https://aclanthology.org/2024.findings-acl.429.pdf",
+      "reading_sections": "§3；§4.1–4.7；局限。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G31"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G31",
+          "title": "Personalized Topic Selection Model for Topic-Grounded Dialogue",
+          "year_venue": "PETD／ACL Findings 2024",
+          "landing_url": "",
+          "fulltext_url": "https://aclanthology.org/2024.findings-acl.429.pdf",
+          "reading_sections": "§3；§4.1–4.7；局限。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G32",
+      "title": "WebGPT: Browser-assisted question-answering with human feedback",
+      "year_venue": "2021／阅读 2022 v3",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/2112.09332",
+      "reading_sections": "§2–4；§6.1–6.3。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G32"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G32",
+          "title": "WebGPT: Browser-assisted question-answering with human feedback",
+          "year_venue": "2021／阅读 2022 v3",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/2112.09332",
+          "reading_sections": "§2–4；§6.1–6.3。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G33",
+      "title": "FunAudioLLM: Voice Understanding and Generation Foundation Models for Natural Interaction Between Humans and LLMs",
+      "year_venue": "2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2407.04051v1",
+      "reading_sections": "§2.2；§4.1–4.3；§5–6。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G33"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G33",
+          "title": "FunAudioLLM: Voice Understanding and Generation Foundation Models for Natural Interaction Between Humans and LLMs",
+          "year_venue": "2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2407.04051v1",
+          "reading_sections": "§2.2；§4.1–4.3；§5–6。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G34",
+      "title": "CosyVoice 3: Towards In-the-wild Speech Generation via Scaling-up and Post-training",
+      "year_venue": "2025／v2",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2505.17589v2",
+      "reading_sections": "tokenizer、后训练方法；实验及控制机制。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G34"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G34",
+          "title": "CosyVoice 3: Towards In-the-wild Speech Generation via Scaling-up and Post-training",
+          "year_venue": "2025／v2",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2505.17589v2",
+          "reading_sections": "tokenizer、后训练方法；实验及控制机制。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G35",
+      "title": "IndexTTS2: A Breakthrough in Emotionally Expressive and Duration-Controlled Auto-Regressive Zero-Shot Text-to-Speech",
+      "year_venue": "AAAI 2026 主会",
+      "landing_url": "https://ojs.aaai.org/index.php/AAAI/article/view/40820",
+      "fulltext_url": "https://ojs.aaai.org/index.php/AAAI/article/download/40820/44781",
+      "reading_sections": "情绪／音色解耦、时长控制；实验。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "aliases": [
+        "G35",
+        "P13"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线",
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G35",
+          "title": "IndexTTS2: A Breakthrough in Emotionally Expressive and Duration-Controlled Auto-Regressive Zero-Shot Text-to-Speech",
+          "year_venue": "2025／AAAI 2026",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2506.21619v2",
+          "reading_sections": "情绪／音色解耦、时长控制；实验。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        },
+        {
+          "group": "语音与聊天",
+          "source_id": "P13",
+          "title": "IndexTTS2: A Breakthrough in Emotionally Expressive and Duration-Controlled Auto-Regressive Zero-Shot Text-to-Speech",
+          "year_venue": "AAAI 2026 主会",
+          "landing_url": "https://ojs.aaai.org/index.php/AAAI/article/view/40820",
+          "fulltext_url": "https://ojs.aaai.org/index.php/AAAI/article/download/40820/44781",
+          "reading_sections": "T2S、三阶段训练、S2M、T2E、实验表 2/3。正式元数据由 AAAI 索引核实，方法读取作者全文。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": [
+            {
+              "label": "作者全文",
+              "url": "https://arxiv.org/html/2506.21619v2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G36",
+      "title": "CoCoEmo: Composable and Controllable Human-Like Emotional TTS via Activation Steering",
+      "year_venue": "2026 年 2 月预印本",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2602.03420v1",
+      "reading_sections": "§2 交叉条件；steering 方法；Tables 2–3；附录。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G36"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G36",
+          "title": "CoCoEmo: Composable and Controllable Human-Like Emotional TTS via Activation Steering",
+          "year_venue": "2026 年 2 月预印本",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2602.03420v1",
+          "reading_sections": "§2 交叉条件；steering 方法；Tables 2–3；附录。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G37",
+      "title": "Fish Audio S2 Technical Report",
+      "year_venue": "2026 年 3 月",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2603.08823v1",
+      "reading_sections": "§2.2；§3.2；§4.2–4.3；§5 与附录。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G37"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G37",
+          "title": "Fish Audio S2 Technical Report",
+          "year_venue": "2026 年 3 月",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2603.08823v1",
+          "reading_sections": "§2.2；§3.2；§4.2–4.3；§5 与附录。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G38",
+      "title": "Seed-VC: Zero-shot Voice Conversion with Diffusion Transformers",
+      "year_venue": "2024／阅读 v1",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2411.09943v1",
+      "reading_sections": "§3.3–3.5；§4.1；§4.3.2。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G38"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G38",
+          "title": "Seed-VC: Zero-shot Voice Conversion with Diffusion Transformers",
+          "year_venue": "2024／阅读 v1",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2411.09943v1",
+          "reading_sections": "§3.3–3.5；§4.1；§4.3.2。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G39",
+      "title": "TurnGPT: a Transformer-based Language Model for Predicting Turn-taking in Spoken Dialog",
+      "year_venue": "EMNLP Findings 2020",
+      "landing_url": "",
+      "fulltext_url": "https://aclanthology.org/2020.findings-emnlp.268.pdf",
+      "reading_sections": "§3–4；§6.2–6.3。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G39"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G39",
+          "title": "TurnGPT: a Transformer-based Language Model for Predicting Turn-taking in Spoken Dialog",
+          "year_venue": "EMNLP Findings 2020",
+          "landing_url": "",
+          "fulltext_url": "https://aclanthology.org/2020.findings-emnlp.268.pdf",
+          "reading_sections": "§3–4；§6.2–6.3。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G40",
+      "title": "Real-time and Continuous Turn-taking Prediction Using Voice Activity Projection",
+      "year_venue": "IWSDS 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2401.04868v1",
+      "reading_sections": "§2 模型；§3 性能。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G40"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G40",
+          "title": "Real-time and Continuous Turn-taking Prediction Using Voice Activity Projection",
+          "year_venue": "IWSDS 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2401.04868v1",
+          "reading_sections": "§2 模型；§3 性能。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G41",
+      "title": "Freeze-Omni: A Smart and Low Latency Speech-to-speech Dialogue Model with Frozen LLM",
+      "year_venue": "ICML 2025",
+      "landing_url": "https://proceedings.mlr.press/v267/wang25aw.html",
+      "fulltext_url": "https://arxiv.org/html/2411.00774v5",
+      "reading_sections": "§2；§3.4–3.5；§4。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "aliases": [
+        "G41",
+        "P20"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线",
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G41",
+          "title": "Freeze-Omni: A Smart and Low Latency Speech-to-speech Dialogue Model with Frozen LLM",
+          "year_venue": "2024 v2",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2411.00774v2",
+          "reading_sections": "§2；§3.4–3.5；§4。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        },
+        {
+          "group": "语音与聊天",
+          "source_id": "P20",
+          "title": "Freeze-Omni: A Smart and Low Latency Speech-to-speech Dialogue Model with Frozen LLM",
+          "year_venue": "ICML 2025",
+          "landing_url": "https://proceedings.mlr.press/v267/wang25aw.html",
+          "fulltext_url": "https://arxiv.org/html/2411.00774v5",
+          "reading_sections": "作者版 §2、§3.1/3.4/3.5；会场由正式出版页核实。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G42",
+      "title": "Moshi: a speech-text foundation model for real-time dialogue",
+      "year_venue": "2024 v2",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2410.00037v2",
+      "reading_sections": "§3.3–3.4；§5.2–5.3、5.8；§6.3。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G42"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G42",
+          "title": "Moshi: a speech-text foundation model for real-time dialogue",
+          "year_venue": "2024 v2",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2410.00037v2",
+          "reading_sections": "§3.3–3.4；§5.2–5.3、5.8；§6.3。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G43",
+      "title": "SoulX-Singer: Towards High-Quality Zero-Shot Singing Voice Synthesis",
+      "year_venue": "2026 年 2 月",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2602.07803v1",
+      "reading_sections": "§2.1–2.2；§3.1–3.3。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G43"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G43",
+          "title": "SoulX-Singer: Towards High-Quality Zero-Shot Singing Voice Synthesis",
+          "year_venue": "2026 年 2 月",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2602.07803v1",
+          "reading_sections": "§2.1–2.2；§3.1–3.3。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G44",
+      "title": "OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments",
+      "year_venue": "2024 v2",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2404.07972v2",
+      "reading_sections": "§2–3；Table 5；§5。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G44"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G44",
+          "title": "OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments",
+          "year_venue": "2024 v2",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2404.07972v2",
+          "reading_sections": "§2–3；Table 5；§5。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G45",
+      "title": "Windows Agent Arena: Evaluating Multi-Modal OS Agents at Scale",
+      "year_venue": "2024／ICML 2025",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2409.08264v1",
+      "reading_sections": "§3–5；正式会议页。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G45"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G45",
+          "title": "Windows Agent Arena: Evaluating Multi-Modal OS Agents at Scale",
+          "year_venue": "2024／ICML 2025",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2409.08264v1",
+          "reading_sections": "§3–5；正式会议页。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G46",
+      "title": "UI-TARS: Pioneering Automated GUI Interaction with Native Agents",
+      "year_venue": "2025 v1",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2501.12326v1",
+      "reading_sections": "§4.3–4.6；§5.4；Table 9。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G46"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G46",
+          "title": "UI-TARS: Pioneering Automated GUI Interaction with Native Agents",
+          "year_venue": "2025 v1",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2501.12326v1",
+          "reading_sections": "§4.3–4.6；§5.4；Table 9。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G47",
+      "title": "Agent S2: A Compositional Generalist-Specialist Framework for Computer Use Agents",
+      "year_venue": "2025 v1",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2504.00906v1",
+      "reading_sections": "§3–4；Tables 1–3。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G47"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G47",
+          "title": "Agent S2: A Compositional Generalist-Specialist Framework for Computer Use Agents",
+          "year_venue": "2025 v1",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2504.00906v1",
+          "reading_sections": "§3–4；Tables 1–3。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G48",
+      "title": "InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents",
+      "year_venue": "ACL Findings 2024",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2403.02691v1",
+      "reading_sections": "§2–3；Table 3；§8。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G48"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G48",
+          "title": "InjecAgent: Benchmarking Indirect Prompt Injections in Tool-Integrated Large Language Model Agents",
+          "year_venue": "ACL Findings 2024",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2403.02691v1",
+          "reading_sections": "§2–3；Table 3；§8。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G49",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "year_venue": "2024 v3",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2406.13352v3",
+      "reading_sections": "§3–4；附录 C。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G49"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G49",
+          "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+          "year_venue": "2024 v3",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2406.13352v3",
+          "reading_sections": "§3–4；附录 C。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G50",
+      "title": "Defeating Prompt Injections by Design",
+      "year_venue": "CaMeL／2025 v1",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2503.18813v1",
+      "reading_sections": "§3–6；§8；附录 B。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G50"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G50",
+          "title": "Defeating Prompt Injections by Design",
+          "year_venue": "CaMeL／2025 v1",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2503.18813v1",
+          "reading_sections": "§3–6；§8；附录 B。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G51",
+      "title": "Evolving Agent Interfaces",
+      "year_venue": "Agent S4／2026 年 10 月预印本",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2610.28601v1",
+      "reading_sections": "§3–7；Tables 1–4；附录 A.2。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G51"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G51",
+          "title": "Evolving Agent Interfaces",
+          "year_venue": "Agent S4／2026 年 10 月预印本",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2610.28601v1",
+          "reading_sections": "§3–7；Tables 1–4；附录 A.2。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G52",
+      "title": "τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains",
+      "year_venue": "2024／ICLR 2025",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2406.12045v1",
+      "reading_sections": "§3–6；失败分析。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G52"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G52",
+          "title": "τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains",
+          "year_venue": "2024／ICLR 2025",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2406.12045v1",
+          "reading_sections": "§3–6；失败分析。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "全项目",
+      "source_id": "G53",
+      "title": "LifelongAgentBench: Evaluating LLM Agents as Lifelong Learners",
+      "year_venue": "2025 v3",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/2505.11942",
+      "reading_sections": "§3–7。",
+      "source_report": "全项目理论依据与 Codex 实现路线",
+      "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "G53"
+      ],
+      "source_reports": [
+        "全项目理论依据与 Codex 实现路线"
+      ],
+      "reference_records": [
+        {
+          "group": "全项目",
+          "source_id": "G53",
+          "title": "LifelongAgentBench: Evaluating LLM Agents as Lifelong Learners",
+          "year_venue": "2025 v3",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/2505.11942",
+          "reading_sections": "§3–7。",
+          "source_report": "全项目理论依据与 Codex 实现路线",
+          "source_report_url": "https://chatgpt.com/space/page_0e6c3d37d15081918b64ea31273bc1be",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C01",
+      "title": "An Integrated Theory of the Mind",
+      "year_venue": "2004，链接为作者早期稿",
+      "landing_url": "",
+      "fulltext_url": "https://www.andrew.cmu.edu/course/85-412/readings/INTEGRATED.NEW.2002=FINAL.pdf",
+      "reading_sections": "陈述记忆、激活方程、fan effect、规则效用",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C01"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C01",
+          "title": "An Integrated Theory of the Mind",
+          "year_venue": "2004，链接为作者早期稿",
+          "landing_url": "",
+          "fulltext_url": "https://www.andrew.cmu.edu/course/85-412/readings/INTEGRATED.NEW.2002=FINAL.pdf",
+          "reading_sections": "陈述记忆、激活方程、fan effect、规则效用",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C02",
+      "title": "LIDA A Systems-level Architecture for Cognition Emotion and Learning",
+      "year_venue": "2014",
+      "landing_url": "",
+      "fulltext_url": "https://ccrg.cs.memphis.edu/assets/papers/2013/franklin-ieee-tamd11.pdf",
+      "reading_sections": "III、VI、VII、VIII、X",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C02"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C02",
+          "title": "LIDA A Systems-level Architecture for Cognition Emotion and Learning",
+          "year_venue": "2014",
+          "landing_url": "",
+          "fulltext_url": "https://ccrg.cs.memphis.edu/assets/papers/2013/franklin-ieee-tamd11.pdf",
+          "reading_sections": "III、VI、VII、VIII、X",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C03",
+      "title": "EMA A process model of appraisal dynamics",
+      "year_venue": "2009",
+      "landing_url": "",
+      "fulltext_url": "https://stacymarsella.org/publications/pdf/EMA_Dynamics.pdf",
+      "reading_sections": "2.3.2–2.3.5",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C03"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C03",
+          "title": "EMA A process model of appraisal dynamics",
+          "year_venue": "2009",
+          "landing_url": "",
+          "fulltext_url": "https://stacymarsella.org/publications/pdf/EMA_Dynamics.pdf",
+          "reading_sections": "2.3.2–2.3.5",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C04",
+      "title": "A Standard Model of the Mind",
+      "year_venue": "2017",
+      "landing_url": "",
+      "fulltext_url": "https://onlinelibrary.wiley.com/doi/epdf/10.1609/aimag.v38i4.2744",
+      "reading_sections": "Structure and Processing、Memory and Content、Learning",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C04"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C04",
+          "title": "A Standard Model of the Mind",
+          "year_venue": "2017",
+          "landing_url": "",
+          "fulltext_url": "https://onlinelibrary.wiley.com/doi/epdf/10.1609/aimag.v38i4.2744",
+          "reading_sections": "Structure and Processing、Memory and Content、Learning",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C05",
+      "title": "Integrating language model embeddings into the ACT-R cognitive modeling framework",
+      "year_venue": "2026",
+      "landing_url": "",
+      "fulltext_url": "https://www.frontiersin.org/journals/language-sciences/articles/10.3389/flang.2026.1721326/full",
+      "reading_sections": "2.2–2.3 与结果部分",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C05"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C05",
+          "title": "Integrating language model embeddings into the ACT-R cognitive modeling framework",
+          "year_venue": "2026",
+          "landing_url": "",
+          "fulltext_url": "https://www.frontiersin.org/journals/language-sciences/articles/10.3389/flang.2026.1721326/full",
+          "reading_sections": "2.2–2.3 与结果部分",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C06",
+      "title": "From RAG to Memory: Non-Parametric Continual Learning for Large Language Models",
+      "year_venue": "HippoRAG 2，ICML 2025",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2502.14802v2",
+      "reading_sections": "3–6、附录 G、表 4",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C06"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C06",
+          "title": "From RAG to Memory: Non-Parametric Continual Learning for Large Language Models",
+          "year_venue": "HippoRAG 2，ICML 2025",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2502.14802v2",
+          "reading_sections": "3–6、附录 G、表 4",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C07",
+      "title": "Zep A Temporal Knowledge Graph Architecture for Agent Memory",
+      "year_venue": "2025",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2501.13956v1",
+      "reading_sections": "2–4",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C07"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C07",
+          "title": "Zep A Temporal Knowledge Graph Architecture for Agent Memory",
+          "year_venue": "2025",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2501.13956v1",
+          "reading_sections": "2–4",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C08",
+      "title": "Synapse Empowering LLM Agents with Episodic-Semantic Memory via Spreading Activation",
+      "year_venue": "2026 预印本",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2601.02744v3",
+      "reading_sections": "3.1–3.4、4.3",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C08"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C08",
+          "title": "Synapse Empowering LLM Agents with Episodic-Semantic Memory via Spreading Activation",
+          "year_venue": "2026 预印本",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2601.02744v3",
+          "reading_sections": "3.1–3.4、4.3",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C09",
+      "title": "Why There Are Complementary Learning Systems in the Hippocampus and Neocortex",
+      "year_venue": "1995",
+      "landing_url": "",
+      "fulltext_url": "https://sites.socsci.uci.edu/~lpearl/courses/readings/McClellandEtAl1995.pdf",
+      "reading_sections": "快慢学习、交错训练、巩固论证",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C09"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C09",
+          "title": "Why There Are Complementary Learning Systems in the Hippocampus and Neocortex",
+          "year_venue": "1995",
+          "landing_url": "",
+          "fulltext_url": "https://sites.socsci.uci.edu/~lpearl/courses/readings/McClellandEtAl1995.pdf",
+          "reading_sections": "快慢学习、交错训练、巩固论证",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C10",
+      "title": "MemRL Self-Evolving Agents via Runtime Reinforcement Learning on Episodic Memory",
+      "year_venue": "2026 预印本",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/html/2601.03192v2",
+      "reading_sections": "3–5、附录 A、G.1–G.2",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C10"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C10",
+          "title": "MemRL Self-Evolving Agents via Runtime Reinforcement Learning on Episodic Memory",
+          "year_venue": "2026 预印本",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/html/2601.03192v2",
+          "reading_sections": "3–5、附录 A、G.1–G.2",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C11",
+      "title": "The Neuro-Symbolic Concept Learner: Interpreting Scenes, Words, and Sentences from Natural Supervision",
+      "year_venue": "ICLR 2019",
+      "landing_url": "",
+      "fulltext_url": "https://jiajunwu.com/papers/nscl_iclr.pdf",
+      "reading_sections": "3.1–3.2、4.1–4.2",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C11"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C11",
+          "title": "The Neuro-Symbolic Concept Learner: Interpreting Scenes, Words, and Sentences from Natural Supervision",
+          "year_venue": "ICLR 2019",
+          "landing_url": "",
+          "fulltext_url": "https://jiajunwu.com/papers/nscl_iclr.pdf",
+          "reading_sections": "3.1–3.2、4.1–4.2",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C12",
+      "title": "Logical Neural Networks",
+      "year_venue": "2020",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/2006.13155",
+      "reading_sections": "3–4、6–7",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C12"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C12",
+          "title": "Logical Neural Networks",
+          "year_venue": "2020",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/2006.13155",
+          "reading_sections": "3–4、6–7",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C13",
+      "title": "Overcoming catastrophic forgetting in neural networks",
+      "year_venue": "PNAS 2017",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/1612.00796",
+      "reading_sections": "参数重要性方法、公式 3、顺序任务实验",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C13"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C13",
+          "title": "Overcoming catastrophic forgetting in neural networks",
+          "year_venue": "PNAS 2017",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/1612.00796",
+          "reading_sections": "参数重要性方法、公式 3、顺序任务实验",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C14",
+      "title": "Learning to Learn without Forgetting by Maximizing Transfer and Minimizing Interference",
+      "year_venue": "ICLR 2019",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/1810.11910",
+      "reading_sections": "2–3、Algorithm 1、实验",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C14"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C14",
+          "title": "Learning to Learn without Forgetting by Maximizing Transfer and Minimizing Interference",
+          "year_venue": "ICLR 2019",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/1810.11910",
+          "reading_sections": "2–3、Algorithm 1、实验",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C15",
+      "title": "On Tiny Episodic Memories in Continual Learning",
+      "year_venue": "2019",
+      "landing_url": "",
+      "fulltext_url": "https://arxiv.org/pdf/1902.10486",
+      "reading_sections": "3–5",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C15"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C15",
+          "title": "On Tiny Episodic Memories in Continual Learning",
+          "year_venue": "2019",
+          "landing_url": "",
+          "fulltext_url": "https://arxiv.org/pdf/1902.10486",
+          "reading_sections": "3–5",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "认知机制",
+      "source_id": "C16",
+      "title": "Neuromodulated Spike-Timing-Dependent Plasticity and Theory of Three-Factor Learning Rules",
+      "year_venue": "2016 理论综述",
+      "landing_url": "",
+      "fulltext_url": "https://www.frontiersin.org/journals/neural-circuits/articles/10.3389/fncir.2015.00085/full",
+      "reading_sections": "4–5，尤其 eligibility trace 与延迟反馈",
+      "source_report": "认知网络理论机制与 Codex 实验设计",
+      "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+      "verification": "沿用研究报告的版本与元数据；本次未重新全文复核",
+      "aliases": [
+        "C16"
+      ],
+      "source_reports": [
+        "认知网络理论机制与 Codex 实验设计"
+      ],
+      "reference_records": [
+        {
+          "group": "认知机制",
+          "source_id": "C16",
+          "title": "Neuromodulated Spike-Timing-Dependent Plasticity and Theory of Three-Factor Learning Rules",
+          "year_venue": "2016 理论综述",
+          "landing_url": "",
+          "fulltext_url": "https://www.frontiersin.org/journals/neural-circuits/articles/10.3389/fncir.2015.00085/full",
+          "reading_sections": "4–5，尤其 eligibility trace 与延迟反馈",
+          "source_report": "认知网络理论机制与 Codex 实验设计",
+          "source_report_url": "https://chatgpt.com/space/page_22043dcdfdec819187b0e6263c3e9498",
+          "verification": "沿用研究报告的版本与元数据；本次未重新全文复核"
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P01",
+      "title": "Controlling and Assessing Appropriate Persona Use in LLM-based Dialogue Generation",
+      "year_venue": "EMNLP 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.emnlp-main.2029/",
+      "fulltext_url": "https://aclanthology.org/2026.emnlp-main.2029.pdf",
+      "reading_sections": "§2–5，表 2/3/6/7，附录 B/C。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P01"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P01",
+          "title": "Controlling and Assessing Appropriate Persona Use in LLM-based Dialogue Generation",
+          "year_venue": "EMNLP 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.emnlp-main.2029/",
+          "fulltext_url": "https://aclanthology.org/2026.emnlp-main.2029.pdf",
+          "reading_sections": "§2–5，表 2/3/6/7，附录 B/C。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P02",
+      "title": "Don’t Guess, Ask Wisely: Benchmarking and Training Proactive Elicitation in Open-Domain LLM Conversations",
+      "year_venue": "EMNLP 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.emnlp-main.1370/",
+      "fulltext_url": "https://aclanthology.org/2026.emnlp-main.1370.pdf",
+      "reading_sections": "§3.3–5.2，表 2/3及消融。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P02"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P02",
+          "title": "Don’t Guess, Ask Wisely: Benchmarking and Training Proactive Elicitation in Open-Domain LLM Conversations",
+          "year_venue": "EMNLP 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.emnlp-main.1370/",
+          "fulltext_url": "https://aclanthology.org/2026.emnlp-main.1370.pdf",
+          "reading_sections": "§3.3–5.2，表 2/3及消融。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P03",
+      "title": "SODA: Million-scale Dialogue Distillation with Social Commonsense Contextualization",
+      "year_venue": "EMNLP 2023 主会",
+      "landing_url": "https://aclanthology.org/2023.emnlp-main.799/",
+      "fulltext_url": "https://aclanthology.org/2023.emnlp-main.799.pdf",
+      "reading_sections": "§2–5，表 5–7及人评设置。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P03"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P03",
+          "title": "SODA: Million-scale Dialogue Distillation with Social Commonsense Contextualization",
+          "year_venue": "EMNLP 2023 主会",
+          "landing_url": "https://aclanthology.org/2023.emnlp-main.799/",
+          "fulltext_url": "https://aclanthology.org/2023.emnlp-main.799.pdf",
+          "reading_sections": "§2–5，表 5–7及人评设置。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P05",
+      "title": "AMULET: Putting Complex Multi-Turn Conversations on the Stand with LLM Juries",
+      "year_venue": "EMNLP 2025 主会",
+      "landing_url": "https://aclanthology.org/2025.emnlp-main.1300/",
+      "fulltext_url": "https://aclanthology.org/2025.emnlp-main.1300.pdf",
+      "reading_sections": "§2–4，表 2–4。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P05"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P05",
+          "title": "AMULET: Putting Complex Multi-Turn Conversations on the Stand with LLM Juries",
+          "year_venue": "EMNLP 2025 主会",
+          "landing_url": "https://aclanthology.org/2025.emnlp-main.1300/",
+          "fulltext_url": "https://aclanthology.org/2025.emnlp-main.1300.pdf",
+          "reading_sections": "§2–4，表 2–4。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P09",
+      "title": "StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models",
+      "year_venue": "NeurIPS 2023 主会",
+      "landing_url": "https://papers.nips.cc/paper_files/paper/2023/hash/3eaad2a0b62b5ed7a2e66c2188bb1449-Abstract-Conference.html",
+      "fulltext_url": "https://papers.nips.cc/paper_files/paper/2023/file/3eaad2a0b62b5ed7a2e66c2188bb1449-Paper-Conference.pdf",
+      "reading_sections": "§3.2、§4、§5.2–5.3。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P09"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P09",
+          "title": "StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models",
+          "year_venue": "NeurIPS 2023 主会",
+          "landing_url": "https://papers.nips.cc/paper_files/paper/2023/hash/3eaad2a0b62b5ed7a2e66c2188bb1449-Abstract-Conference.html",
+          "fulltext_url": "https://papers.nips.cc/paper_files/paper/2023/file/3eaad2a0b62b5ed7a2e66c2188bb1449-Paper-Conference.pdf",
+          "reading_sections": "§3.2、§4、§5.2–5.3。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P10",
+      "title": "NaturalSpeech 3: Zero-Shot Speech Synthesis with Factorized Codec and Diffusion Models",
+      "year_venue": "ICML 2024",
+      "landing_url": "https://proceedings.mlr.press/v235/ju24b.html",
+      "fulltext_url": "https://arxiv.org/html/2403.03100v3",
+      "reading_sections": "§3、§4.1/4.3，附录 A.5–A.6。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P10"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P10",
+          "title": "NaturalSpeech 3: Zero-Shot Speech Synthesis with Factorized Codec and Diffusion Models",
+          "year_venue": "ICML 2024",
+          "landing_url": "https://proceedings.mlr.press/v235/ju24b.html",
+          "fulltext_url": "https://arxiv.org/html/2403.03100v3",
+          "reading_sections": "§3、§4.1/4.3，附录 A.5–A.6。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P11",
+      "title": "PromptTTS 2: Describing and Generating Voices with Text Prompt",
+      "year_venue": "ICLR 2024",
+      "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/fed1ea8dcc2a13f3835cc854e8c8294c-Abstract-Conference.html",
+      "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/fed1ea8dcc2a13f3835cc854e8c8294c-Paper-Conference.pdf",
+      "reading_sections": "§3.1–3.3、§4、§5.1–5.3。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P11"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P11",
+          "title": "PromptTTS 2: Describing and Generating Voices with Text Prompt",
+          "year_venue": "ICLR 2024",
+          "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2024/hash/fed1ea8dcc2a13f3835cc854e8c8294c-Abstract-Conference.html",
+          "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/fed1ea8dcc2a13f3835cc854e8c8294c-Paper-Conference.pdf",
+          "reading_sections": "§3.1–3.3、§4、§5.1–5.3。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P12",
+      "title": "EmoKnob: Enhance Voice Cloning with Fine-Grained Emotion Control",
+      "year_venue": "EMNLP 2024 主会",
+      "landing_url": "https://aclanthology.org/2024.emnlp-main.466/",
+      "fulltext_url": "https://aclanthology.org/2024.emnlp-main.466.pdf",
+      "reading_sections": "§3–5。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P12"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P12",
+          "title": "EmoKnob: Enhance Voice Cloning with Fine-Grained Emotion Control",
+          "year_venue": "EMNLP 2024 主会",
+          "landing_url": "https://aclanthology.org/2024.emnlp-main.466/",
+          "fulltext_url": "https://aclanthology.org/2024.emnlp-main.466.pdf",
+          "reading_sections": "§3–5。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P14",
+      "title": "F5-TTS: A Fairytaler that Fakes Fluent and Faithful Speech with Flow Matching",
+      "year_venue": "ACL 2025 主会",
+      "landing_url": "https://aclanthology.org/2025.acl-long.313/",
+      "fulltext_url": "https://aclanthology.org/2025.acl-long.313.pdf",
+      "reading_sections": "§3.1–3.2、§5.1、表 1及采样分析。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P14"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P14",
+          "title": "F5-TTS: A Fairytaler that Fakes Fluent and Faithful Speech with Flow Matching",
+          "year_venue": "ACL 2025 主会",
+          "landing_url": "https://aclanthology.org/2025.acl-long.313/",
+          "fulltext_url": "https://aclanthology.org/2025.acl-long.313.pdf",
+          "reading_sections": "§3.1–3.2、§5.1、表 1及采样分析。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P15",
+      "title": "VoiceCraft: Zero-Shot Speech Editing and Text-to-Speech in the Wild",
+      "year_venue": "ACL 2024 主会",
+      "landing_url": "https://aclanthology.org/2024.acl-long.673/",
+      "fulltext_url": "https://aclanthology.org/2024.acl-long.673.pdf",
+      "reading_sections": "§3、§5.1/5.3/5.4。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P15"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P15",
+          "title": "VoiceCraft: Zero-Shot Speech Editing and Text-to-Speech in the Wild",
+          "year_venue": "ACL 2024 主会",
+          "landing_url": "https://aclanthology.org/2024.acl-long.673/",
+          "fulltext_url": "https://aclanthology.org/2024.acl-long.673.pdf",
+          "reading_sections": "§3、§5.1/5.3/5.4。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P16",
+      "title": "Advancing Zero-shot Text-to-Speech Intelligibility across Diverse Domains via Preference Alignment",
+      "year_venue": "ACL 2025 主会",
+      "landing_url": "https://aclanthology.org/2025.acl-long.598/",
+      "fulltext_url": "https://aclanthology.org/2025.acl-long.598.pdf",
+      "reading_sections": "§3–5，附录 D/F。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P16"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P16",
+          "title": "Advancing Zero-shot Text-to-Speech Intelligibility across Diverse Domains via Preference Alignment",
+          "year_venue": "ACL 2025 主会",
+          "landing_url": "https://aclanthology.org/2025.acl-long.598/",
+          "fulltext_url": "https://aclanthology.org/2025.acl-long.598.pdf",
+          "reading_sections": "§3–5，附录 D/F。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P17",
+      "title": "Multi-Faceted Interactivity Alignment in Full-Duplex Speech Models",
+      "year_venue": "EMNLP 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.emnlp-main.2331/",
+      "fulltext_url": "https://aclanthology.org/2026.emnlp-main.2331.pdf",
+      "reading_sections": "§3.2–5。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P17"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P17",
+          "title": "Multi-Faceted Interactivity Alignment in Full-Duplex Speech Models",
+          "year_venue": "EMNLP 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.emnlp-main.2331/",
+          "fulltext_url": "https://aclanthology.org/2026.emnlp-main.2331.pdf",
+          "reading_sections": "§3.2–5。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P18",
+      "title": "Full-Duplex-Bench-v2: A Multi-Turn Evaluation Framework for Duplex Dialogue Systems with an Automated Examiner",
+      "year_venue": "ACL 2026 主会短文",
+      "landing_url": "https://aclanthology.org/2026.acl-short.4/",
+      "fulltext_url": "https://aclanthology.org/2026.acl-short.4.pdf",
+      "reading_sections": "§2.1–2.4、§3及附录。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P18"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P18",
+          "title": "Full-Duplex-Bench-v2: A Multi-Turn Evaluation Framework for Duplex Dialogue Systems with an Automated Examiner",
+          "year_venue": "ACL 2026 主会短文",
+          "landing_url": "https://aclanthology.org/2026.acl-short.4/",
+          "fulltext_url": "https://aclanthology.org/2026.acl-short.4.pdf",
+          "reading_sections": "§2.1–2.4、§3及附录。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P19",
+      "title": "Talking Turns: Benchmarking Audio Foundation Models on Turn-Taking Dynamics",
+      "year_venue": "ICLR 2025",
+      "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/82f68b38747c406672f7f9f6bab86775-Abstract-Conference.html",
+      "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/82f68b38747c406672f7f9f6bab86775-Paper-Conference.pdf",
+      "reading_sections": "§3.2、§4.1–4.8、§7及用户研究。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P19"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P19",
+          "title": "Talking Turns: Benchmarking Audio Foundation Models on Turn-Taking Dynamics",
+          "year_venue": "ICLR 2025",
+          "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/82f68b38747c406672f7f9f6bab86775-Abstract-Conference.html",
+          "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/82f68b38747c406672f7f9f6bab86775-Paper-Conference.pdf",
+          "reading_sections": "§3.2、§4.1–4.8、§7及用户研究。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P21",
+      "title": "LLaMA-Omni 2: LLM-based Real-time Spoken Chatbot with Autoregressive Streaming Speech Synthesis",
+      "year_venue": "ACL 2025 主会",
+      "landing_url": "https://aclanthology.org/2025.acl-long.912/",
+      "fulltext_url": "https://aclanthology.org/2025.acl-long.912.pdf",
+      "reading_sections": "§2–5，重点消融表。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P21"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P21",
+          "title": "LLaMA-Omni 2: LLM-based Real-time Spoken Chatbot with Autoregressive Streaming Speech Synthesis",
+          "year_venue": "ACL 2025 主会",
+          "landing_url": "https://aclanthology.org/2025.acl-long.912/",
+          "fulltext_url": "https://aclanthology.org/2025.acl-long.912.pdf",
+          "reading_sections": "§2–5，重点消融表。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P22",
+      "title": "OmniFlatten: An End-to-end GPT Model for Seamless Voice Conversation",
+      "year_venue": "ACL 2025 主会",
+      "landing_url": "https://aclanthology.org/2025.acl-long.709/",
+      "fulltext_url": "https://aclanthology.org/2025.acl-long.709.pdf",
+      "reading_sections": "§3–4，表 3/4。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P22"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P22",
+          "title": "OmniFlatten: An End-to-end GPT Model for Seamless Voice Conversation",
+          "year_venue": "ACL 2025 主会",
+          "landing_url": "https://aclanthology.org/2025.acl-long.709/",
+          "fulltext_url": "https://aclanthology.org/2025.acl-long.709.pdf",
+          "reading_sections": "§3–4，表 3/4。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P23",
+      "title": "Scaling Speech-Text Pre-training with Synthetic Interleaved Data",
+      "year_venue": "ICLR 2025",
+      "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/7b5ae891000049b91b3b62de596b1560-Abstract-Conference.html",
+      "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/7b5ae891000049b91b3b62de596b1560-Paper-Conference.pdf",
+      "reading_sections": "§2.1–2.4、§3.1–3.3。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P23"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P23",
+          "title": "Scaling Speech-Text Pre-training with Synthetic Interleaved Data",
+          "year_venue": "ICLR 2025",
+          "landing_url": "https://proceedings.iclr.cc/paper_files/paper/2025/hash/7b5ae891000049b91b3b62de596b1560-Abstract-Conference.html",
+          "fulltext_url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/7b5ae891000049b91b3b62de596b1560-Paper-Conference.pdf",
+          "reading_sections": "§2.1–2.4、§3.1–3.3。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P24",
+      "title": "Stream RAG: Instant and Accurate Spoken Dialogue Systems with Streaming Tool Usage",
+      "year_venue": "ICML 2026",
+      "landing_url": "https://proceedings.mlr.press/v306/arora26a.html",
+      "fulltext_url": "https://arxiv.org/html/2510.02044",
+      "reading_sections": "作者版 §3–5；正式会场由 PMLR 核实。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P24"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P24",
+          "title": "Stream RAG: Instant and Accurate Spoken Dialogue Systems with Streaming Tool Usage",
+          "year_venue": "ICML 2026",
+          "landing_url": "https://proceedings.mlr.press/v306/arora26a.html",
+          "fulltext_url": "https://arxiv.org/html/2510.02044",
+          "reading_sections": "作者版 §3–5；正式会场由 PMLR 核实。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P25",
+      "title": "What Do Prosody and Text Convey? Characterizing How Meaningful Information is Distributed Across Multiple Channels",
+      "year_venue": "ACL 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.acl-long.1085/",
+      "fulltext_url": "https://aclanthology.org/2026.acl-long.1085.pdf",
+      "reading_sections": "方法、通道比较与实验讨论。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P25"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P25",
+          "title": "What Do Prosody and Text Convey? Characterizing How Meaningful Information is Distributed Across Multiple Channels",
+          "year_venue": "ACL 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.acl-long.1085/",
+          "fulltext_url": "https://aclanthology.org/2026.acl-long.1085.pdf",
+          "reading_sections": "方法、通道比较与实验讨论。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P26",
+      "title": "Audio MultiChallenge: A Multi-Turn Evaluation of Spoken Dialogue Systems on Natural Human Interaction",
+      "year_venue": "ACL 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.acl-long.1654/",
+      "fulltext_url": "https://aclanthology.org/2026.acl-long.1654.pdf",
+      "reading_sections": "数据构造、四类任务、评测协议及结果。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P26"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P26",
+          "title": "Audio MultiChallenge: A Multi-Turn Evaluation of Spoken Dialogue Systems on Natural Human Interaction",
+          "year_venue": "ACL 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.acl-long.1654/",
+          "fulltext_url": "https://aclanthology.org/2026.acl-long.1654.pdf",
+          "reading_sections": "数据构造、四类任务、评测协议及结果。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P27",
+      "title": "S2S-Arena: Evaluating Paralinguistic Instruction Following in Speech-to-Speech Models",
+      "year_venue": "ACL 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.acl-long.1615/",
+      "fulltext_url": "https://aclanthology.org/2026.acl-long.1615.pdf",
+      "reading_sections": "任务定义、样本构造、比赛与裁判验证。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P27"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P27",
+          "title": "S2S-Arena: Evaluating Paralinguistic Instruction Following in Speech-to-Speech Models",
+          "year_venue": "ACL 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.acl-long.1615/",
+          "fulltext_url": "https://aclanthology.org/2026.acl-long.1615.pdf",
+          "reading_sections": "任务定义、样本构造、比赛与裁判验证。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    },
+    {
+      "group": "语音与聊天",
+      "source_id": "P28",
+      "title": "RealTalk-CN: A Realistic Chinese Speech Task-Oriented Dialogue Benchmark with Cross-Modal Analysis",
+      "year_venue": "ACL 2026 主会",
+      "landing_url": "https://aclanthology.org/2026.acl-long.131/",
+      "fulltext_url": "https://aclanthology.org/2026.acl-long.131.pdf",
+      "reading_sections": "数据收集、标注、跨模态协议及实验。",
+      "source_report": "语音与聊天专项",
+      "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+      "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+      "other_original_links": [],
+      "aliases": [
+        "P28"
+      ],
+      "source_reports": [
+        "语音与聊天专项"
+      ],
+      "reference_records": [
+        {
+          "group": "语音与聊天",
+          "source_id": "P28",
+          "title": "RealTalk-CN: A Realistic Chinese Speech Task-Oriented Dialogue Benchmark with Cross-Modal Analysis",
+          "year_venue": "ACL 2026 主会",
+          "landing_url": "https://aclanthology.org/2026.acl-long.131/",
+          "fulltext_url": "https://aclanthology.org/2026.acl-long.131.pdf",
+          "reading_sections": "数据收集、标注、跨模态协议及实验。",
+          "source_report": "语音与聊天专项",
+          "source_report_url": "https://chatgpt.com/space/page_249638892dc88191b085c62c34002bb9",
+          "verification": "2026-11-04 本轮复核官方标题、会议与年份；研究卡方法和数值沿用此前全文阅读",
+          "other_original_links": []
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,11 +1,14 @@
 """One scheduled sender with shared activity and durable delivery reservations."""
 
+from __future__ import annotations
+
 import asyncio
 import json
 import re
 import sqlite3
 import time
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from astrbot.api import logger
 from astrbot.api.event import MessageChain
@@ -16,6 +19,11 @@ from .conversation_style import CHAT_STYLE, _visible_text
 from .persona_rules import PROACTIVE_RULES
 from .policy import LOCAL_TZ
 from .shared_history import read_shared_history
+
+if TYPE_CHECKING:
+    from .initiative_materials import InterestMaterials
+    from .interest_discovery import InterestDiscovery
+    from .model_controls import ModelControls
 
 
 class ProactiveChat:
@@ -29,8 +37,9 @@ class ProactiveChat:
         self.contacts = contacts
         self.proactive_lock = asyncio.Lock()
         self.last_check = {"reason": "starting"}
-        self.materials = None
-        self.discovery = None
+        self.models: ModelControls | None = None
+        self.materials: InterestMaterials | None = None
+        self.discovery: InterestDiscovery | None = None
 
     async def loop(self):
         await asyncio.sleep(90)
@@ -229,14 +238,11 @@ class ProactiveChat:
             "explicit_conversation_threads": threads,
             "fresh_web_discoveries": materials,
         }
-        generate = (
-            self.models.generate
-            if getattr(self, "models", None)
-            else self.context.llm_generate
-        )
+        models = getattr(self, "models", None)
+        generate = models.generate if models else self.context.llm_generate
         provider_args = (
             {}
-            if getattr(self, "models", None)
+            if models
             else {
                 "chat_provider_id": self.config.get("provider_id", "chatgpt-companion")
             }

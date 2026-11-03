@@ -1,0 +1,9 @@
+{
+  "name": "xiaoxia-quality-tools",
+  "version": "1.3.0",
+  "private": true,
+  "description": "Pinned quality tools; no application dependencies or model downloads.",
+  "devDependencies": {
+    "pyright": "1.1.414"
+  }
+}

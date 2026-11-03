@@ -43,7 +43,7 @@ cd xiaoxia
 
 运行日志位于 `.runtime/logs`。聊天数据位于 `data`，模型位于 `models`，本机配置、密钥、聊天记录和生成音频均不提交到 Git。
 
-新安装默认准备 CosyVoice3 的独立环境和模型。已有配置明确选择 `index` 时，安装沿用该选择；可用以下命令安装并切换说话后端。切换重启说话服务和语音网关，继续使用同一参考音色和聊天模型：
+新安装默认准备 CosyVoice3 的独立环境和模型。已有配置明确选择 `index` 或 `fish` 时，安装沿用该选择；可用以下命令安装并切换说话后端。切换重启说话服务和语音网关，继续使用同一参考音色和聊天模型：
 
 ```powershell
 .\setup.ps1 -WithCosy
@@ -51,6 +51,9 @@ cd xiaoxia
 # 需要使用 IndexTTS-2 时，再安装它的环境和模型
 .\setup.ps1 -WithIndex
 .\.venvs\bot\Scripts\python.exe xiaoxia.py voice-engine index
+# 需要使用 Fish S2 时，安装固定源码、依赖和完整权重
+.\setup.ps1 -WithFish
+.\.venvs\bot\Scripts\python.exe xiaoxia.py voice-engine fish
 ```
 
 CosyVoice3 使用零样本参考和轻度情绪指令，数字、时间和金额由随依赖安装的离线 WeText 处理。首次安装需要联网，日常合成不需要下载资源。用户已认可 CosyVoice 候选的声音底色，日常情绪、各类演唱和完整聊天体验仍在打磨；更快或识别更准不等于整体验收通过。

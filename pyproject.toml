@@ -90,9 +90,15 @@ astrbot = "astrbot.cli.__main__:cli"
 Repository = "https://github.com/AstrBotDevs/AstrBot"
 
 [tool.ruff]
-exclude = ["astrbot/core/utils/t2i/local_strategy.py", "astrbot/api/all.py", "tests"]
+exclude = [".git", ".venvs", "node_modules", "__pycache__"]
 line-length = 88
-target-version = "py310"
+target-version = "py312"
+required-version = "==0.15.22"
+
+[tool.ruff.per-file-target-version]
+# setup.ps1 and the deployed worker environments use Python 3.11.
+"services/**/*.py" = "py311"
+"services/memory/**/*.py" = "py312"
 
 [tool.ruff.lint]
 select = [
@@ -113,14 +119,6 @@ ignore = [
   "ASYNC230", # TODO: handle ASYNC230 in AstrBot
   "ASYNC240", # TODO: handle ASYNC240 in AstrBot
 ]
-
-[tool.pyright]
-typeCheckingMode = "basic"
-pythonVersion = "3.10"
-reportMissingTypeStubs = false
-reportMissingImports = false
-include = ["astrbot"]
-exclude = ["dashboard", "node_modules", "dist", "data", "tests"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

@@ -1,0 +1,22 @@
+{
+  "generator": "uv 0.11.7",
+  "platform": "x86_64-pc-windows-msvc",
+  "python": "3.11.15",
+  "source_revision": "0f8a12e8a651062fdee9c33a894bdccd3a8513f1",
+  "model_revision": "1de9996b6be38b745688de084d87a5633f714e4e",
+  "inputs": {
+    "requirements/fish.in": "4bfd9150104a6c6a26cf4a56e4b9cce879bfbffca0c617779f31f0f3a7cca3c6",
+    "requirements/fish-overrides.txt": "fb7bfa36b59f0839d461a760e1c0c2ed1492df5d533ef416d0a017cda34219cc"
+  },
+  "output": {
+    "path": "requirements/fish.lock",
+    "sha256": "805fc91654a57f31cb62e1485ac7e9306b7e24208ffe65ff2eaf87b0af77c5b2"
+  },
+  "command": "uv pip compile requirements/fish.in --overrides requirements/fish-overrides.txt --python-version 3.11.15 --python-platform x86_64-pc-windows-msvc --generate-hashes --no-annotate --no-header --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match -o requirements/fish.lock",
+  "known_metadata_conflict": {
+    "package": "descript-audiotools==0.7.2",
+    "declared": "protobuf>=3.9.2,<3.20",
+    "installed": "protobuf==5.29.6",
+    "reason": "Pinned Fish upstream pyproject.toml explicitly overrides protobuf>=3.20.0,<6.0.0; retain the existing candidate without misreporting pip check success."
+  }
+}

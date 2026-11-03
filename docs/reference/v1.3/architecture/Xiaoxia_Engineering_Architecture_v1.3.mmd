@@ -1,0 +1,28 @@
+flowchart TB
+    subgraph Dependency["源码依赖与运行装配"]
+        Channel["渠道与 UI"] --> Usecase["应用用例与端口"]
+        Usecase --> Domain["领域规则与状态转换"]
+        Bootstrap["组合入口"] --> Adapter["模型 媒体 存储 工具适配器"]
+        Adapter -. "实现端口" .-> Usecase
+        Bootstrap --> Router["运行时能力路由"]
+        Router --> Adapter
+    end
+    subgraph Authority["三个状态边界"]
+        Business["业务状态与有效事实"]
+        Job["编排状态与副作用回执"]
+        Media["话轮与实际播放位置"]
+        Job -->|"已提交结果"| Business
+        Media -->|"实际播放回执"| Business
+        Job -->|"受控交付"| Media
+    end
+    Usecase --> Business
+    Usecase --> Job
+    Adapter --> Media
+    subgraph Gates["质量门按影响范围执行"]
+        G1["G1 变更与边界检查"]
+        G2["G2 集成与恢复"]
+        G3["G3 发布与完整旅程"]
+    end
+    G1 -. "验证依赖与契约" .-> Usecase
+    G2 -. "验证提交与恢复" .-> Job
+    G3 -. "验证真实交付" .-> Business

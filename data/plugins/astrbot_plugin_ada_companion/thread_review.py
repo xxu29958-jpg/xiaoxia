@@ -1,10 +1,16 @@
 """Close answered topics using current human evidence, with stale-write protection."""
 
+from __future__ import annotations
+
 import asyncio
 import json
 import re
+from typing import TYPE_CHECKING
 
 from astrbot.api import logger
+
+if TYPE_CHECKING:
+    from .model_controls import ModelControls
 
 REVIEW_RULES = """Review whether the CURRENT human message closes any supplied open topic.
 Return JSON only: {"resolve":[{"id":"existing id","evidence_quote":"exact current human words"}]}.
@@ -21,7 +27,7 @@ When ambiguous, return an empty resolve list. Do not produce a conversational re
 class ThreadReview:
     def __init__(self, dialogue, owners, policy):
         self.dialogue, self.owners, self.policy = dialogue, owners, policy
-        self.models = None
+        self.models: ModelControls | None = None
         self.last = {"reason": "not_needed"}
 
     async def process(self, event, history):

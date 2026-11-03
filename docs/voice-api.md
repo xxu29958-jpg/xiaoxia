@@ -16,7 +16,11 @@ IndexTTS-2 按强度混合情绪；CosyVoice3 使用轻度自然语言指令，`
 
 2026-11-03 按用户要求，本机候选切换为 `Fish S2 + Seed-VC`。S2 生成说话方式，随后复用常驻 Seed-VC 转回同一个 QQ 四秒参考音色。`emotion` 继续由现有一轮聊天生成；`neutral` 不添加标签，其他语气使用 S2 原生指令，`emotion_strength: 0` 关闭额外指令。全流程仍由 `/speech` 返回一份 WAV，QQ／微信客户端无需修改。候选切换不代表真人感或完整听说唱 Goal 已通过验收。
 
-这条候选使用独立 Fish 环境。源码固定在 `fishaudio/fish-speech@0f8a12e8a651062fdee9c33a894bdccd3a8513f1`，S2 权重固定在 `fishaudio/s2-pro@1de9996b6be38b745688de084d87a5633f714e4e`。按其官方 `uv sync --extra cu128 --python 3.11 --no-dev` 准备环境，再用同一个解释器安装 `fastapi==0.115.12`、`pydantic==2.9.2`、`requests`。在 `xiaoxia.local.json` 设置 `fish_repo`、`fish_models`、`python_fish` 为实际源码、权重目录和解释器路径，然后运行 `xiaoxia.py voice-engine fish`。现有 `setup.ps1` 的默认安装仍是 Cosy；Fish 采用上述独立安装方式。
+这条候选使用独立 Fish 环境。源码固定在 `fishaudio/fish-speech@0f8a12e8a651062fdee9c33a894bdccd3a8513f1`，S2 权重固定在 `fishaudio/s2-pro@1de9996b6be38b745688de084d87a5633f714e4e`。`setup.ps1 -WithFish` 额外准备 Python 3.11.15 的 `.venvs/fish`、固定源码和完整权重；已有配置选择 `fish` 时自动准备它。新配置的源码默认位于 `.runtime/sources/fish_speech`，权重在 `models/fish-s2`。安装完成后使用 `xiaoxia.py voice-engine fish` 明确切换，安装额外引擎本身不切换现用声音。
+
+`vendor/sources.json` 固定源码压缩包 SHA-256；已有不同内容的源码拒绝覆盖，外部源码路径只验证。`requirements/fish.in`、`fish-overrides.txt` 和 `fish.provenance.json` 记录依赖来源及生成命令；`fish.lock` 保存全部 Windows 依赖版本和分发哈希。安装使用已完成依赖解析的完整锁文件，不再解析浮动依赖。上游显式覆盖了 `descript-audiotools` 的旧 protobuf 限制，因此 `uv pip check` 仍会报告这一项已登记冲突，不能把它描述成无冲突环境。
+
+模型清单位于 `models-manifests/fish.json`，包含许可证、配置、分词器、解码器和两份权重分片，下载后按 SHA-256 核验。离线源码可用 `python -m tools.installation.fish --archive <固定版本ZIP>` 准备。已有安装可继续设置 `fish_repo`、`fish_models`、`python_fish` 指向实际路径；这些路径和当前声音参考不会由本次迁移自动改写。
 
 切换命令会重启语音网关以应用 GPU 使用方式。Fish 与常驻音色转换共享显存；其解码器中始终被逐窗口掩码覆盖的固定掩码不再保留。启动整组语音服务时，先完成演唱模型的预热，再载入 S2。演唱请求期间先把 S2 移到 CPU，完成后下一次说话自动移回 GPU。
 

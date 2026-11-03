@@ -17,9 +17,10 @@
 | `voice_state` | `.runtime/voice`；服务密钥、生成音频和工作文件 |
 | `memory_state` | `.runtime/memory`；向量服务密钥 |
 | `voice_profile` | `assets/voices/profile.json`；说话和唱歌共享参考 |
-| `speech_engine` | `cosy`（默认）或 `index`；用 `xiaoxia.py voice-engine` 切换并重启说话服务 |
+| `speech_engine` | `cosy`（默认）、`index` 或 `fish`；用 `xiaoxia.py voice-engine` 切换并重启说话服务 |
 | `index_models` / `index_aux` | `models/index-tts` / `models/index-aux` |
 | `cosy_models` | `models/cosyvoice3`；Fun-CosyVoice3-0.5B-2512 SFT 模型 |
+| `fish_repo` / `fish_models` | `.runtime/sources/fish_speech` / `models/fish-s2`；固定源码和完整 S2 权重 |
 | `seed_models` | `models/seed-vc` |
 | `soul_models` | `models/soulx` |
 | `separator_models` | `models/separator` |
@@ -27,7 +28,7 @@
 | `memory_models` | `models/e5-small` |
 | `python_bot` 等 | `.venvs/<组件>/Scripts/python.exe` |
 
-`setup.ps1` 安装当前选中的说话后端，新安装默认选择 CosyVoice3。`-WithCosy` 和 `-WithIndex` 可另外安装对应后端；下载器的 `--include-cosy`、`--include-index` 与之对应，Index 的附属模型也会一并准备。已有模型时可指定 `cosy_models` 并使用 `-SkipModels`；只下载它可运行 `tools/download_models.py --only cosy_models`。源码在 `vendor/cosyvoice`，对应环境为 `python_cosy`。为保留已有脚本，`start/stop/status index` 控制当前选中的说话后端，服务仍使用端口 `6191`。
+`setup.ps1` 安装当前选中的说话后端，新安装默认选择 CosyVoice3。`-WithCosy`、`-WithIndex` 和 `-WithFish` 可另外安装对应后端；下载器的 `--include-cosy`、`--include-index`、`--include-fish` 与之对应，Index 的附属模型也会一并准备。已有模型时可指定相应模型路径并使用 `-SkipModels`；例如仅下载 Fish 可运行 `tools/download_models.py --only fish_models`。Fish 的固定版本、锁文件和已登记依赖冲突见 [语音接口说明](voice-api.md)。为保留已有脚本，`start/stop/status index` 控制当前选中的说话后端，服务仍使用端口 `6191`。
 
 已有 AstrBot 用户可把 `bot_root` 指向原实例，以继续使用其账号和聊天数据。此时该实例的 `data/plugins` 仍是实际加载的插件目录；迁移插件时应保存自己的改动。新安装使用本仓库的插件。
 

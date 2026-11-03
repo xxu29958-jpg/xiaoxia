@@ -1,0 +1,585 @@
+{
+  "title": "小夏演唱／戏曲与基座专项来源目录 v1.2",
+  "as_of": "2026-11-04 Asia/Shanghai",
+  "principle": "项目交付与约定验收为不变量；论文、模型、算法、内部结构和部署均可修订。",
+  "count_note": "7篇正式会议研究卡另列；模型报告、官方模型卡、代码、文档和仓库证据不合并冒称论文数量。与原91项母册可能重合，未直接相加。",
+  "runtime_tested_on_user_hardware": false,
+  "conference_papers": [
+    {
+      "id": "S01",
+      "title": "FT-GAN: Fine-Grained Tune Modeling for Chinese Opera Synthesis",
+      "venue": "AAAI 2024, 38(17), 19697–19705",
+      "url": "https://ojs.aaai.org/index.php/AAAI/article/download/29943/31649#page=1",
+      "official_record": "https://ojs.aaai.org/index.php/AAAI/article/view/29943",
+      "read_sections": [
+        "Dataset Construction",
+        "Method: Conditioner, Mel Predictor, Discriminator, Losses, Speech Pre-Training",
+        "Experiments",
+        "Extensive Experiments",
+        "Tables 1–4"
+      ],
+      "read_status": "primary_paper_methods_and_experiments_read",
+      "project_use": "opera-specific phoneme annotation, pitch/style modeling, data adaptation",
+      "verification_notes": "Table 3, w/o Vowel Morphing row, Pro column: pronunciation CMOS -0.43 relative to full model; not naturalness MOS.",
+      "implementation": "https://github.com/zhengmidon/Gezi-Opera-Synthesis"
+    },
+    {
+      "id": "S02",
+      "title": "Improving Chinese Pop Song and Hokkien Gezi Opera Singing Voice Synthesis by Enhancing Local Modeling",
+      "venue": "EMNLP 2023 main, 3302–3312",
+      "url": "https://aclanthology.org/2023.emnlp-main.200.pdf",
+      "official_record": "https://aclanthology.org/2023.emnlp-main.200/",
+      "read_sections": [
+        "2.1–2.3 Methods",
+        "3 Experiments",
+        "4.1–4.4 Results",
+        "Limitations",
+        "Tables 1–4"
+      ],
+      "read_status": "primary_paper_methods_and_experiments_read",
+      "project_use": "phoneme-local repair, breathing and pronunciation artifacts",
+      "implementation": "https://github.com/baipeng1/SVSELM"
+    },
+    {
+      "id": "S03",
+      "title": "Peking Opera Synthesis via Duration Informed Attention Network",
+      "venue": "Interspeech 2020, 1226–1230",
+      "url": "https://arxiv.org/pdf/2008.03029",
+      "official_record": "https://www.isca-archive.org/interspeech_2020/wu20d_interspeech.html",
+      "read_sections": [
+        "2.1–2.3 Methods",
+        "3.1 Data",
+        "3.2 Duration Prediction",
+        "3.3.1–3.3.2 Opera Synthesis",
+        "4 Conclusions",
+        "Table 1"
+      ],
+      "read_status": "primary_paper_methods_and_experiments_read",
+      "project_use": "phoneme-duration allocation under note timing and expressive pitch"
+    },
+    {
+      "id": "S04",
+      "title": "Towards Chinese Yue Opera Singing Voice Synthesis: A Benchmark with Dataset, Data Augmentation and Baseline Model",
+      "venue": "Interspeech 2026, 1596–1600",
+      "url": "https://www.isca-archive.org/interspeech_2026/bai26_interspeech.pdf",
+      "official_record": "https://www.isca-archive.org/interspeech_2026/bai26_interspeech.html",
+      "read_sections": [
+        "2.1–2.3 YOAT Dataset and Augmentation",
+        "3.1–3.2 YueOpera-Singer",
+        "4.1–4.4 Experiments",
+        "5.1–5.3 Results and Analysis",
+        "Tables 1–3"
+      ],
+      "read_status": "primary_paper_methods_and_experiments_read",
+      "project_use": "Wu-dialect opera adaptation, pronunciation/pitch augmentation and compact acoustic rendering"
+    },
+    {
+      "id": "S05",
+      "title": "TCSinger: Zero-Shot Singing Voice Synthesis with Style Transfer and Multi-Level Style Control",
+      "venue": "EMNLP 2024 main, 1960–1975",
+      "url": "https://aclanthology.org/2024.emnlp-main.117.pdf",
+      "official_record": "https://aclanthology.org/2024.emnlp-main.117/",
+      "read_sections": [
+        "3.1–3.5 Methods",
+        "4.1–4.3 Experiments and Ablations",
+        "6 Limitations",
+        "Appendix A.3–A.7",
+        "Appendix B",
+        "Appendix C.1",
+        "Tables 1–5 and 7"
+      ],
+      "read_status": "primary_paper_methods_and_experiments_read",
+      "project_use": "separate timbre/content/style; jointly plan style and duration",
+      "verification_notes": "Appendix B Table 7 prints total 294h, while dataset rows and Section 4.1 list 36+30+85+85+18=254h. Aggregate omitted from research card because the paper is internally inconsistent; retained dataset names and 40 held-out singers.",
+      "implementation": "https://tcsinger.github.io/"
+    },
+    {
+      "id": "S06",
+      "title": "TechSinger: Technique Controllable Multilingual Singing Voice Synthesis via Flow Matching",
+      "venue": "AAAI 2025, 39(22), 23978–23986, Technical Track on Natural Language Processing I",
+      "url": "https://arxiv.org/pdf/2502.12572",
+      "official_record": "https://ojs.aaai.org/index.php/AAAI/article/view/34571",
+      "official_pdf": "https://ojs.aaai.org/index.php/AAAI/article/download/34571/36726",
+      "doi": "10.1609/aaai.v39i22.34571",
+      "read_sections": [
+        "TechSinger: Overview, FMPP, CFG Postnet, Technique Predictor, Technique Detector, Training and Inference",
+        "Experiments: Setup, Main Results, Ablation Study",
+        "Tables 1–5"
+      ],
+      "read_status": "primary_paper_methods_and_experiments_read",
+      "project_use": "language-to-phoneme technique control and feedback-localized adjustment",
+      "verification_notes": "Table 4 whole-system F1 0.770 measures the audio-to-phoneme technique detector over six techniques other than rule-determined glissando. Table 3 prompt-to-technique predictor with FLAN-T5-Large has F1 0.818. Official AAAI proceedings record and issue directory confirm formal publication on 2025-04-11.",
+      "implementation": "https://github.com/gwx314/TechSinger"
+    },
+    {
+      "id": "S07",
+      "title": "GTSinger: A Global Multi-Technique Singing Corpus with Realistic Music Scores for All Singing Tasks",
+      "venue": "NeurIPS 2024, Datasets and Benchmarks Track",
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2024/file/023d2c1a17cf35b11a0cbb43a0677c91-Paper-Datasets_and_Benchmarks_Track.pdf",
+      "official_record": "https://papers.nips.cc/paper_files/paper/2024/hash/023d2c1a17cf35b11a0cbb43a0677c91-Abstract-Datasets_and_Benchmarks_Track.html",
+      "read_sections": [
+        "3.1–3.6 Dataset Description",
+        "4.1–4.4 Benchmarks",
+        "5 Conclusion and Discussion",
+        "Tables 2–6"
+      ],
+      "read_status": "primary_paper_methods_and_experiments_read",
+      "project_use": "paired speech/singing identity anchors, controlled technique comparison and score annotations"
+    }
+  ],
+  "models_and_implementations": [
+    {
+      "id": "MB01",
+      "title": "SoulX-Singer: Towards High-Quality Zero-Shot Singing Voice Synthesis",
+      "type": "technical_report",
+      "year_venue": "2026",
+      "url": "https://arxiv.org/html/2602.07803v1",
+      "read_sections": "2.2 model architecture, conditioning and inference; 3.1-3.3 evaluation",
+      "code_blob_sha": null,
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB02",
+      "title": "SoulX-Singer official repository",
+      "type": "official_repository",
+      "year_venue": "2026",
+      "url": "https://github.com/Soul-AILab/SoulX-Singer",
+      "read_sections": "Overview; News; Quick Start; Roadmap; License",
+      "code_blob_sha": "7f333fa7940aeed81a9bd18e7ffeee79d749f671",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB03",
+      "title": "SoulX-Singer preprocessing and MIDI editing",
+      "type": "official_implementation_docs",
+      "year_venue": "2026",
+      "url": "https://github.com/Soul-AILab/SoulX-Singer/blob/main/preprocess/README.md",
+      "read_sections": "Full preprocessing workflow, dependencies and MIDI conversion",
+      "code_blob_sha": "17e9bc4457f1f8cf4b6f1791c0975424bb445a1a",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB04",
+      "title": "SoulX-Singer SVC inference example",
+      "type": "official_code",
+      "year_venue": "2026",
+      "url": "https://github.com/Soul-AILab/SoulX-Singer/blob/main/example/infer_svc.sh",
+      "read_sections": "Full script: waveform and F0 inputs; fp16 and pitch flags",
+      "code_blob_sha": "036ef83e4a6cbcc6e2a78b441adb67d73f2dd6a6",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB05",
+      "title": "SoulX-Singer SVC WebUI guidance",
+      "type": "official_code",
+      "year_venue": "2026",
+      "url": "https://github.com/Soul-AILab/SoulX-Singer/blob/main/webui_svc.py",
+      "read_sections": "Input/reference advice and long-range timbre stability tips, lines 69-82",
+      "code_blob_sha": "52fe0c4127341064626ac38f1d62bd79b847ba1b",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB06",
+      "title": "SoulX-Singer pinned dependencies",
+      "type": "official_code",
+      "year_venue": "2026",
+      "url": "https://github.com/Soul-AILab/SoulX-Singer/blob/main/requirements.txt",
+      "read_sections": "Full dependency file; torch 2.2.0, SageAttention, NeMo",
+      "code_blob_sha": "ca14955f697624d723c6e0d3bf163f0c53c16706",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB07",
+      "title": "Zero-shot Voice Conversion with Diffusion Transformers",
+      "type": "preprint",
+      "year_venue": "2024",
+      "url": "https://arxiv.org/html/2411.09943v1",
+      "read_sections": "Sections 3.2-3.5; 4.1 model configuration",
+      "code_blob_sha": null,
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB08",
+      "title": "Seed-VC repository and archive status",
+      "type": "official_repository",
+      "year_venue": "2025",
+      "url": "https://github.com/Plachtaa/seed-vc",
+      "read_sections": "Model table, CLI, platform support, realtime benchmark; archived Nov 21 2025",
+      "code_blob_sha": "2caf62fdedd40ee83aecae0aad80ca9933b222e0",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB09",
+      "title": "Seed-VC code license",
+      "type": "official_license",
+      "year_venue": "2025",
+      "url": "https://github.com/Plachtaa/seed-vc/blob/main/LICENSE",
+      "read_sections": "GPL-3.0 header and licensing text",
+      "code_blob_sha": "e72bfddabc15be5718a7cc061ac10e47741d8219",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB10",
+      "title": "Seed-VC official model-card license",
+      "type": "official_model_card",
+      "year_venue": "2025",
+      "url": "https://huggingface.co/Plachta/Seed-VC/blob/main/README.md",
+      "read_sections": "GPL-3.0 metadata",
+      "code_blob_sha": null,
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB11",
+      "title": "DiffSinger: Singing Voice Synthesis via Shallow Diffusion Mechanism",
+      "type": "conference_paper_bibliography_and_author_code",
+      "year_venue": "AAAI 2022",
+      "url": "https://arxiv.org/abs/2105.02446",
+      "read_sections": "Author README verifies AAAI-2022 and links paper; no claim of full paper reading by this child",
+      "code_blob_sha": "348ae07f8d75d46669533cdeb7e83809514e1a69",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB12",
+      "title": "OpenVPI DiffSinger",
+      "type": "official_maintained_implementation",
+      "year_venue": "current main",
+      "url": "https://github.com/openvpi/DiffSinger",
+      "read_sections": "Features, deployment links, Apache2.0; BestPractices language/phoneme/data/voicebank configuration",
+      "code_blob_sha": "b7cd4dde07dcd0515c065b3875c04cabb5a5fbb8",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB13",
+      "title": "OpenVPI DiffSinger Getting Started",
+      "type": "official_implementation_docs",
+      "year_venue": "current main",
+      "url": "https://github.com/openvpi/DiffSinger/blob/main/docs/GettingStarted.md",
+      "read_sections": "Full document: DS inference, training and ONNX export",
+      "code_blob_sha": "24538f801e7545b3bc428408e5619414ea308cdb",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB14",
+      "title": "OpenUtau DiffSinger support",
+      "type": "official_implementation_docs",
+      "year_venue": "2025",
+      "url": "https://github.com/openutau/OpenUtau/wiki/DiffSinger-support",
+      "read_sections": "CPU default, Windows DirectML, pitch/energy/breathiness/tension curves",
+      "code_blob_sha": null,
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB15",
+      "title": "ACE-Step 1.5: Pushing the Boundaries of Open-Source Music Generation",
+      "type": "technical_report",
+      "year_venue": "2026",
+      "url": "https://arxiv.org/html/2602.00744v3",
+      "read_sections": "Sections 3.1-3.4; generation/editing conditional architecture",
+      "code_blob_sha": null,
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB16",
+      "title": "ACE-Step 1.5 model variants and XL release",
+      "type": "official_repository",
+      "year_venue": "2026",
+      "url": "https://github.com/ace-step/ACE-Step-1.5",
+      "read_sections": "News; model zoo; XL date Apr 2 2026; feature differences; MIT",
+      "code_blob_sha": "f5c20302cde16e37e8a17ea28308495371befbfa",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB17",
+      "title": "ACE-Step GPU Compatibility Guide",
+      "type": "official_implementation_docs",
+      "year_venue": "current main",
+      "url": "https://github.com/ace-step/ACE-Step-1.5/blob/main/docs/en/GPU_COMPATIBILITY.md",
+      "read_sections": "Full GPU tier table, offload, quantization, profiling and memory caveats",
+      "code_blob_sha": "c2de671c8716213515612ae84fb1b50b0efef602",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB18",
+      "title": "ACE-Step Installation Guide",
+      "type": "official_implementation_docs",
+      "year_venue": "current main",
+      "url": "https://github.com/ace-step/ACE-Step-1.5/blob/main/docs/en/INSTALL.md",
+      "read_sections": "System requirements; Windows portable CUDA12.8; model tiers",
+      "code_blob_sha": "84cebf0193eedfd96dd8285bad99b7c37d114331",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB19",
+      "title": "ACE-Step REST API",
+      "type": "official_implementation_docs",
+      "year_venue": "current main",
+      "url": "https://github.com/ace-step/ACE-Step-1.5/blob/main/docs/en/API.md",
+      "read_sections": "Task submit, polling, artifact retrieval, repaint conditions",
+      "code_blob_sha": "9f0773824cec691d85debcc8807e18b92237d9b1",
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB20",
+      "title": "ACE-Step 1.5 official model card",
+      "type": "official_model_card",
+      "year_venue": "2026",
+      "url": "https://huggingface.co/ACE-Step/Ace-Step1.5",
+      "read_sections": "License MIT, checkpoint variants",
+      "code_blob_sha": null,
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    },
+    {
+      "id": "MB21",
+      "title": "PyTorch 2.7 Release",
+      "type": "official_release_notes",
+      "year_venue": "2025",
+      "url": "https://pytorch.org/blog/pytorch-2-7/",
+      "read_sections": "Blackwell support and CUDA12.8 prebuilt wheels",
+      "code_blob_sha": null,
+      "evidence": "primary_source_static",
+      "hardware_tested_by_this_agent": false
+    }
+  ],
+  "unified_and_local_candidates": [
+    {
+      "id": "U01",
+      "title": "UniVoice: A Unified Model for Speech and Singing Voice Generation",
+      "type": "preprint",
+      "year_venue": "2026 arXiv",
+      "url": "https://arxiv.org/abs/2606.05852",
+      "read_sections": "§3 conditions, DiT and null melody; §4 benchmark; §5 experiments and ablations; §6 limitations",
+      "read_status": "methods_and_experiments_read",
+      "note": "Internal numerical inconsistencies; used as mechanism reference, not model-ranking evidence."
+    },
+    {
+      "id": "U02",
+      "title": "Qwen3-Omni Technical Report",
+      "type": "technical_report",
+      "year_venue": "2025 arXiv",
+      "url": "https://arxiv.org/html/2509.17765",
+      "read_sections": "§2.1 overview, §2.4 Talker, streaming inference and experimental setup",
+      "read_status": "selected_sections_read"
+    },
+    {
+      "id": "U03",
+      "title": "Qwen3.5-9B official model card",
+      "type": "official_model_card",
+      "year_venue": "2026",
+      "url": "https://huggingface.co/Qwen/Qwen3.5-9B",
+      "read_sections": "Model overview, serving, context, thinking options and quantization links",
+      "read_status": "official_card_read"
+    }
+  ],
+  "runtime_official_sources": [
+    {
+      "id": "F1",
+      "title": "LangGraph persistence",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F2",
+      "title": "LangGraph checkpointers",
+      "url": "https://docs.langchain.com/oss/python/langgraph/checkpointers",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F3",
+      "title": "LangGraph fault tolerance",
+      "url": "https://docs.langchain.com/oss/python/langgraph/fault-tolerance",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F4",
+      "title": "Temporal activity idempotency",
+      "url": "https://docs.temporal.io/activity-definition",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F4a",
+      "title": "Temporal Windows local dev",
+      "url": "https://docs.temporal.io/develop/python/set-up-your-local-python",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F5",
+      "title": "SQLite WAL",
+      "url": "https://www.sqlite.org/wal.html",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F6",
+      "title": "SQLite Online Backup",
+      "url": "https://www.sqlite.org/backup.html",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F7",
+      "title": "LiveKit voice quickstart",
+      "url": "https://docs.livekit.io/agents/start/voice-ai/",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F8",
+      "title": "LiveKit turns and interruptions",
+      "url": "https://docs.livekit.io/agents/logic/turns/",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F9",
+      "title": "LiveKit local media server",
+      "url": "https://docs.livekit.io/transport/self-hosting/local/",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F10",
+      "title": "Pipecat transports",
+      "url": "https://docs.pipecat.ai/pipecat/learn/transports",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F10a",
+      "title": "Pipecat quickstart",
+      "url": "https://docs.pipecat.ai/pipecat/get-started/quickstart",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F10b",
+      "title": "Pipecat C++ Windows client",
+      "url": "https://github.com/pipecat-ai/pipecat-client-cxx/blob/main/README.md",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F11",
+      "title": "Pipecat interruptions",
+      "url": "https://docs.pipecat.ai/pipecat/fundamentals/interruptions",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F12",
+      "title": "AstrBot Windows install",
+      "url": "https://docs.astrbot.app/deploy/astrbot/package.html",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F13",
+      "title": "AstrBot OneBot QQ",
+      "url": "https://docs.astrbot.app/platform/aiocqhttp.html",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F14",
+      "title": "AstrBot personal WeChat",
+      "url": "https://docs.astrbot.app/platform/weixin_oc.html",
+      "source_type": "official_documentation_or_repository"
+    },
+    {
+      "id": "F14a",
+      "title": "AstrBot WeChat official account",
+      "url": "https://docs.astrbot.app/platform/weixin-official-account.html",
+      "source_type": "official_documentation_or_repository"
+    }
+  ],
+  "project_snapshot": {
+    "repository": "xxu29958-jpg/xiaoxia",
+    "head": "8c63aff5a18fcccd624ad0f29ee70f303e15975b",
+    "sources": [
+      {
+        "path": "GOAL.md",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/GOAL.md"
+      },
+      {
+        "path": "pyproject.toml",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/pyproject.toml"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/main.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/main.py"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/shared_core.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/shared_core.py"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/services.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/services.py"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/policy.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/policy.py"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/lifecycle.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/lifecycle.py"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/local_voice.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/local_voice.py"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/response_media.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/response_media.py"
+      },
+      {
+        "path": "services/voice/server_singing.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/services/voice/server_singing.py"
+      },
+      {
+        "path": "services/voice/resident_pipeline.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/services/voice/resident_pipeline.py"
+      },
+      {
+        "path": "services/runtime.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/services/runtime.py"
+      },
+      {
+        "path": "docs/voice-api.md",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/docs/voice-api.md"
+      },
+      {
+        "path": "setup.ps1",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/setup.ps1"
+      },
+      {
+        "path": "xiaoxia.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/xiaoxia.py"
+      },
+      {
+        "path": "astrbot/core/config/default.py",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/astrbot/core/config/default.py"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_ada_companion/_conf_schema.json",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_ada_companion/_conf_schema.json"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_codex_oauth_plug/_conf_schema.json",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_codex_oauth_plug/_conf_schema.json"
+      },
+      {
+        "path": "data/plugins/astrbot_plugin_codex_oauth_plug/README.md",
+        "url": "https://github.com/xxu29958-jpg/xiaoxia/blob/8c63aff5a18fcccd624ad0f29ee70f303e15975b/data/plugins/astrbot_plugin_codex_oauth_plug/README.md"
+      }
+    ]
+  }
+}
