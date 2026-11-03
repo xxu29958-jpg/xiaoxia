@@ -1,9 +1,11 @@
-param([switch]$SkipModels)
+param([switch]$SkipModels, [switch]$WithCosy)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 Get-Command uv -ErrorAction Stop | Out-Null
 Get-Command npm -ErrorAction Stop | Out-Null
-foreach ($xiaoxiaComponent in @('bot', 'gateway', 'index', 'singing', 'memory')) {
+$xiaoxiaComponents = @('bot', 'gateway', 'index', 'singing', 'memory')
+if ($WithCosy) { $xiaoxiaComponents += 'cosy' }
+foreach ($xiaoxiaComponent in $xiaoxiaComponents) {
     $xiaoxiaVersion = if ($xiaoxiaComponent -in @('bot', 'memory')) { '3.12' } else { '3.11' }
     $xiaoxiaEnv = Join-Path $PSScriptRoot ".venvs/$xiaoxiaComponent"
     $xiaoxiaPython = Join-Path $xiaoxiaEnv 'Scripts/python.exe'
@@ -11,7 +13,9 @@ foreach ($xiaoxiaComponent in @('bot', 'gateway', 'index', 'singing', 'memory'))
         & uv venv --python $xiaoxiaVersion $xiaoxiaEnv
         if ($LASTEXITCODE -ne 0) { throw "Environment creation failed: $xiaoxiaComponent" }
     }
-    & uv pip install --python $xiaoxiaPython --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match -r "requirements/$xiaoxiaComponent.txt"
+    $xiaoxiaBuildArgs = @()
+    if ($xiaoxiaComponent -eq 'cosy') { $xiaoxiaBuildArgs = @('--build-constraint', 'requirements/cosy-build.txt') }
+    & uv pip install --python $xiaoxiaPython --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match @xiaoxiaBuildArgs -r "requirements/$xiaoxiaComponent.txt"
     if ($LASTEXITCODE -ne 0) { throw "Dependency install failed: $xiaoxiaComponent" }
 }
 $xiaoxiaPython = Join-Path $PSScriptRoot '.venvs/bot/Scripts/python.exe'
@@ -35,7 +39,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Browser dependency install failed.' }
 } finally { Pop-Location }
 if (-not $SkipModels) {
-    & $xiaoxiaPython tools/download_models.py
+    $xiaoxiaModelArgs = @()
+    if ($WithCosy) { $xiaoxiaModelArgs += '--include-cosy' }
+    & $xiaoxiaPython tools/download_models.py @xiaoxiaModelArgs
     if ($LASTEXITCODE -ne 0) { throw 'Model download failed.' }
 }
 Write-Output 'Installed. Run .\start.ps1 and open http://127.0.0.1:6185.'

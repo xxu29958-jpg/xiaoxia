@@ -96,7 +96,7 @@ class Cover(BaseModel):
 def health():
     return {
         "status": "ready" if recognizer else "loading",
-        "engine": "IndexTTS-2",
+        "engine": "Xiaoxia Voice Gateway",
         "voice": profile["id"],
         "project": str(PROJECT),
         "reference_sha256": profile["reference_sha256"],

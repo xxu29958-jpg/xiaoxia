@@ -21,6 +21,11 @@ def main():
     parser.add_argument(
         "--verify", action="store_true", help="Only verify installed files"
     )
+    parser.add_argument(
+        "--include-cosy",
+        action="store_true",
+        help="Also install the optional CosyVoice3 speech model",
+    )
     args = parser.parse_args()
     items = json.loads((ROOT / "models.manifest.json").read_text(encoding="utf-8"))
     proxy = CONFIG["download_proxy"]
@@ -29,6 +34,8 @@ def main():
     )
     for item in items:
         if args.only and item["component"] != args.only:
+            continue
+        if item["component"] == "cosy_models" and not (args.only or args.include_cosy):
             continue
         target = path(item["component"]) / item["file"]
         if target.exists():

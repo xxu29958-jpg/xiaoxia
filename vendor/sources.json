@@ -19,5 +19,15 @@
     "upstream_revision": "dffe922",
     "local_revision": "cf1e314e13e3b37da0ace77a346e97ff413b4fc4",
     "local_changes_included": true
+  },
+  "cosyvoice": {
+    "repository": "https://github.com/QwenAudio/CosyVoice",
+    "revision": "074ca6dc9e80a2f424f1f74b48bdd7d3fea531cc",
+    "local_changes_included": false
+  },
+  "cosyvoice_matcha": {
+    "repository": "https://github.com/shivammehta25/Matcha-TTS",
+    "revision": "dd9105b34bf2be2230f4aa1e4769fb586a3c824e",
+    "local_changes_included": false
   }
 }

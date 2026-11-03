@@ -23,6 +23,12 @@ SERVICES = {
     "memory": ("services/memory/server.py", 11435, "/health"),
     "bot": ("main.py", 6185, "/"),
 }
+SPEECH_ENGINES = {"index": "server_index.py", "cosy": "server_cosy.py"}
+SERVICES["index"] = (
+    "services/voice/" + SPEECH_ENGINES[CONFIG["speech_engine"]],
+    6191,
+    "/health",
+)
 HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
@@ -156,7 +162,9 @@ def start(names):
             print(f"{name}: already listening")
             continue
         entry = PROJECT / SERVICES[name][0]
-        python = path("python_" + name)
+        python = path(
+            "python_" + (CONFIG["speech_engine"] if name == "index" else name)
+        )
         arguments = [str(python), str(entry)]
         if name == "bot":
             arguments += ["--webui-dir", str(PROJECT / "astrbot/dashboard/dist")]
@@ -202,10 +210,35 @@ def hidden_startup():
     return info
 
 
+def stop(names):
+    """Stop the selected workers through their owned process entry points."""
+    for name in reversed(names):
+        pid = PROJECT / f".runtime/{name}.pid"
+        if pid.is_file():
+            python_name = CONFIG["speech_engine"] if name == "index" else name
+            subprocess.run(
+                [
+                    str(path("python_bot")),
+                    str(PROJECT / "maintenance/runtime/graceful_stop.py"),
+                    pid.read_text().strip(),
+                    str(path("python_" + python_name)),
+                    str(PROJECT / SERVICES[name][0]),
+                    "--timeout",
+                    "30",
+                ],
+                check=True,
+            )
+            pid.unlink()
+
+
 def main():
     parser = argparse.ArgumentParser(description="小夏：聊天、听、说、歌曲和戏曲")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("init")
+    p = commands.add_parser(
+        "voice-engine", help="Switch the speech worker and start it"
+    )
+    p.add_argument("engine", choices=list(SPEECH_ENGINES))
     for command in ["start", "stop", "status"]:
         p = commands.add_parser(command)
         p.add_argument(
@@ -248,6 +281,38 @@ def main():
     if args.command == "init":
         initialize()
         return
+    if args.command == "voice-engine":
+        if not path("python_" + args.engine).is_file():
+            raise RuntimeError(
+                "Speech environment missing; run setup.ps1 -WithCosy for CosyVoice3"
+            )
+        model_config = "cosyvoice3.yaml" if args.engine == "cosy" else "config.yaml"
+        if not (path(args.engine + "_models") / model_config).is_file():
+            raise RuntimeError(
+                "Speech model missing; run tools/download_models.py --only "
+                + args.engine
+                + "_models"
+            )
+        if args.engine != CONFIG["speech_engine"]:
+            stop(["index"])
+            if status(["index"])["index"].get("status") == "ready":
+                raise RuntimeError(
+                    "The previous speech worker still listens; stop its original launcher first"
+                )
+            local = json.loads(CONFIG_FILE.read_text(encoding="utf-8-sig"))
+            local["speech_engine"] = args.engine
+            CONFIG_FILE.write_text(
+                json.dumps(local, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            CONFIG["speech_engine"] = args.engine
+            SERVICES["index"] = (
+                "services/voice/" + SPEECH_ENGINES[args.engine],
+                6191,
+                "/health",
+            )
+        start(["index"])
+        print(json.dumps(status(["index"]), ensure_ascii=False, indent=2))
+        return
     if args.command in {"start", "stop", "status"}:
         names = (
             list(SERVICES)
@@ -263,22 +328,7 @@ def main():
         elif args.command == "status":
             print(json.dumps(status(names), ensure_ascii=False, indent=2))
         else:
-            for name in reversed(names):
-                pid = PROJECT / f".runtime/{name}.pid"
-                if pid.is_file():
-                    subprocess.run(
-                        [
-                            str(path("python_bot")),
-                            str(PROJECT / "maintenance/runtime/graceful_stop.py"),
-                            pid.read_text().strip(),
-                            str(path("python_" + name)),
-                            str(PROJECT / SERVICES[name][0]),
-                            "--timeout",
-                            "30",
-                        ],
-                        check=True,
-                    )
-                    pid.unlink()
+            stop(names)
         return
     key = (path("voice_state") / "service.key").read_text().strip()
     headers = {"Authorization": "Bearer " + key}

@@ -6,6 +6,9 @@
 |---|---|
 | AstrBot 主程序与管理界面 | https://github.com/AstrBotDevs/AstrBot |
 | IndexTTS-2 | https://github.com/index-tts/index-tts |
+| CosyVoice3（Apache-2.0） | https://github.com/QwenAudio/CosyVoice |
+| CosyVoice 使用的 Matcha-TTS（MIT） | https://github.com/shivammehta25/Matcha-TTS |
+| WeText 离线文本规范化（Apache-2.0） | https://github.com/pengzhendong/wetext |
 | Seed-VC | https://github.com/Plachtaa/seed-vc |
 | SoulX-Singer | https://github.com/Soul-AILab/SoulX-Singer |
 | Mel-Band Roformer 分离模型 | https://huggingface.co/becruily/mel-band-roformer-karaoke |
