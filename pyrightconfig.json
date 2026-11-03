@@ -11,6 +11,7 @@
     {"root": "services/voice", "pythonVersion": "3.11", "extraPaths": [".", "vendor/soulx_singer"]},
     {"root": "services", "pythonVersion": "3.11", "extraPaths": ["."]},
     {"root": "tests/media_pipeline", "pythonVersion": "3.11", "extraPaths": [".", "vendor/soulx_singer"]},
+    {"root": "maintenance/tests", "pythonVersion": "3.12", "extraPaths": [".", "data/plugins"]},
     {"root": ".", "pythonVersion": "3.12"}
   ]
 }

@@ -10,10 +10,17 @@ from pathlib import Path
 from . import boundaries
 from .changes import capture, load_before, source_bytes
 from .content_checks import asset_findings, secret_findings, verify_reference_bundle
-from .external_checks import complexity, complexity_values, execute, python_checks
+from .external_checks import (
+    bot_checks,
+    complexity,
+    complexity_values,
+    execute,
+    python_checks,
+)
 from .git_snapshot import BlobReader, entries
-from .ownership import SOURCE, TEXT
+from .ownership import TEXT
 from .size_gate import compare, identities
+from .test_selection import required_tests
 
 
 def dependency_sources(repo: Path, base: str, changes: list) -> tuple[dict, dict]:
@@ -110,77 +117,6 @@ def inspect_changes(repo: Path, snapshot: dict, policy: dict) -> dict:
     return result
 
 
-def required_tests(changes: list) -> dict:
-    quality_changed = any(
-        c.path.startswith(("tools/quality/", "quality/"))
-        or c.path in {"requirements/quality.txt", "pyrightconfig.json"}
-        for c in changes
-    )
-    installation_paths = {
-        "setup.ps1",
-        "services/runtime.py",
-        "tools/download_models.py",
-        "vendor/sources.json",
-    }
-    installation = [
-        c.path
-        for c in changes
-        if c.path in installation_paths
-        or c.path.startswith(
-            (
-                "tools/installation/",
-                "tests/installation/",
-                "requirements/fish",
-                "models-manifests/",
-            )
-        )
-    ]
-    media_paths = {
-        "services/voice/job_api.py",
-        "services/voice/job_execution.py",
-        "services/voice/job_renderer.py",
-        "services/voice/cover_source.py",
-        "services/voice/server_voice.py",
-        "services/voice/server_singing.py",
-        "services/voice/cover_pipeline.py",
-    }
-    media = [
-        c.path
-        for c in changes
-        if c.path in media_paths
-        or c.path.startswith(
-            ("services/jobs/", "tests/media_jobs/", "tests/media_pipeline/")
-        )
-    ]
-    pipeline = any(
-        c.path == "services/voice/cover_pipeline.py"
-        or c.path.startswith("tests/media_pipeline/")
-        for c in changes
-    )
-    other_code = [
-        c.path
-        for c in changes
-        if Path(c.path).suffix in SOURCE
-        and not c.path.startswith(("tools/quality/", "quality/"))
-        and c.path not in installation
-        and c.path not in media
-    ]
-    frontend = [
-        c.path
-        for c in changes
-        if c.path.startswith("dashboard/")
-        and Path(c.path).suffix not in {".md", ".png", ".svg"}
-    ]
-    return {
-        "quality_contracts": quality_changed,
-        "installation_contracts": bool(installation),
-        "media_job_contracts": bool(media),
-        "media_pipeline_contracts": pipeline,
-        "unmapped_code_changes": other_code,
-        "frontend_checks_required": frontend,
-    }
-
-
 def contract_checks(repo: Path, tests: dict, runtimes: dict[str, str]) -> list[dict]:
     checks = []
     for flag, folder, interpreter in (
@@ -211,6 +147,8 @@ def contract_checks(repo: Path, tests: dict, runtimes: dict[str, str]) -> list[d
                 [interpreter, "-B", "-m", "unittest", "discover", "-s", folder, "-v"],
             )
         )
+    if tests["performance_contracts"]:
+        checks.extend(bot_checks(repo, runtimes.get("bot", "")))
     return checks
 
 
@@ -268,13 +206,14 @@ def main() -> None:
     parser.add_argument(
         "--base", required=True, help="Immutable predecessor commit or branch base"
     )
+    parser.add_argument("--bot-python", type=Path)
     parser.add_argument("--gateway-python", type=Path)
     parser.add_argument("--singing-python", type=Path)
     args = parser.parse_args()
     try:
         runtimes = {
             name: str(value.resolve())
-            for name in ("gateway", "singing")
+            for name in ("bot", "gateway", "singing")
             if (value := getattr(args, f"{name}_python")) is not None
         }
         report = run(Path.cwd(), args.base, runtimes)

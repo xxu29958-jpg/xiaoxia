@@ -29,6 +29,11 @@ npm ci --prefix quality --ignore-scripts
 .venvs/quality/Scripts/python.exe -B -m tools.quality.gate --base <change-base-commit> `
   --gateway-python <gateway-python.exe> --singing-python <singing-python.exe>
 
+# 涉及聊天消费者时，提供已安装的主程序 Python 3.12 环境。
+# 子进程使用临时 ASTRBOT_ROOT、测试配置及回环网关，不打开运行目录的聊天数据库。
+.venvs/quality/Scripts/python.exe -B -m tools.quality.gate --base <change-base-commit> `
+  --bot-python <bot-python.exe>
+
 # stdout 为 JSON。固定提交，不包含未提交文件；重定向到选定的证据目录。
 .venvs/quality/Scripts/python.exe -B -m tools.quality.inventory --revision HEAD
 
@@ -61,7 +66,8 @@ npm ci --prefix quality --ignore-scripts
 - 密钥扫描只报告路径／规则／行号，不输出匹配值；当前覆盖私钥头、GitHub token、OpenAI 风格 key 与运行凭据文件名，不宣称能识别所有秘密。发现疑似密钥后不再执行可能回显源内容的 lint/type/test 命令。
 - 引用包单独按哈希和完整文件集合验证；额外塞入源码不能借该路径逃过检查。新增／增长到 10 MiB 以上资产需审查。
 - 当前自动消费者映射覆盖质量工具自身，以及 Fish 源码安装／模型选择的标准库契约测试和 PowerShell 语法检查。Fish 生成锁文件的输入／输出哈希也纳入检查。其他业务代码、前端或脚本变化会显示缺少的检查映射并阻断，必须补对应的真实测试，不允许当作自动跳过。空环境依赖安装、真实模型导入、GPU 服务和完整安装旅程分别保留环境证据，不能由这些快速检查推断通过。
-- 媒体任务映射覆盖真实 SQLite／进程强杀、HTTP 控制与回环 RPC、WAV 读回；信号处理映射使用演唱环境中的 librosa／soundfile 和确定性转换器，覆盖时长、重叠、停顿、尾音、取消及真实 yt-dlp 下载。模型权重与外部聊天渠道不在快速测试内；这些测试不能代替 GPU 合成、插件消费者、发送回执或人工听审。
+- 媒体任务映射覆盖真实 SQLite／进程强杀、HTTP 控制与回环 RPC、WAV 读回；信号处理映射使用演唱环境中的 librosa／soundfile 和确定性转换器，覆盖时长、重叠、停顿、尾音、取消及真实 yt-dlp 下载。
+- 聊天演出消费者映射覆盖真实插件工具、HTTP 网关、完整 61 秒 MP3 编码与读回、跨入口查询／取消、渠道回执丢失、重启，以及真实进程强杀发生在外部回环接收后、本地回执事务提交前后的两个窗口。渠道使用测试接收器，不发送外部消息；这些证据不代替真实模型、QQ／微信原生收发、手机体验或人工听审。相关旧语音、对话、工具生成器与 MCP 返回值消费者一并回归。
 - gate 的 JSON 保留基线、HEAD、候选文件哈希、工具退出码和结果；源码在运行期间发生变化时结果作废。命令本身不生成工作树缓存或改写文件，输出由调用者重定向到证据目录。
 
 工具和规则变化后，重新测同一原始提交，保留旧证据，避免把计数器变化误认成产品改善。

@@ -46,7 +46,7 @@ async def test_local_voice_passes_context_tone_and_reports_applied_tone(tmp_path
     await runner.setup()
     site = web.TCPSite(runner, "127.0.0.1", 0)
     await site.start()
-    port = site._server.sockets[0].getsockname()[1]
+    port = runner.addresses[0][1]
     key = tmp_path / "key"
     key.write_text("test-only-key")
     voice = LocalVoice(
@@ -79,7 +79,7 @@ def builder(origin):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("quoted", [False, True])
 async def test_recognized_voice_routes_reply_but_quoted_voice_does_not(
-    tmp_path, quoted
+    tmp_path, quoted, monkeypatch
 ):
     audio = tmp_path / "incoming.wav"
     with wave.open(str(audio), "wb") as stream:
@@ -94,14 +94,15 @@ async def test_recognized_voice_routes_reply_but_quoted_voice_does_not(
     )
     stt = SimpleNamespace(get_text=AsyncMock(return_value="今天有点累"))
     stage = PreProcessStage()
-    stage.config = {}
+    monkeypatch.setattr(stage, "config", {}, raising=False)
     stage.platform_settings = {}
     stage.stt_settings = {"enable": True}
-    stage.plugin_manager = SimpleNamespace(
+    manager = SimpleNamespace(
         context=SimpleNamespace(
             get_using_stt_provider_async=AsyncMock(return_value=stt)
         )
     )
+    monkeypatch.setattr(stage, "plugin_manager", manager, raising=False)
     await stage.process(current)
     assert "今天有点累" in current.get_message_str()
     assert bool(current.get_extra("voice_input")) is (not quoted)
@@ -155,7 +156,7 @@ async def test_tool_intro_does_not_consume_final_voice_reply(tmp_path):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("platform", ["aiocqhttp", "weixin_oc"])
 async def test_singing_uses_platform_audio_and_does_not_add_spoken_duplicate(
-    tmp_path, platform
+    tmp_path, platform, monkeypatch
 ):
     buffer = io.BytesIO()
     with wave.open(buffer, "wb") as stream:
@@ -167,8 +168,13 @@ async def test_singing_uses_platform_audio_and_does_not_add_spoken_duplicate(
     plugin = object.__new__(AdaCompanion)
     plugin.config = {"voice_enabled": True, "ffmpeg_path": FFMPEG}
     plugin.lifecycle = Lifecycle()
-    plugin.owner_memory = SimpleNamespace(scope=lambda event: "owner")
-    plugin.local_voice = voice
+    monkeypatch.setattr(
+        plugin,
+        "owner_memory",
+        SimpleNamespace(scope=lambda event: "owner"),
+        raising=False,
+    )
+    monkeypatch.setattr(plugin, "local_voice", voice, raising=False)
     plugin.media = ResponseMedia(plugin.config, tmp_path, voice)
     current = native_event(platform, "给我唱两句原创的小曲")
     current.set_extra("ada_voice_requested", True)
@@ -179,27 +185,36 @@ async def test_singing_uses_platform_audio_and_does_not_add_spoken_duplicate(
     assert len(results) == 1 and len(results[0].chain) == 1
     component = results[0].chain[0]
     assert isinstance(component, File if platform == "weixin_oc" else Record)
+    assert component.file is not None
     assert Path(component.file).is_file()
     voice.synthesize.assert_awaited_once_with(
         "晚风轻轻吹过窗，你把今天放一旁。", mode="singing"
     )
     current.set_result(results[0])
     await plugin.media.decorate(current)
-    assert len(current.get_result().chain) == 1
+    decorated = current.get_result()
+    assert decorated is not None and len(decorated.chain) == 1
     assert plugin.media.last_voice["mode"] == "singing"
 
 
 @pytest.mark.asyncio
-async def test_failed_singing_does_not_claim_or_send_audio():
+async def test_failed_singing_does_not_claim_or_send_audio(monkeypatch):
     voice = SimpleNamespace(
         synthesize=AsyncMock(side_effect=VoiceError("local_voice_unavailable"))
     )
     plugin = object.__new__(AdaCompanion)
     plugin.config = {"voice_enabled": True, "ffmpeg_path": FFMPEG}
     plugin.lifecycle = Lifecycle()
-    plugin.owner_memory = SimpleNamespace(scope=lambda event: "owner")
-    plugin.local_voice = voice
-    plugin.media = SimpleNamespace(voice_lock=asyncio.Lock())
+    monkeypatch.setattr(
+        plugin,
+        "owner_memory",
+        SimpleNamespace(scope=lambda event: "owner"),
+        raising=False,
+    )
+    monkeypatch.setattr(plugin, "local_voice", voice, raising=False)
+    monkeypatch.setattr(
+        plugin, "media", SimpleNamespace(voice_lock=asyncio.Lock()), raising=False
+    )
     current = native_event("aiocqhttp", "唱两句")
     results = [
         result
@@ -211,56 +226,28 @@ async def test_failed_singing_does_not_claim_or_send_audio():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("platform", ["aiocqhttp", "weixin_oc"])
-async def test_complete_cover_uses_attachment_and_preserves_full_audio(
-    tmp_path, platform
+async def test_cover_entrypoint_returns_durable_admission_without_waiting_for_generation(
+    monkeypatch,
 ):
-    source = tmp_path / "opera.wav"
-    with wave.open(str(source), "wb") as stream:
-        stream.setnchannels(1)
-        stream.setsampwidth(2)
-        stream.setframerate(16000)
-        stream.writeframes(b"\0\0" * 16000 * 61)
-    voice = SimpleNamespace(cover=AsyncMock(return_value=source.read_bytes()))
     plugin = object.__new__(AdaCompanion)
-    plugin.config = {"voice_enabled": True, "ffmpeg_path": FFMPEG}
     plugin.lifecycle = Lifecycle()
-    plugin.owner_memory = SimpleNamespace(scope=lambda event: "owner")
-    plugin.local_voice = voice
-    plugin.media = ResponseMedia(plugin.config, tmp_path, voice)
-    current = native_event(platform, "把这段戏曲完整唱出来")
-    current.message_obj.message.append(File(name="opera.wav", file=str(source)))
-    results = [
-        result
-        async for result in plugin.cover_song(current, title="戏曲", acapella=True)
-    ]
-    voice.cover.assert_awaited_once_with(
-        source,
-        acapella=True,
-        pitch=0,
-        start_seconds=0.0,
-        duration_seconds=None,
-        source_url="",
+    performances = SimpleNamespace(
+        submit=AsyncMock(return_value='{"ok":true,"request_id":"queued"}')
     )
-    assert len(results) == 1 and len(results[0].chain) == 1
-    component = results[0].chain[0]
-    assert isinstance(component, File) and component.name == "小夏 - 戏曲.mp3"
-    process = await asyncio.create_subprocess_exec(
-        FFMPEG,
-        "-v",
-        "error",
-        "-i",
-        component.file,
-        "-f",
-        "s16le",
-        "-ar",
-        "16000",
-        "-ac",
-        "1",
-        "pipe:1",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+    monkeypatch.setattr(plugin, "performances", performances, raising=False)
+    current = native_event("aiocqhttp", "把这段戏曲完整唱出来")
+    result = await plugin.cover_song(current, title="戏曲", acapella=True)
+    assert result == '{"ok":true,"request_id":"queued"}'
+    performances.submit.assert_awaited_once_with(
+        current,
+        "戏曲",
+        {
+            "source_path": "",
+            "source_url": "",
+            "acapella": True,
+            "pitch": 0,
+            "start_seconds": 0.0,
+            "duration_seconds": None,
+        },
+        False,
     )
-    decoded, _ = await process.communicate()
-    assert process.returncode == 0
-    assert abs(len(decoded) / 32000 - 61) < 0.02

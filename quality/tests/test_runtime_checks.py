@@ -65,6 +65,28 @@ class RuntimeCheckTests(unittest.TestCase):
             result["unmapped_code_changes"], ["services/voice/unmapped.py"]
         )
 
+    def test_chat_consumer_has_bot_checks_and_unknown_plugin_changes_still_fail(self):
+        result = required_tests(
+            [
+                Change(
+                    "data/plugins/astrbot_plugin_ada_companion/performances.py",
+                    None,
+                    "A",
+                ),
+                Change(
+                    "data/plugins/astrbot_plugin_ada_companion/unmapped.py", None, "A"
+                ),
+            ]
+        )
+        self.assertTrue(result["performance_contracts"])
+        self.assertEqual(
+            result["unmapped_code_changes"],
+            ["data/plugins/astrbot_plugin_ada_companion/unmapped.py"],
+        )
+        self.assertEqual(
+            runtime_group("tests/performance_delivery/test_journey.py"), "bot"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

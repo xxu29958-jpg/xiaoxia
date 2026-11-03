@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import re
 from collections.abc import AsyncGenerator, Awaitable, Callable
-from typing import Any
+from typing import Any, TypeVar
 
 import docstring_parser
+from mcp.types import CallToolResult
 
 from astrbot.core import logger
 from astrbot.core.agent.agent import Agent
@@ -27,6 +28,12 @@ from ..filter.platform_adapter_type import (
 from ..filter.regex import RegexFilter
 from ..star_handler import EventType, StarHandlerMetadata, star_handlers_registry
 
+ToolResult = MessageEventResult | CallToolResult | str | None
+ToolHandler = TypeVar(
+    "ToolHandler",
+    bound=Callable[..., AsyncGenerator[ToolResult, None] | Awaitable[ToolResult]],
+)
+
 
 def get_handler_full_name(
     awaitable: Callable[..., Awaitable[Any] | AsyncGenerator[Any]],
@@ -38,8 +45,7 @@ def get_handler_full_name(
 def get_handler_or_create(
     handler: Callable[
         ...,
-        Awaitable[MessageEventResult | str | None]
-        | AsyncGenerator[MessageEventResult | str | None],
+        Awaitable[ToolResult] | AsyncGenerator[ToolResult, None],
     ],
     event_type: EventType,
     dont_add=False,
@@ -621,13 +627,7 @@ def register_llm_tool(name: str | None = None, **kwargs):
     if kwargs.get("registering_agent"):
         registering_agent = kwargs["registering_agent"]
 
-    def decorator(
-        awaitable: Callable[
-            ...,
-            AsyncGenerator[MessageEventResult | str | None]
-            | Awaitable[MessageEventResult | str | None],
-        ],
-    ):
+    def decorator(awaitable: ToolHandler) -> ToolHandler:
         llm_tool_name = name_ if name_ else awaitable.__name__
         func_doc = awaitable.__doc__ or ""
         docstring = docstring_parser.parse(func_doc)

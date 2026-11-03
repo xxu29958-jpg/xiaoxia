@@ -5,12 +5,15 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from .metrics import python_metrics
 
 
-def execute(repo: Path, argv: list[str], *, timeout: int = 180) -> dict:
+def execute(
+    repo: Path, argv: list[str], *, timeout: int = 180, extra_env: dict | None = None
+) -> dict:
     result = subprocess.run(
         argv,
         cwd=repo,
@@ -19,17 +22,83 @@ def execute(repo: Path, argv: list[str], *, timeout: int = 180) -> dict:
         encoding="utf-8",
         errors="replace",
         timeout=timeout,
-        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "NO_COLOR": "1"},
+        env={
+            **os.environ,
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "NO_COLOR": "1",
+            **(extra_env or {}),
+        },
     )
     return {
         "command": argv,
         "exit_code": result.returncode,
         "stdout": result.stdout,
         "stderr": result.stderr,
+        "explicit_environment": extra_env or {},
     }
 
 
+def bot_checks(repo: Path, interpreter: str) -> list[dict]:
+    if not interpreter or not Path(interpreter).is_file():
+        return [
+            {
+                "command": ["bot-consumer-tests"],
+                "exit_code": 2,
+                "stdout": "",
+                "stderr": "Missing --bot-python interpreter.",
+            }
+        ]
+    commands = [
+        [
+            interpreter,
+            "-B",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/performance_delivery",
+            "-v",
+        ],
+        [
+            interpreter,
+            "-B",
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "maintenance/tests/test_ada_local_voice.py",
+            "maintenance/tests/test_ada_dialogue.py",
+            "maintenance/tests/test_ada_companion.py",
+            "tests/unit/test_tool_generator_lifecycle.py",
+            "tests/test_tool_loop_agent_runner.py::test_tool_result_includes_all_calltoolresult_content",
+        ],
+    ]
+    results = []
+    for command in commands:
+        with tempfile.TemporaryDirectory(prefix="xiaoxia-bot-contract-") as root:
+            results.append(
+                execute(
+                    repo,
+                    command,
+                    extra_env={
+                        "ASTRBOT_ROOT": root,
+                        "ASTRBOT_TEST_MODE": "true",
+                        "TESTING": "true",
+                    },
+                )
+            )
+    return results
+
+
 def runtime_group(path: str) -> str:
+    if path.startswith(
+        ("data/plugins/astrbot_plugin_ada_companion/", "tests/performance_delivery/")
+    ) or path in {
+        "astrbot/core/star/register/star_handler.py",
+        "maintenance/tests/test_ada_local_voice.py",
+    }:
+        return "bot"
     if path == "services/voice/server_voice.py":
         return "gateway"
     if path in {
@@ -68,7 +137,7 @@ def pyright_checks(
                     "-c",
                     "import sys; print(sys.version); "
                     "raise SystemExit(0 if sys.version_info[:2] == "
-                    + ("(3, 12)" if group == "quality" else "(3, 11)")
+                    + ("(3, 12)" if group in {"quality", "bot"} else "(3, 11)")
                     + " else 2)",
                 ],
             )

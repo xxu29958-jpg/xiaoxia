@@ -2,11 +2,11 @@
 
 import asyncio
 import contextlib
+import json
 import time
 from pathlib import Path
 
 from astrbot.api.event import AstrMessageEvent, filter
-from astrbot.api.message_components import File
 from astrbot.api.star import Context, Star, StarTools
 
 from .admin_api import AdminApi
@@ -30,6 +30,8 @@ from .message_rhythm import prepare_bubbles
 from .model_controls import ModelControls
 from .online_memes import OnlineMemes
 from .owner_memory import OwnerMemory
+from .performance_store import PerformanceError
+from .performances import Performances
 from .policy import DeliveryPolicy
 from .prompting import ContextBuilder
 from .public_browser import PublicBrowser
@@ -89,6 +91,9 @@ class AdaCompanion(Star):
             self.services,
         )
         self.media = ResponseMedia(config, self.folder, self.local_voice)
+        self.performances = Performances(
+            self.folder, config, self.owner_memory, context
+        )
         self.prompt.review.models = self.models
         self.initiative = ProactiveChat(
             config,
@@ -150,6 +155,7 @@ class AdaCompanion(Star):
                 handler.__name__,
             )
         self.job = asyncio.create_task(self.initiative.loop())
+        self.performances.worker.start()
 
     async def terminate(self):
         if self.job:
@@ -160,6 +166,7 @@ class AdaCompanion(Star):
         await self.bili.stop()
         await self.public_browser.close()
         await self.lifecycle.close()
+        await self.performances.worker.close()
 
     @filter.llm_tool(name="ada_desktop")
     async def desktop_control(
@@ -251,7 +258,8 @@ class AdaCompanion(Star):
 
         Preserve the supplied performance's melody, phrasing and accompaniment.
         Accept any genre and duration; use the current audio attachment automatically.
-        Send one playable MP3 to the current chat. Never invent a source URL.
+        Queue a background job and later deliver one playable MP3 to this chat.
+        Return immediately after durable admission so chatting can continue. Never invent a source URL.
         For a song title, use available web search first to find a real recording.
         Source access can fail; a search result alone is not playable audio.
         Short and full covers both work.
@@ -265,59 +273,43 @@ class AdaCompanion(Star):
             start_seconds(number): Start time when an excerpt is requested; default zero.
             duration_seconds(number): Length of a requested short excerpt. Zero preserves the whole recording; use the length requested by the user.
 
-        Yields:
-            The complete converted track, or an actionable source/generation message.
+        Returns:
+            The durable request ID and state, or an actionable source/generation error.
         """
         async with self.lifecycle.operation():
-            self.owner_memory.scope(event)
-            event.set_extra("ada_voice_done", True)
-            if not self.config.get("voice_enabled", False):
-                yield event.plain_result("语音现在停用了，开启后我再唱给你。")
-                return
-            files = [item for item in event.get_messages() if isinstance(item, File)]
-            if files:
-                source = Path(await files[0].get_file())
-            elif use_voice_recording and event.get_extra("voice_input_files"):
-                source = Path(event.get_extra("voice_input_files")[0])
-            elif source_url:
-                source = None
-            else:
-                yield '{"ok":false,"reason":"source_required","next":"Find a public recording with web search and call again with its URL, or use an attached performance."}'
-                return
+            return await self.performances.submit(
+                event,
+                title,
+                {
+                    "source_path": "",
+                    "source_url": source_url,
+                    "acapella": acapella,
+                    "pitch": pitch,
+                    "start_seconds": start_seconds,
+                    "duration_seconds": duration_seconds or None,
+                },
+                use_voice_recording,
+            )
+
+    @filter.llm_tool(name="ada_performance")
+    async def performance_status(
+        self, event: AstrMessageEvent, action: str = "status", request_id: str = ""
+    ) -> str:
+        """Query or cancel an existing background performance across the owner's chats.
+
+        Generation, channel acceptance and playback are separate facts. Never call an
+        unknown send successful or automatically resend it. Cancellation stops future
+        delivery but cannot withdraw a send that has already started.
+
+        Args:
+            action(string): status or cancel; cancel only at the user's request.
+            request_id(string): An observed request ID; empty selects the owner's latest request.
+        """
+        async with self.lifecycle.operation():
             try:
-                audio = await self.local_voice.cover(
-                    source,
-                    acapella=acapella,
-                    pitch=pitch,
-                    start_seconds=start_seconds,
-                    duration_seconds=duration_seconds or None,
-                    source_url=source_url if source is None else "",
-                )
-                component = await self.media.audio_files.create(
-                    audio,
-                    title,
-                    event.get_platform_name(),
-                    song=True,
-                )
-                self.media.last_voice = {
-                    "state": "attached_to_reply",
-                    "at": time.time(),
-                    "platform": event.get_platform_name(),
-                    "bytes": len(audio),
-                    "mode": "cover",
-                    "title": title,
-                }
-                yield event.chain_result([component])
-            except VoiceError as exc:
-                self.media.last_voice = {
-                    "state": "failed",
-                    "mode": "cover",
-                    "error": str(exc),
-                }
-                if str(exc) == "source_unavailable":
-                    yield '{"ok":false,"reason":"source_unavailable","next":"This source could not be downloaded. Use another accessible source or an attached recording. No singing was generated."}'
-                    return
-                yield event.plain_result("这首转换失败了，没生成完整歌声。")
+                return await self.performances.control(event, action, request_id)
+            except PerformanceError as error:
+                return json.dumps({"ok": False, "reason": str(error)})
 
     @filter.llm_tool(name="ada_bili")
     async def bili_read(

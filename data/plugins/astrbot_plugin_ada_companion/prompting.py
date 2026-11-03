@@ -1,9 +1,12 @@
 """Construct one companion context from shared evidence and current platform capabilities."""
 
+from __future__ import annotations
+
 import json
 import re
 import time
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent
@@ -17,6 +20,9 @@ from .shared_history import read_shared_history
 from .temper import temper_context
 from .thread_review import ThreadReview
 
+if TYPE_CHECKING:
+    from .initiative_materials import InterestMaterials
+
 
 class ContextBuilder:
     def __init__(self, config, owners, dialogue, policy, context, services):
@@ -28,7 +34,7 @@ class ContextBuilder:
         self.services = services
         self.target = policy.target
         self.review = ThreadReview(dialogue, owners, policy)
-        self.materials = None
+        self.materials: InterestMaterials | None = None
 
     async def prepare(self, event: AstrMessageEvent, req):
         if not event.is_private_chat():
