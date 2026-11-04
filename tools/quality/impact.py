@@ -150,10 +150,10 @@ def matrix(report: dict) -> dict:
         "include": [
             {
                 "group": group,
-                "python": "3.11"
+                "python": "3.11.15"
                 if group
                 in {"media_pipeline_contracts", "runtime_singing", "runtime_gateway"}
-                else "3.12",
+                else "3.12.13",
             }
             for group in report["groups"]
         ]

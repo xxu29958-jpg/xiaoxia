@@ -6,6 +6,7 @@ import hashlib
 import importlib.metadata
 import json
 import platform
+import subprocess
 from collections import Counter
 from pathlib import Path, PurePosixPath
 
@@ -29,6 +30,12 @@ def provenance(policy: dict) -> dict:
     return {
         "schema_version": VERSION,
         "python": platform.python_version(),
+        "node": subprocess.check_output(
+            ["node", "--version"], text=True, timeout=10
+        ).strip(),
+        "git": subprocess.check_output(
+            ["git", "--version"], text=True, timeout=10
+        ).strip(),
         "ruff": importlib.metadata.version("ruff"),
         "pygments": importlib.metadata.version("pygments"),
         "typescript": "5.1.6",
