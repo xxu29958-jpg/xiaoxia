@@ -5,7 +5,6 @@ import multiprocessing as mp
 import queue
 import tempfile
 import threading
-import time
 import unittest
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -36,9 +35,10 @@ class ReceiptHandler(BaseHTTPRequestHandler):
 
 
 def sending_worker(database, url, ready, committed):
-    store = PerformanceStore(Path(database))
+    # Keep the claim valid until the chosen crash point, independent of host speed.
+    store = PerformanceStore(Path(database), clock=lambda: 100.0)
     store.submit("owner", {"origin": "fixture"}, "native-event", "track", {}, {})
-    claim = store.claim(lease=0.3)
+    claim = store.claim()
     assert claim is not None
     store.observe_generation(
         claim["id"], claim["token"], {"id": "job", "state": "completed"}
@@ -87,6 +87,7 @@ class SendCrashTests(unittest.TestCase):
                     self.assertEqual(
                         sink.calls.get(timeout=2), b"one-local-side-effect"
                     )
+                    self.assertTrue(process.is_alive())
                 finally:
                     if process.is_alive():
                         process.terminate()
@@ -94,14 +95,18 @@ class SendCrashTests(unittest.TestCase):
                     sink.shutdown()
                     thread.join(2)
                     sink.server_close()
-                restored = PerformanceStore(database)
-                deadline = time.monotonic() + 3
-                while (
-                    restored.get("owner")["state"] == "sending"
-                    and time.monotonic() < deadline
-                ):
-                    self.assertIsNone(restored.claim())
-                    time.sleep(0.02)
+                self.assertFalse(process.is_alive())
+                self.assertIsNotNone(process.exitcode)
+                self.assertNotEqual(process.exitcode, 0)
+                now = 100.0
+                restored = PerformanceStore(database, clock=lambda: now)
+                self.assertEqual(
+                    restored.get("owner")["state"],
+                    "accepted" if committed else "sending",
+                )
+                self.assertIsNone(restored.claim())
+                now = 161.0
+                self.assertIsNone(restored.claim())
                 saved = restored.get("owner")
                 self.assertEqual(saved["state"], "accepted" if committed else "unknown")
                 self.assertIsNone(restored.claim())
