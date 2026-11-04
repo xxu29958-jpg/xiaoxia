@@ -7,7 +7,6 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from importlib import import_module
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -15,8 +14,11 @@ from types import SimpleNamespace
 async def native_probe(folder):
     """Use the production loader namespace and a private synthetic database."""
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-    prefix = "data.plugins.astrbot_plugin_memory_companion.core"
-    store = import_module(prefix + ".store").MemoryStore(folder / "memory.db")
+    from data.plugins.astrbot_plugin_ada_companion.appraisals import EventUnderstanding
+    from data.plugins.astrbot_plugin_ada_companion.dialogue import DialogueState
+    from data.plugins.astrbot_plugin_memory_companion.core.store import MemoryStore
+
+    store = MemoryStore(folder / "memory.db")
     store.initialize()
     origin = "qq:FriendMessage:fixture"
     owners = SimpleNamespace(
@@ -27,11 +29,8 @@ async def native_probe(folder):
     )
     bridge = SimpleNamespace(_plugin=SimpleNamespace(store=store))
     services = SimpleNamespace(memory=lambda: bridge)
-    companion = "data.plugins.astrbot_plugin_ada_companion"
-    dialogue = import_module(companion + ".dialogue").DialogueState(
-        folder / "dialogue.json", owners, services
-    )
-    appraisals = import_module(companion + ".appraisals").EventUnderstanding(dialogue)
+    dialogue = DialogueState(folder / "dialogue.json", owners, services)
+    appraisals = EventUnderstanding(dialogue)
     try:
         for consumer in (dialogue, appraisals):
             result = await consumer.snapshot(origin)
