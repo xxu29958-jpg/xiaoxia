@@ -25,6 +25,7 @@ CLEAR_TABLES = (
     "knowledge_edges",
     "knowledge_nodes",
     "working_objects",
+    "appraisal_objects",
     "timeline",
     "cross_window_threads",
     "memory_acl_rules",
@@ -56,9 +57,27 @@ def working_scope(db, target_type, user_id, *, execute=False):
     Minimal hashed operation/name/import markers remain to prevent replay and
     automatic re-adoption of preserved legacy JSON; they contain no message text.
     """
+    return _private_derived_scope(db, target_type, user_id, "working", execute)
+
+
+def appraisal_scope(db, target_type, user_id, *, execute=False):
+    """Withdraw the event interpretation if any supporting private source is erased."""
+    return _private_derived_scope(db, target_type, user_id, "appraisal", execute)
+
+
+def derived_scope_counts(db, target_type, user_id, *, execute=False):
+    return {
+        "working_objects": working_scope(db, target_type, user_id, execute=execute),
+        "appraisal_objects": appraisal_scope(db, target_type, user_id, execute=execute),
+    }
+
+
+def _private_derived_scope(db, target_type, user_id, domain, execute):
+    if domain not in {"working", "appraisal"}:
+        raise ValueError("invalid_derived_domain")
     if target_type != "private":
         return 0
-    rows = db.execute("SELECT owner,id,record FROM working_revisions").fetchall()
+    rows = db.execute(f"SELECT owner,id,record FROM {domain}_revisions").fetchall()
     keys = set()
     for row in rows:
         source = json.loads(row[2])["source"]
@@ -72,6 +91,6 @@ def working_scope(db, target_type, user_id, *, execute=False):
             keys.add((row[0], row[1]))
     if execute:
         db.executemany(
-            "DELETE FROM working_objects WHERE owner=? AND id=?", sorted(keys)
+            f"DELETE FROM {domain}_objects WHERE owner=? AND id=?", sorted(keys)
         )
     return len(keys)

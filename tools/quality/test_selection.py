@@ -27,6 +27,9 @@ CONTRACTS = {
         "maintenance/tests/test_sticker_request_routing.py",
     ),
     "cognition_contracts": (
+        "data/plugins/astrbot_plugin_memory_companion/core/appraisal_*.py",
+        "data/plugins/astrbot_plugin_memory_companion/core/sql/appraisal_state.sql",
+        "data/plugins/astrbot_plugin_ada_companion/appraisals.py",
         "data/plugins/astrbot_plugin_memory_companion/core/core_state*.py",
         "data/plugins/astrbot_plugin_memory_companion/core/working_state*.py",
         "data/plugins/astrbot_plugin_memory_companion/core/sensitive_data.py",

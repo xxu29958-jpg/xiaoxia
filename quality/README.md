@@ -74,3 +74,7 @@ npm ci --prefix quality --ignore-scripts
 - 阅读映射覆盖来源／范围事务、旧库迁移、版本变化、进程强杀、恢复搬迁、原生工具注册和 QQ／微信身份隔离，以及 RSS、字幕、主动材料和浏览器消费者。需先执行 `npm ci --prefix maintenance/browser --ignore-scripts --no-audit --no-fund`，安装锁定的 MCP 包；测试实际运行 Chrome／MCP，缺包或缺浏览器均失败，不用跳过代替。真实 LLM 四阶段旅程在快速门外保留独立候选证据，详见 [阅读边界](../docs/reading-evidence.md)。
 
 工具和规则变化后，重新测同一原始提交，保留旧证据，避免把计数器变化误认成产品改善。
+
+事件理解映射沿 cognition 检查覆盖原生解释／修订／操作回执、来源撤回、跨端回复与提示、主动候选版本复核、
+强杀及备份恢复。真实模型的旧／新／空状态对照另外保留，不能将受控状态影响当作完整认知或聊天体验通过；
+详见 [事件理解边界](../docs/event-understanding.md)。

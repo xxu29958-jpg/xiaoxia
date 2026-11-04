@@ -11,7 +11,11 @@ from typing import Any
 from .models import (
     clean_text,
 )
-from .store_erasure_domains import CLEAR_TABLES, validate_scope, working_scope
+from .store_erasure_domains import (
+    CLEAR_TABLES,
+    derived_scope_counts,
+    validate_scope,
+)
 
 
 class MemoryStoreScopeErasure:
@@ -130,7 +134,7 @@ class MemoryStoreScopeErasure:
             ]
             all_memory_ids = list(dict.fromkeys([*memory_ids, *linked_memory_ids]))
             counts = {
-                "working_objects": working_scope(self._conn, target_type, user_id),
+                **derived_scope_counts(self._conn, target_type, user_id),
                 "memories": len(all_memory_ids),
                 "timeline": len(timeline_ids),
                 "relationship_edges": self._count_relationship_edges_for_scope_or_memory_ids(
@@ -171,8 +175,8 @@ class MemoryStoreScopeErasure:
             backup = self.backup(f".before_clear_{target_type}")
             deleted: dict[str, int] = {}
             with self._transaction_sync():
-                deleted["working_objects"] = working_scope(
-                    self._conn, target_type, user_id, execute=True
+                deleted.update(
+                    derived_scope_counts(self._conn, target_type, user_id, execute=True)
                 )
                 if all_memory_ids:
                     self._delete_many_by_ids(

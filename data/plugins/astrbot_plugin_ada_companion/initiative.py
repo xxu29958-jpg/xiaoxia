@@ -15,6 +15,7 @@ from astrbot.api.event import MessageChain
 from astrbot.api.message_components import Plain
 from astrbot.core.utils.session_lock import session_lock_manager
 
+from .appraisals import EventUnderstanding
 from .conversation_style import CHAT_STYLE, _visible_text
 from .persona_rules import PROACTIVE_RULES
 from .policy import LOCAL_TZ
@@ -142,6 +143,7 @@ class ProactiveChat:
                 meme,
                 choice.get("material"),
                 choice.get("thread_version", ""),
+                choice.get("appraisal_revision", ""),
             )
             self.last_check = {"at": time.time(), **outcome}
             return self.last_check
@@ -223,6 +225,9 @@ class ProactiveChat:
             for x in self.policy.data["deliveries"][-6:]
         ]
         threads = await self.dialogue.visible(target)
+        appraisals = await EventUnderstanding(self.dialogue).snapshot(target)
+        if not appraisals.get("ok"):
+            raise RuntimeError("appraisal_context_unavailable")
         try:
             materials = self.materials.candidates(now) if self.materials else []
         except (ValueError, OSError, sqlite3.Error) as exc:
@@ -245,6 +250,7 @@ class ProactiveChat:
             "relevant_memory": memory,
             "previous_checkins_do_not_repeat": previous,
             "explicit_conversation_threads": threads,
+            "revisable_event_interpretations_not_facts": appraisals,
             "fresh_web_discoveries": materials,
         }
         models = getattr(self, "models", None)
@@ -265,7 +271,10 @@ class ProactiveChat:
             ),
             timeout=150,
         )
-        return self._interpret_candidate(response, threads, materials)
+        return {
+            **self._interpret_candidate(response, threads, materials),
+            "appraisal_revision": appraisals["revision"],
+        }
 
     def _interpret_candidate(self, response, threads, materials):
         raw = response.completion_text.strip()
@@ -315,6 +324,7 @@ class ProactiveChat:
         thread_id,
         thread_version,
         material,
+        appraisal_revision="",
     ):
         target = destination["origin"]
         cm = self.context.conversation_manager
@@ -341,6 +351,10 @@ class ProactiveChat:
             return "context_changed"
         if material and (not self.materials or not self.materials.current(material)):
             return "material_changed"
+        if appraisal_revision and await EventUnderstanding(self.dialogue).changed(
+            target, appraisal_revision
+        ):
+            return "appraisal_changed"
         return ""
 
     async def _deliver(
@@ -356,11 +370,10 @@ class ProactiveChat:
         meme=None,
         material=None,
         thread_version="",
+        appraisal_revision="",
     ):
         """Recheck activity, reserve once and record the actual delivery outcome."""
-        cm = self.context.conversation_manager
         target = destination["origin"]
-        native = destination["native"]
         async with session_lock_manager.acquire_lock(target):
             changed = await self._candidate_change(
                 cid,
@@ -371,6 +384,7 @@ class ProactiveChat:
                 thread_id,
                 thread_version,
                 material,
+                appraisal_revision,
             )
             if changed:
                 return {"reason": changed}
@@ -426,34 +440,7 @@ class ProactiveChat:
                     )
             item["status"] = "sent"
             self.policy.save()
-            try:
-                latest = await cm.get_conversation(target, cid)
-                content = json.loads(latest.history or "[]")
-                content.append({"role": "assistant", "content": text})
-                await cm.update_conversation(target, cid, history=content)
-                item["history_saved"] = True
-                item["memory_id"] = await bridge.record_visible_turn(
-                    role="assistant",
-                    content=text,
-                    scope="private",
-                    session_id=target,
-                    platform=native["platform"],
-                    user_id=native["user_id"],
-                    message_id="ada-proactive-" + item["id"],
-                    source="ada_companion",
-                    metadata={
-                        "bot_id": native["bot_id"],
-                        "persona_id": "Ada",
-                        "proactive": True,
-                        "has_image": meme is not None,
-                    },
-                )
-            except Exception as exc:
-                item["record_error"] = type(exc).__name__
-                logger.warning(
-                    "Ada sent a check-in but its history record needs repair: %s",
-                    type(exc).__name__,
-                )
+            await self._record_delivery(bridge, cid, text, destination, item, meme)
             self.policy.save()
         self.last_check = {
             "reason": "sent",
@@ -465,3 +452,36 @@ class ProactiveChat:
             "source_url": material["url"] if material else "",
         }
         return self.last_check
+
+    async def _record_delivery(self, bridge, cid, text, destination, item, meme):
+        """Persist observed delivery separately from the send reservation/check."""
+        cm = self.context.conversation_manager
+        target, native = destination["origin"], destination["native"]
+        try:
+            latest = await cm.get_conversation(target, cid)
+            content = json.loads(latest.history or "[]")
+            content.append({"role": "assistant", "content": text})
+            await cm.update_conversation(target, cid, history=content)
+            item["history_saved"] = True
+            item["memory_id"] = await bridge.record_visible_turn(
+                role="assistant",
+                content=text,
+                scope="private",
+                session_id=target,
+                platform=native["platform"],
+                user_id=native["user_id"],
+                message_id="ada-proactive-" + item["id"],
+                source="ada_companion",
+                metadata={
+                    "bot_id": native["bot_id"],
+                    "persona_id": "Ada",
+                    "proactive": True,
+                    "has_image": meme is not None,
+                },
+            )
+        except Exception as exc:
+            item["record_error"] = type(exc).__name__
+            logger.warning(
+                "Ada sent a check-in but its history record needs repair: %s",
+                type(exc).__name__,
+            )

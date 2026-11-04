@@ -258,6 +258,55 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
             self.plugin.policy.data["deliveries"][0]["memory_id"], "evt-real"
         )
 
+    async def test_interpretation_reaches_candidate_and_new_revision_blocks_delivery(
+        self,
+    ):
+        from astrbot_plugin_ada_companion.appraisals import EventUnderstanding
+
+        from maintenance.tests.working_state_support import incoming
+
+        port = EventUnderstanding(self.plugin.dialogue)
+        source = incoming(self.plugin.dialogue, TARGET, "今天值班有点烦，先不聊听歌。")
+        change = {
+            "item_id": "",
+            "title": "值班听歌",
+            "understanding": "暂时想安静，不等于讨厌歌。",
+            "response_implication": "值班时先留空间。",
+            "uncertainty": "下班时机未知",
+            "status": "active",
+            "evidence_quote": "今天值班有点烦，先不聊听歌。",
+        }
+        first = await port.update(source, change)
+        self.assertTrue(first["ok"], first)
+
+        async def generate(**kwargs):
+            payload = json.loads(kwargs["prompt"])
+            seen = payload["revisable_event_interpretations_not_facts"]["items"][0]
+            self.assertEqual(seen["version"], first["version"])
+            later = incoming(
+                self.plugin.dialogue, TARGET, "现在已下班，想继续聊那首歌。"
+            )
+            await port.snapshot(TARGET, event=later)
+            updated = await port.update(
+                later,
+                {
+                    **change,
+                    "item_id": first["id"],
+                    "evidence_quote": "现在已下班，想继续聊那首歌。",
+                    "understanding": "已经下班，愿意聊歌。",
+                },
+            )
+            self.assertTrue(updated["ok"], updated)
+            return SimpleNamespace(
+                completion_text='{"send":true,"text":"A concrete musical thought."}'
+            )
+
+        self.context.llm_generate.side_effect = generate
+        result = await self.plugin.proactive()
+        self.assertEqual(result["reason"], "appraisal_changed")
+        self.context.send_message.assert_not_awaited()
+        self.assertEqual(self.plugin.policy.data["deliveries"], [])
+
     async def test_send_timeout_is_not_retried_or_remembered_as_sent(self):
         self.context.send_message.side_effect = TimeoutError
         self.assertEqual(
