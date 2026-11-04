@@ -3,8 +3,10 @@ from __future__ import annotations
 import asyncio
 import math
 import sqlite3
+from collections.abc import Callable
 from typing import Any
 
+from .core_state_store import CoreStateAccess
 from .models import (
     MemoryRecord,
     clean_text,
@@ -16,8 +18,19 @@ from .models import (
 from .profile_quality import normalize_profile_value
 
 
-class MemoryStoreRecordInsert:
+class MemoryStoreRecordInsert(CoreStateAccess):
     """store record insert; the facade owns all shared resources."""
+
+    PROFILE_MEMORY_TYPES: frozenset[str]
+    PROFILE_RULE_EXTRACTORS: frozenset[str]
+    PROFILE_SINGLE_VALUE_DIMENSIONS: frozenset[str]
+    _embedding_candidate_cache: dict[
+        tuple[str, bool, int], list[tuple[MemoryRecord, list[float], str]]
+    ]
+    _embedding_candidate_cache_revision: str
+    _profile_domain_rows_sync: Callable[[MemoryRecord], list[sqlite3.Row]]
+    _profile_state: Callable[[MemoryRecord], str]
+    _write_memory_record_sync: Callable[[MemoryRecord], sqlite3.Row]
 
     @staticmethod
     def _memory_atom_record_for_row(
@@ -292,85 +305,6 @@ class MemoryStoreRecordInsert:
                 (now, now, max(1, min(1000, int(limit or 200)))),
             ).fetchall()
         return [MemoryRecord.from_row(row) for row in rows]
-
-    async def save_core_memory(
-        self,
-        record: MemoryRecord,
-        *,
-        expected_revision: int | None = None,
-    ) -> dict[str, Any]:
-        return await self._run_recoverable_database_operation(
-            self._save_core_memory_sync,
-            record,
-            expected_revision,
-        )
-
-    def _save_core_memory_sync(
-        self,
-        record: MemoryRecord,
-        expected_revision: int | None,
-    ) -> dict[str, Any]:
-        """Atomically create or replace one labeled core-memory block."""
-        record.memory_type = "core_memory"
-        record.ensure_defaults()
-        with self._lock:
-            with self._transaction_sync():
-                current = self._conn.execute(
-                    "SELECT * FROM memories WHERE id=?",
-                    (record.id,),
-                ).fetchone()
-                current_revision = 0
-                if current is not None:
-                    if clean_text(current["memory_type"], 80) != "core_memory":
-                        return {"ok": False, "code": "memory_type_conflict"}
-                    current_metadata = json_loads(current["metadata"], {})
-                    if isinstance(current_metadata, dict):
-                        try:
-                            current_revision = max(
-                                0, int(current_metadata.get("core_revision") or 0)
-                            )
-                        except (TypeError, ValueError):
-                            current_revision = 0
-                    record.created_at = (
-                        clean_text(current["created_at"], 80) or record.created_at
-                    )
-                if (
-                    expected_revision is not None
-                    and int(expected_revision) != current_revision
-                ):
-                    return {
-                        "ok": False,
-                        "code": "revision_conflict",
-                        "current_revision": current_revision,
-                    }
-
-                metadata = (
-                    dict(record.metadata) if isinstance(record.metadata, dict) else {}
-                )
-                next_revision = current_revision + 1
-                metadata["core_revision"] = next_revision
-                metadata["core_memory"] = True
-                record.metadata = metadata
-                record.updated_at = utc_now()
-                record.canonical_key = ""
-                record.content_fingerprint = ""
-                data = record.to_db()
-                columns = ", ".join(data.keys())
-                placeholders = ", ".join(f":{key}" for key in data.keys())
-                updates = ", ".join(
-                    f"{key}=excluded.{key}" for key in data.keys() if key != "id"
-                )
-                self._conn.execute(
-                    f"INSERT INTO memories ({columns}) VALUES ({placeholders}) "
-                    f"ON CONFLICT(id) DO UPDATE SET {updates}",
-                    data,
-                )
-                row = self._conn.execute(
-                    "SELECT * FROM memories WHERE id=?",
-                    (record.id,),
-                ).fetchone()
-                self._upsert_memory_fts_row(row)
-        return {"ok": True, "id": record.id, "revision": next_revision}
 
     async def update_review_status(self, memory_id: str, status: str) -> bool:
         return await asyncio.to_thread(

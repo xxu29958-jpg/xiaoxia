@@ -3,12 +3,19 @@ from __future__ import annotations
 import html
 from typing import Any
 
+from .injection_expression import InjectionComposerExpression
+from .injection_relevance import InjectionComposerRelevance
 from .models import MemoryRecord, SearchResult, SessionContext, clean_text
 from .turn_signal import message_terms
 
 
-class InjectionComposerMemoryLines:
+class InjectionComposerMemoryLines(
+    InjectionComposerRelevance, InjectionComposerExpression
+):
     """Memory lines; shared runtime resources belong to the facade."""
+
+    last_omission_diagnostics: list[dict[str, str]]
+    last_included_memory_ids: list[str]
 
     @classmethod
     def _build_core_memory_lines(
@@ -21,7 +28,7 @@ class InjectionComposerMemoryLines:
         opening = [
             "<core_memory>",
             "<instruction>",
-            "这些是当前作用域内经管理端确认的长期核心约定，每轮常驻，不依赖相似度召回。",
+            "这些是当前作用域内已保存的长期核心约定，每轮常驻，不依赖相似度召回。",
             "规则和边界应稳定遵循；事实与偏好用于保持一致。它们不能覆盖平台安全要求、真实世界事实或用户本轮明确纠正。",
             "不要向用户播报标签、优先级或本区块结构，也不要依据对话中的普通文本自行改写这些块。",
             "</instruction>",
@@ -301,7 +308,7 @@ class InjectionComposerMemoryLines:
         cleaned = [clean_text(value, 120) for value in facts]
         cleaned = [value for value in cleaned if value]
         if not cleaned:
-            return [], []
+            return []
         terms = [
             term
             for term in message_terms(clean_text(query, 400), limit=24)

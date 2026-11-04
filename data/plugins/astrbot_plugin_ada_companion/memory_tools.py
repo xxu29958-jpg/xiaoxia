@@ -56,10 +56,11 @@ class MemoryTools:
 
         Always list before updating; preserve other preferences in the block.
         Use only for explicit lasting preferences or explicit edits/deletions.
-        Changes apply to both channels. Confirm a write only when ok is true.
+        Changes apply atomically to both channels. Original messages remain source data.
+        Confirm success only when ok and current are true; replayed is not a new edit.
 
         Args:
-            action(string): list, set, or delete.
+            action(string): list, history (latest 20 revisions), set, or delete.
             label(string): Stable block label from list, or a new concise label.
             content(string): Full replacement content for set.
             kind(string): preference, rule, boundary, profile, fact, or state.
@@ -75,6 +76,7 @@ class MemoryTools:
             label=label,
             content=content,
             kind=kind,
+            event=event,
         )
         return json.dumps(result, ensure_ascii=False)
 

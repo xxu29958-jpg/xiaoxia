@@ -104,7 +104,7 @@ class MemoryStore(
 
     MEMORY_ATOM_BACKFILL_VERSION = "v1"
 
-    SCHEMA_VERSION = "memory-atom-v2"
+    SCHEMA_VERSION = "memory-atom-v2-core-state-v1"
 
     MAINTENANCE_REPAIR_BATCH_SIZE = 200
 

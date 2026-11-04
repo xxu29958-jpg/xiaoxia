@@ -6,6 +6,19 @@ from pathlib import Path
 from .ownership import SOURCE
 
 CONTRACTS = {
+    "cognition_contracts": (
+        "data/plugins/astrbot_plugin_memory_companion/core/core_state*.py",
+        "data/plugins/astrbot_plugin_memory_companion/core/store.py",
+        "data/plugins/astrbot_plugin_memory_companion/core/store_record_insert.py",
+        "data/plugins/astrbot_plugin_memory_companion/core/sql/memory_schema.sql",
+        "data/plugins/astrbot_plugin_memory_companion/core/injection_memory_lines.py",
+        "data/plugins/astrbot_plugin_ada_companion/shared_core.py",
+        "data/plugins/astrbot_plugin_ada_companion/memory_tools.py",
+        "data/plugins/astrbot_plugin_ada_companion/owner_memory.py",
+        "data/plugins/astrbot_plugin_ada_companion/main.py",
+        "maintenance/tests/test_companion_runtime.py",
+        "tests/cognition_state/*",
+    ),
     "quality_contracts": (
         "tools/quality/*",
         "quality/*",

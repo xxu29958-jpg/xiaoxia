@@ -67,6 +67,23 @@ CREATE INDEX IF NOT EXISTS idx_memories_reality
 CREATE INDEX IF NOT EXISTS idx_memories_content
     ON memories(content);
 
+CREATE TABLE IF NOT EXISTS core_memory_revisions (
+    memory_id TEXT NOT NULL REFERENCES memories(id) ON DELETE CASCADE,
+    revision INTEGER NOT NULL,
+    record TEXT NOT NULL,
+    source TEXT NOT NULL,
+    recorded_at TEXT NOT NULL,
+    PRIMARY KEY(memory_id, revision)
+);
+
+CREATE TABLE IF NOT EXISTS core_memory_mutations (
+    owner TEXT NOT NULL,
+    operation TEXT NOT NULL,
+    request_hash TEXT NOT NULL,
+    receipt TEXT NOT NULL,
+    PRIMARY KEY(owner, operation)
+);
+
 CREATE TABLE IF NOT EXISTS identities (
     id TEXT PRIMARY KEY,
     platform TEXT NOT NULL DEFAULT '',
@@ -481,3 +498,8 @@ CREATE TABLE IF NOT EXISTS portrait_daily_runs (
     updated_at TEXT NOT NULL DEFAULT '',
     PRIMARY KEY(person_id, run_day)
 );
+
+CREATE TRIGGER IF NOT EXISTS core_history_source_deleted AFTER DELETE ON timeline BEGIN
+    DELETE FROM core_memory_revisions
+    WHERE json_extract(source, '$.capture.source_ref') = 'timeline:' || OLD.id;
+END;

@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import AsyncMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "data/plugins"))
@@ -27,7 +28,7 @@ QQ = "qq-personal-companion:FriendMessage:owner"
 WX = "wechat-companion:FriendMessage:owner-wx"
 
 
-def event(origin, text="hello"):
+def event(origin, text="hello") -> Any:
     return SimpleNamespace(
         unified_msg_origin=origin,
         is_private_chat=lambda: True,
@@ -139,7 +140,7 @@ class SharedCoreTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_native_write_failure_is_reported_without_false_success(self):
         with patch.object(
-            self.service, "save_core_memory_block", side_effect=OSError("disk full")
+            self.service.store, "_core_write", side_effect=OSError("disk full")
         ):
             result = await self.call(action="set", label="voice", content="gentle")
             self.assertFalse(result["ok"])
