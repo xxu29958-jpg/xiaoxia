@@ -3,6 +3,7 @@
 import asyncio
 import hashlib
 import json
+import time
 from pathlib import Path
 
 
@@ -23,6 +24,7 @@ class OwnerMemory:
                 self.contexts = {}
                 self.healthy = False
         self.last = {}
+        self.last_received_ns = 0
 
     def observe(self, event):
         """Persist native identities only for locally configured private owners.
@@ -33,6 +35,9 @@ class OwnerMemory:
         origin = event.unified_msg_origin
         if not self.healthy or origin not in self.owners or not event.is_private_chat():
             return
+        if not getattr(event, "_ada_memory_received_ns", 0):
+            self.last_received_ns = max(time.time_ns(), self.last_received_ns + 1)
+            event._ada_memory_received_ns = self.last_received_ns
         context = {
             "session_id": origin,
             "scope": "private",

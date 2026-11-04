@@ -9,6 +9,7 @@ from pathlib import Path
 
 from . import boundaries
 from .changes import capture, load_before, source_bytes
+from .cognition_checks import cognition_checks
 from .content_checks import asset_findings, secret_findings, verify_reference_bundle
 from .external_checks import (
     bot_checks,
@@ -149,6 +150,8 @@ def contract_checks(repo: Path, tests: dict, runtimes: dict[str, str]) -> list[d
         )
     if tests["performance_contracts"]:
         checks.extend(bot_checks(repo, runtimes.get("bot", "")))
+    if tests["cognition_contracts"]:
+        checks.extend(cognition_checks(repo, runtimes.get("bot", "")))
     return checks
 
 

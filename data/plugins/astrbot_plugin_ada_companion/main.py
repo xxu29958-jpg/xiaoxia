@@ -510,10 +510,10 @@ class AdaCompanion(Star):
         content: str = "",
         kind: str = "preference",
     ) -> str:
-        """Read or update this same owner's shared QQ and WeChat core preferences.
+        """Read/update shared QQ/WeChat core preferences; confirm writes only when ok and current are true.
 
         Args:
-            action(string): list, set, or delete.
+            action(string): list, history (latest 20 revisions), set, or delete.
             label(string): Stable block label from list, or a new concise label.
             content(string): Full replacement content for set.
             kind(string): preference, rule, boundary, profile, fact, or state.

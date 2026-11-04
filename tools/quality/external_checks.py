@@ -93,10 +93,16 @@ def bot_checks(repo: Path, interpreter: str) -> list[dict]:
 
 def runtime_group(path: str) -> str:
     if path.startswith(
-        ("data/plugins/astrbot_plugin_ada_companion/", "tests/performance_delivery/")
+        (
+            "data/plugins/astrbot_plugin_ada_companion/",
+            "tests/performance_delivery/",
+            "data/plugins/astrbot_plugin_memory_companion/",
+            "tests/cognition_state/",
+        )
     ) or path in {
         "astrbot/core/star/register/star_handler.py",
         "maintenance/tests/test_ada_local_voice.py",
+        "maintenance/tests/test_companion_runtime.py",
     }:
         return "bot"
     if path == "services/voice/server_voice.py":
@@ -213,7 +219,9 @@ def complexity(repo: Path, path: str, text: str) -> list[dict]:
             "-",
         ],
         cwd=repo,
-        input=text,
+        # Windows text-mode stdin translates LF to CRLF. Passing existing CRLF
+        # unchanged inserts extra blank lines and breaks AST/diagnostic binding.
+        input=text.replace("\r\n", "\n").replace("\r", "\n"),
         capture_output=True,
         text=True,
         encoding="utf-8",
