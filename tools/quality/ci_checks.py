@@ -1,6 +1,7 @@
 """Run structural and selected consumer gates, preserving partial outcomes."""
 
 import json
+import platform
 import sys
 import time
 from pathlib import Path
@@ -117,6 +118,7 @@ def check(repo: Path, base: str, tier: str, group: str = "") -> dict:
         **result,
         "status": "fail" if failed else "pass",
         "tier": tier,
+        "runtime": {"python": platform.python_version(), "platform": platform.system()},
         "head": snapshot["head"],
         "base": snapshot["base"],
         "candidate_hashes": snapshot["content_sha256"],

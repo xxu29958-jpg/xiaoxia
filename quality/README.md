@@ -47,6 +47,7 @@ TypeScript 5.1.6／Vue SFC 3.3.4 从输入文本解析导入和符号，不执�
 ## 独立环境
 
 CI 固定 Python 3.12.13（语音类型／信号组为 3.11.15）与 Node 24.15.0；报告另记录实际 Git 版本。
+Windows 组用固定 uv 0.11.7 的独立 Python 构建创建隔离环境；不依赖 setup-python 是否发布该补丁的 Windows 安装器。
 使用相同运行时和 uv，在仓库根目录执行：
 
 ```powershell

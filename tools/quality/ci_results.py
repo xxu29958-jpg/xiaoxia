@@ -114,6 +114,7 @@ def selection_audit(plan: dict, reports: dict[str, dict]) -> dict:
         "execution": {
             group: {
                 "status": report.get("status"),
+                "runtime": report.get("runtime"),
                 "elapsed_seconds": report.get("elapsed_seconds"),
                 "head": report.get("head"),
                 "base": report.get("base"),
