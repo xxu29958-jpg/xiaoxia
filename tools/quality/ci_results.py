@@ -42,7 +42,12 @@ def test_result(command: dict) -> dict:
         status = "not_executed"
     elif skipped and status == "pass":
         status = "partial"
-    return {"status": status, "executed": total, "counts": counts}
+    return {
+        "status": status,
+        "collected": total,
+        "executed": None if total is None else total - counts.get("skipped", 0),
+        "counts": counts,
+    }
 
 
 def qualify(commands: list[dict]) -> bool:
@@ -71,4 +76,67 @@ def job_result(jobs: Mapping[str, str], has_groups: str) -> dict:
         "g2_applicable": has_groups != "false",
         "g3": "not_executed",
         "production_deployed": False,
+    }
+
+
+def selection_audit(plan: dict, reports: dict[str, dict]) -> dict:
+    expected = set(plan.get("groups", []))
+    selected = set(plan.get("incremental_groups", []))
+    missing = sorted(expected - reports.keys())
+    failed = sorted(
+        group
+        for group in expected & reports.keys()
+        if reports[group].get("status") != "pass"
+    )
+    misses = sorted(set(failed) - selected)
+    mismatched = sorted(
+        group
+        for group in expected & reports.keys()
+        if not plan.get("head")
+        or reports[group].get("head") != plan["head"]
+        or reports[group].get("base") != plan.get("base")
+        or not reports[group].get("stable_candidate")
+    )
+    valid = (
+        plan.get("status") == "planned"
+        and not missing
+        and not failed
+        and not mismatched
+    )
+    return {
+        "status": "pass" if valid else "fail",
+        "scope": "All registered contract groups when scheduled/full or selection-engine qualification; unregistered journeys are not claimed covered",
+        "incremental_groups": sorted(selected),
+        "executed_groups": sorted(reports),
+        "required_but_not_executed": missing,
+        "failed_groups": failed,
+        "candidate_mismatch_groups": mismatched,
+        "execution": {
+            group: {
+                "status": report.get("status"),
+                "elapsed_seconds": report.get("elapsed_seconds"),
+                "head": report.get("head"),
+                "base": report.get("base"),
+                "commands": [
+                    {
+                        k: command.get(k)
+                        for k in (
+                            "command",
+                            "status",
+                            "exit_code",
+                            "elapsed_seconds",
+                            "tests",
+                        )
+                    }
+                    for command in report.get("commands", [])
+                ],
+            }
+            for group, report in sorted(reports.items())
+        },
+        "failures_outside_incremental_selection": misses,
+        "full_comparison": bool(
+            plan.get("full_regression") or plan.get("selection_engine_qualification")
+        ),
+        "map_gaps": plan.get("coverage_gaps", []),
+        "unmapped_transitive_consumers": plan.get("unmapped_transitive_consumers", []),
     }

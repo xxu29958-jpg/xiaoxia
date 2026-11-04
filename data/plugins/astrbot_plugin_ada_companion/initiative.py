@@ -226,7 +226,10 @@ class ProactiveChat:
         ]
         threads = await self.dialogue.visible(target)
         appraisals = await EventUnderstanding(self.dialogue).attend(
-            target, query, threads, now=now
+            target,
+            query,
+            threads,
+            now=now,
         )
         if not appraisals.get("ok"):
             raise RuntimeError("appraisal_context_unavailable")

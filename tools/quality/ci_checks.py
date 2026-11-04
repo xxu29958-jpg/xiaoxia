@@ -10,7 +10,9 @@ from .ci_results import qualify
 from .content_checks import verify_reference_bundle
 from .external_checks import execute, pyright_checks, runtime_group
 from .gate import check_dependencies, contract_checks, inspect_changes
+from .git_snapshot import git
 from .impact import plan
+from .quality_exceptions import validate
 from .test_selection import CONTRACTS
 
 
@@ -58,16 +60,23 @@ def g1(repo: Path, snapshot: dict, policy: dict) -> dict:
             )
         )
     reference = verify_reference_bundle(repo)
+    exception_issues = validate(
+        policy, json.loads(git(repo, "show", f"{snapshot['base']}:quality/policy.json"))
+    )
     blocked = any(f["blocking"] for f in changes["size"]) or any(
         changes[k] for k in ("complexity", "secrets", "assets")
     )
     blocked = blocked or bool(
-        dependencies["new_cycles"] or dependencies["new_forbidden"] or reference
+        dependencies["new_cycles"]
+        or dependencies["new_forbidden"]
+        or reference
+        or exception_issues
     )
     return {
         "findings": changes,
         "dependencies": dependencies,
         "reference_issues": reference,
+        "exception_issues": exception_issues,
         "blocked": blocked,
         "commands": commands,
     }

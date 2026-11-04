@@ -3,6 +3,7 @@
 from collections import deque
 from fnmatch import fnmatchcase
 
+from .quality_exceptions import for_record
 from .source_relations import relationships
 from .test_selection import CONTRACTS
 
@@ -41,14 +42,12 @@ def query(report: dict, path: str) -> dict:
     }
 
 
-def attach(records: list[dict], sources: dict[str, bytes], policy: dict) -> dict:
+def attach(
+    records: list[dict], sources: dict[str, bytes], policy: dict, as_of: str = ""
+) -> dict:
     edges, facts = relationships(
         sources,
-        [
-            r["path"]
-            for r in records
-            if r["role"] in {"schema_migration", "configuration"}
-        ],
+        [r["path"] for r in records],
     )
     reverse: dict[str, list[str]] = {}
     for source, targets in edges.items():
@@ -80,11 +79,9 @@ def attach(records: list[dict], sources: dict[str, bytes], policy: dict) -> dict
         record["quality_gates"] = ["G1"] + (
             ["G2"] if record["test_groups"] or record["risk"] != "local" else []
         )
-        record["exceptions"] = [
-            e for e in policy.get("exceptions", []) if e.get("path") == path
-        ]
+        record["exceptions"] = for_record(record, policy, as_of)
     return {
-        "scope": "Resolved Python imports, literal dynamic imports and source references to tracked configuration/schema; ambiguous dynamic links remain gaps",
+        "scope": "Python and TypeScript/Vue imports, literal dynamic imports and tracked resources; dynamic/template/runtime activation gaps remain explicit",
         "edges": sum(len(targets) for targets in edges.values()),
         "map_gaps": [
             {"path": r["path"], "gaps": r.get("dynamic_gaps", [])}

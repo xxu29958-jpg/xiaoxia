@@ -2,14 +2,20 @@
 
 import ast
 import re
+from collections import defaultdict
 from collections.abc import Sequence
 from pathlib import PurePosixPath
 
 from . import boundaries
+from .frontend import EXTENSIONS, analyze
 
 TABLE = re.compile(
     r"\b(FROM|JOIN|UPDATE|INTO|TABLE(?:\s+IF\s+NOT\s+EXISTS)?)\s+[\"`\[]?([A-Za-z_]\w*)",
     re.I,
+)
+SQL_STATEMENT = re.compile(
+    r"\b(?:SELECT\s+.+?\s+FROM|INSERT\s+(?:OR\s+\w+\s+)?INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|CREATE\s+TABLE|ALTER\s+TABLE|DROP\s+TABLE)\b",
+    re.I | re.S,
 )
 
 
@@ -63,6 +69,9 @@ def facts(path: str, text: str) -> dict:
                         "name": node.name,
                         "line": node.lineno,
                         "kind": type(node).__name__,
+                        "signature": ast.dump(node.args)
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                        else ",".join(ast.dump(base) for base in node.bases),
                     }
                 )
             for decorator in node.decorator_list:
@@ -78,10 +87,16 @@ def facts(path: str, text: str) -> dict:
                         {"symbol": node.name, "entry": name, "line": decorator.lineno}
                     )
         elif isinstance(node, ast.Constant) and isinstance(node.value, str):
-            result["tables"].extend(
-                {"name": match[2], "operation": match[1].upper(), "line": node.lineno}
-                for match in TABLE.finditer(node.value)
-            )
+            # Ordinary prose such as "from memory into context" is not SQL.
+            if SQL_STATEMENT.search(node.value):
+                result["tables"].extend(
+                    {
+                        "name": match[2],
+                        "operation": match[1].upper(),
+                        "line": node.lineno,
+                    }
+                    for match in TABLE.finditer(node.value)
+                )
             if (
                 node.value.endswith((".sql", ".json", ".yaml", ".yml", ".toml"))
                 and "\n" not in node.value
@@ -126,6 +141,10 @@ def facts(path: str, text: str) -> dict:
 def relationships(
     sources: dict[str, bytes], resources: Sequence[str] = ()
 ) -> tuple[dict[str, set[str]], dict]:
+    scripts = {
+        p: data for p, data in sources.items() if PurePosixPath(p).suffix in EXTENSIONS
+    }
+    sources = {p: data for p, data in sources.items() if p not in scripts}
     module_paths = {boundaries.module_name(path): path for path in sources}
     static = boundaries.graph(sources)
     graph = {
@@ -139,6 +158,9 @@ def relationships(
         name.removeprefix("data.plugins."): path for name, path in module_paths.items()
     }
     all_modules = module_paths | aliases
+    resources_by_name = defaultdict(list)
+    for resource in resources:
+        resources_by_name[PurePosixPath(resource).name].append(resource)
     for path, record in parsed.items():
         for name in record["dynamic_imports"]:
             if name in all_modules:
@@ -148,7 +170,11 @@ def relationships(
                     {"kind": "unresolved_literal_import", "module": name}
                 )
         for reference in record["resource_references"]:
-            matches = resource_matches(path, reference["name"], resources)
+            matches = resource_matches(
+                path,
+                reference["name"],
+                resources_by_name[PurePosixPath(reference["name"]).name],
+            )
             if len(matches) == 1:
                 graph[path].update(matches)
             if len(matches) != 1:
@@ -159,4 +185,8 @@ def relationships(
                         "matches": matches,
                     }
                 )
+    frontend = analyze(scripts, list(resources))
+    for path, record in frontend.items():
+        graph[path] = set(record["dependencies"])
+        parsed[path] = record
     return graph, parsed

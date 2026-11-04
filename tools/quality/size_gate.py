@@ -1,31 +1,17 @@
 """Compare real source metrics to the same predecessor, including file renames."""
 
-import ast
-import copy
-import hashlib
+from datetime import UTC, datetime
 
-from .metrics import DEFINITIONS, physical_lines, python_metrics
+from .metrics import physical_lines, python_metrics
 from .ownership import file_kind, findings
+from .quality_exceptions import apply
 
 
 def identities(text: str) -> dict[str, str]:
-    tree = ast.parse(text)
-    result = {}
-
-    def visit(node: ast.AST, prefix: str = "") -> None:
-        for child in ast.iter_child_nodes(node):
-            if isinstance(child, DEFINITIONS):
-                name = f"{prefix}.{child.name}" if prefix else child.name
-                stable = copy.deepcopy(child)
-                stable.name = "__definition__"
-                digest = hashlib.sha256(ast.dump(stable).encode()).hexdigest()
-                result[name] = digest
-                visit(child, name)
-            else:
-                visit(child, prefix)
-
-    visit(tree)
-    return result
+    metrics = python_metrics(text, "identity.py")
+    if "parse_error" in metrics:
+        raise ValueError(f"Cannot identify invalid Python: {metrics['parse_error']}")
+    return {s["key"]: s["fingerprint"] for s in metrics["symbols"]}
 
 
 def measurements(
@@ -52,6 +38,7 @@ def compare(
     new, new_ids = measurements(path, after, policy)
     old_values = {(f["metric"], f.get("symbol")): f["value"] for f in old}
     old_by_identity = {value: key for key, value in old_ids.items()}
+    carry_layout_findings(path, after, old, new, old_ids, new_ids)
     result = []
     if (
         before is not None
@@ -75,16 +62,55 @@ def compare(
         state = "new" if old_value is None else "unchanged"
         if old_value is not None and finding["value"] != old_value:
             state = "worsened" if finding["value"] > old_value else "reduced"
-        result.append(
-            {
-                **finding,
-                "path": path,
-                "previous_path": previous,
-                "previous_symbol": old_name,
-                "previous_value": old_value,
-                "state": state,
-                "blocking": finding["level"] == "review"
-                and state in {"new", "worsened"},
-            }
+        layout_only = (
+            name
+            and old_name
+            and new_ids.get(name) == old_ids.get(old_name)
+            and state == "reduced"
         )
+        item = {
+            **finding,
+            "path": path,
+            "previous_path": previous,
+            "previous_symbol": old_name,
+            "previous_value": old_value,
+            "state": "layout_only"
+            if layout_only or finding.get("layout_only_threshold_crossing")
+            else state,
+            "blocking": finding["level"] == "review" and state in {"new", "worsened"},
+        }
+        result.append(apply(item, policy, new_ids.get(name), datetime.now(UTC).date()))
     return result
+
+
+def carry_layout_findings(
+    path: str, after: bytes | None, old: list, new: list, old_ids: dict, new_ids: dict
+) -> None:
+    """Retain debt when an identical definition crosses a physical threshold."""
+    if not after or not path.endswith((".py", ".pyi")):
+        return
+    covered = {(f["metric"], f.get("symbol")) for f in new}
+    current = {
+        s["key"]: s for s in python_metrics(after.decode("utf-8-sig"), path)["symbols"]
+    }
+    for finding in old:
+        symbol = finding.get("symbol")
+        names = [
+            name for name, digest in new_ids.items() if digest == old_ids.get(symbol)
+        ]
+        for name in names:
+            if not symbol or (finding["metric"], name) in covered:
+                continue
+            measured = current[name]
+            metric = (
+                "control_nesting" if finding["metric"] == "control_nesting" else "lines"
+            )
+            new.append(
+                {
+                    **finding,
+                    "symbol": name,
+                    "line": measured["start"],
+                    "value": measured[metric],
+                    "layout_only_threshold_crossing": True,
+                }
+            )

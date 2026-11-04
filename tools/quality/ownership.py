@@ -100,7 +100,7 @@ def findings(record: dict, limits: dict) -> list[dict]:
                     result.append(
                         {
                             "metric": metric,
-                            "symbol": symbol["name"],
+                            "symbol": symbol["key"],
                             "line": symbol["start"],
                             "value": value,
                             "level": level,

@@ -30,6 +30,7 @@ def measure(sources: dict[str, str]) -> dict[str, dict[int, int]]:
                 "check",
                 "--isolated",
                 "--no-cache",
+                "--ignore-noqa",
                 "--select",
                 "C901",
                 "--config",
@@ -99,4 +100,32 @@ def summarize(records: list[dict]) -> dict:
         "missing_function_complexity": [
             s["name"] for s in functions if "complexity" not in s
         ],
+        "threshold_findings": {
+            metric: {
+                level: sum(
+                    f["metric"] == metric and f["level"] == level
+                    for r in records
+                    for f in r["findings"]
+                )
+                for level in ("warn", "review")
+            }
+            for metric in sorted({f["metric"] for r in records for f in r["findings"]})
+        },
+        "frontend_function_length": distribution(
+            [
+                s["lines"]
+                for r in records
+                for s in r.get("frontend_symbols", [])
+                if s["kind"] == "function"
+            ]
+        ),
+        "frontend_class_length": distribution(
+            [
+                s["lines"]
+                for r in records
+                for s in r.get("frontend_symbols", [])
+                if s["kind"] == "class"
+            ]
+        ),
+        "scope": "C901 and nesting use Python AST/Ruff only; frontend spans use TypeScript/Vue AST. Other languages have file/line measures only; unknown complexity is not zero",
     }

@@ -17,6 +17,11 @@
     {"id": "reading-source-state", "patterns": ["data/plugins/astrbot_plugin_ada_companion/reading_store*"], "owner": "ReadingStore", "change_reason": "Immutable reading sources and delivered ranges"}
   ],
   "adoption_state": "EQ2_static_change_checks_product_gates_separate",
+  "representative_changes": [
+    {"id": "replace-voice-model", "seeds": ["services/voice/server_voice.py", "models.manifest.json"], "reason": "Voice gateway protocol and model identity"},
+    {"id": "add-chat-channel", "seeds": ["astrbot/core/platform/register.py"], "reason": "Actual platform adapter registration entry"},
+    {"id": "revise-cognitive-state", "seeds": ["data/plugins/astrbot_plugin_memory_companion/core/appraisal_rules.py", "data/plugins/astrbot_plugin_memory_companion/core/appraisal_state.py"], "reason": "Authoritative interpretation revision rules and storage"}
+  ],
   "dependency_contracts": [
     {"id": "ARC-01-worker-channel-boundary", "source": "services", "forbidden": ["astrbot", "data.plugins"]},
     {"id": "STR-02-quality-import-isolation", "source": "tools.quality", "forbidden": ["astrbot", "services", "data.plugins", "torch", "fastapi", "requests"]},
@@ -48,5 +53,21 @@
     "manual_document_lines": {"warn_above": 600, "navigation_review_above": 1200}
   },
   "mccabe_tool": "ruff==0.15.22; C901 output measured separately, no custom complexity formula",
-  "exceptions": []
+  "exceptions": [
+    {
+      "id": "COD-03-proactive-candidate-span",
+      "metric": "function_lines",
+      "path": "data/plugins/astrbot_plugin_ada_companion/initiative.py",
+      "symbol": "ProactiveChat._candidate",
+      "fingerprint": "caa1fdc05bc69a7706375b9b7767bfb6586f00e843e029af1dadb137ac3b662e",
+      "maximum": 102,
+      "reason": "Restore the explicit multi-line attend call. This bounded candidate-assembly responsibility was 102 lines in the real-model evidence; compressing the call to 99 lines was not decomposition or a quality improvement. Existing delivery, quota and candidate interpretation are already separate responsibilities.",
+      "alternative_guarantees": "Exact AST identity; bounded input windows and model timeout; appraisals unavailable fail closed; existing candidate and delivery consumer contracts remain required. No complexity, correctness or state-authority exemption.",
+      "validation": ["cognition_contracts", "performance_contracts", "PR6 six real-model cases; normalized whole-module AST sha256 7e63c8da989b04155a1e785dbd7745ce70f275f59dddfd8ed64e69fb096a1c7e"],
+      "owner": "Codex under v1.3 local technical-exception authority",
+      "exit_trigger": "Any semantic change, expanded dependencies, span above 102, or review date requires a new evidence-based decision; extract only a demonstrated independently changing responsibility.",
+      "review_by": "2026-12-04",
+      "history": [{"date": "2026-11-04", "source_commit": "96ff59c44dffee5411e929b17fff98eaef636093", "decision": "Restore readable layout and record the real span instead of avoiding review by compression."}]
+    }
+  ]
 }

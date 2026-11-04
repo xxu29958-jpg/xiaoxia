@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -18,24 +19,29 @@ from .external_checks import (
     execute,
     python_checks,
 )
+from .frontend import EXTENSIONS
 from .git_snapshot import BlobReader, entries
 from .ownership import TEXT
 from .reading_checks import reading_checks
 from .size_gate import compare, identities
+from .source_relations import relationships
 from .test_selection import required_tests
 
 
-def dependency_sources(repo: Path, base: str, changes: list) -> tuple[dict, dict]:
+def dependency_sources(
+    repo: Path, base: str, changes: list, *, include_frontend: bool = False
+) -> tuple[dict, dict]:
+    suffixes = {".py", ".pyi"} | (EXTENSIONS if include_frontend else set())
     before = {}
     with BlobReader(repo) as reader:
         for item in entries(repo, base):
-            if item.path.endswith(".py"):
+            if Path(item.path).suffix in suffixes:
                 before[item.path] = reader.read(item.oid)
     after = {
         name: data for name in before if (data := source_bytes(repo, name)) is not None
     }
     for change in changes:
-        if change.path.endswith(".py"):
+        if Path(change.path).suffix in suffixes:
             data = source_bytes(repo, change.path)
             if data is not None:
                 after[change.path] = data
@@ -43,16 +49,27 @@ def dependency_sources(repo: Path, base: str, changes: list) -> tuple[dict, dict
 
 
 def check_dependencies(repo: Path, base: str, changes: list, policy: dict) -> dict:
-    before, after = dependency_sources(repo, base, changes)
-    old = boundaries.violations(before, policy["dependency_contracts"])
-    new = boundaries.violations(after, policy["dependency_contracts"])
+    before, after = dependency_sources(repo, base, changes, include_frontend=True)
+    old = boundaries.violations(
+        {p: b for p, b in before.items() if p.endswith((".py", ".pyi"))},
+        policy["dependency_contracts"],
+    )
+    new = boundaries.violations(
+        {p: b for p, b in after.items() if p.endswith((".py", ".pyi"))},
+        policy["dependency_contracts"],
+    )
+    old_graph, _ = relationships(before)
+    new_graph, _ = relationships(after)
+    renamed = {c.previous_path: c.path for c in changes if c.status.startswith("R")}
+    old_graph = {
+        renamed.get(p, p): {renamed.get(t, t) for t in targets}
+        for p, targets in old_graph.items()
+    }
     return {
-        "scope": "statically resolvable Python imports, including plugins/tests/vendor; dynamic registration requires runtime validation",
+        "scope": "Resolved Python and TypeScript/Vue imports, including plugin aliases; computed registration remains a map gap",
         "existing_forbidden": old,
         "new_forbidden": [v for v in new if v not in old],
-        "new_cycles": boundaries.new_cycles(
-            boundaries.graph(before), boundaries.graph(after)
-        ),
+        "new_cycles": boundaries.new_cycles(old_graph, new_graph),
     }
 
 
@@ -121,6 +138,12 @@ def inspect_changes(repo: Path, snapshot: dict, policy: dict) -> dict:
 
 def contract_checks(repo: Path, tests: dict, runtimes: dict[str, str]) -> list[dict]:
     checks = []
+    if tests["frontend_contracts"]:
+        npm = "npm.cmd" if os.name == "nt" else "npm"
+        checks.extend(
+            execute(repo, [npm, "run", "--prefix", "dashboard", command])
+            for command in ("typecheck", "i18n:check")
+        )
     for flag, folder, interpreter in (
         ("quality_contracts", "quality/tests", sys.executable),
         ("installation_contracts", "tests/installation", sys.executable),

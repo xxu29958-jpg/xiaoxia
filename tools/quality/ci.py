@@ -43,6 +43,23 @@ def package(repo: Path, base: str, output: Path) -> dict:
 
 
 def install(repo: Path, group: str) -> None:
+    if group == "frontend_contracts":
+        npx = "npx.cmd" if os.name == "nt" else "npx"
+        subprocess.run(
+            [
+                npx,
+                "--yes",
+                "pnpm@10.15.1",
+                "--dir",
+                "dashboard",
+                "install",
+                "--frozen-lockfile",
+                "--ignore-scripts",
+            ],
+            cwd=repo,
+            check=True,
+        )
+        return
     if group in {
         "performance_contracts",
         "cognition_contracts",

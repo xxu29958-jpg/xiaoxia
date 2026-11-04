@@ -6,6 +6,7 @@ from pathlib import Path
 from .ownership import SOURCE
 
 CONTRACTS = {
+    "frontend_contracts": ("dashboard/*", "tools/quality/frontend*"),
     "reading_contracts": (
         "data/plugins/astrbot_plugin_ada_companion/reading_*.py",
         "data/plugins/astrbot_plugin_ada_companion/web_notebook.py",
@@ -86,6 +87,7 @@ CONTRACTS = {
         "tests/installation/*",
         "requirements/fish*",
         "models-manifests/*",
+        "models.manifest.json",
     ),
     "media_job_contracts": (
         "services/jobs/*",

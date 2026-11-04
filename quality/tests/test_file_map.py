@@ -67,7 +67,7 @@ class LineTests(unittest.TestCase):
     def test_actual_ruff_measures_below_ten_and_above_fifteen_without_custom_formula(
         self,
     ):
-        complex_source = "def choose(value):\n" + "".join(
+        complex_source = "def choose(value):  # noqa: C901\n" + "".join(
             f"    if value == {n}:\n        return {n}\n" for n in range(16)
         )
         values = complexity_report.measure(
@@ -142,6 +142,9 @@ class ExactTreeTests(unittest.TestCase):
             head = commit()
             after = collect(root, head, POLICY, {}, previous=before)
             self.assertEqual(after["incremental"]["reused_file_metrics"], 2)
+            measured = next(r for r in after["files"] if r["path"] == "renamed.py")
+            self.assertEqual(measured["recent_change_count"], 2)
+            self.assertEqual(len(after["history"]["renames"]), 1)
             report = trends.delta(root, before, after)
             total = after["scale"]["Repository Total"]
             for key in total:

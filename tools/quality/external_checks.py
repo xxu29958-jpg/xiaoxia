@@ -225,6 +225,7 @@ def complexity(repo: Path, path: str, text: str) -> list[dict]:
             "check",
             "--isolated",
             "--no-cache",
+            "--ignore-noqa",
             "--select",
             "C901",
             "--config",
@@ -255,7 +256,7 @@ def complexity(repo: Path, path: str, text: str) -> list[dict]:
 def complexity_values(path: str, text: str, diagnostics: list[dict]) -> dict[str, int]:
     """Bind a diagnostic to the qualified symbol, not just a shared method name."""
     symbols = python_metrics(text, path).get("symbols", [])
-    definitions = {symbol["definition_line"]: symbol["name"] for symbol in symbols}
+    definitions = {symbol["definition_line"]: symbol["key"] for symbol in symbols}
     result = {}
     for line, value in complexity_by_line(diagnostics).items():
         name = definitions.get(line)
