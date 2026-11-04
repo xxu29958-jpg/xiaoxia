@@ -93,6 +93,7 @@ class AppraisalConsumerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(run.messages[-1].content[-1].text, response.completion_text)
         self.assertNotIn("appraisal", response.completion_text)
         self.assertEqual(self.replyer.last["extra_model_calls"], 0)
+        self.assertFalse(self.replyer.last["appraisal_save_failed"])
         self.assertTrue(request.system_prompt.startswith("Original persona."))
         self.h.reopen()
         next_event = event(WX, "那件听歌的事你怎么理解？", "next")
@@ -129,14 +130,24 @@ class AppraisalConsumerTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn(SAVE["uncertainty"], next_request.system_prompt)
         self.assertEqual((await self.h.snapshot())["total"], 1)
 
-    async def test_failed_persistence_is_visible_without_claiming_saved_or_new_evidence(
+    async def test_internal_save_failure_keeps_chat_natural_and_diagnostic_truthful(
         self,
     ):
         await self.prepare(self.h.first)
         response = await self.reply(
             self.h.first, {**SAVE, "evidence_quote": "不是本轮原话"}
         )
-        self.assertIn("没能保存", response.completion_text)
+        self.assertEqual(response.completion_text, "好，先让你安静值班。")
+        self.assertEqual(
+            self.h.first.get_extra("ada_spoken_reply"), response.completion_text
+        )
+        self.assertTrue(self.replyer.last["appraisal_save_failed"])
+        self.assertFalse(self.h.first.get_extra("ada_appraisal_receipts")[0]["ok"])
+        run = SimpleNamespace(
+            messages=[Message(role="assistant", content=[TextPart(text="envelope")])]
+        )
+        self.replyer.sync_history(self.h.first, run)
+        self.assertEqual(run.messages[-1].content[-1].text, response.completion_text)
         self.assertEqual((await self.h.snapshot())["total"], 0)
 
     async def test_feedback_revises_its_context_once_without_rewriting_facts(self):

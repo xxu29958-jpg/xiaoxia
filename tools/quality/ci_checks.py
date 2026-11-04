@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import os
 import platform
 import sys
 import time
@@ -169,6 +170,7 @@ def check(
         **result,
         "status": "fail" if failed else "pass",
         "tier": tier,
+        "run_attempt": int(os.environ.get("GITHUB_RUN_ATTEMPT", "1")),
         "runtime": {"python": platform.python_version(), "platform": platform.system()},
         "head": snapshot["head"],
         "base": snapshot["base"],

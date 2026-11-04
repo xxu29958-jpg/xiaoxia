@@ -11,6 +11,7 @@ from pathlib import Path
 
 from tools.quality.changes import capture
 from tools.quality.ci_checks import check, execution_plan
+from tools.quality.ci_results import latest_group_reports, selection_audit
 from tools.quality.impact import plan
 
 
@@ -65,7 +66,7 @@ class BoundPlanTests(unittest.TestCase):
         self.plan_path.write_bytes(data)
         return hashlib.sha256(data).hexdigest()
 
-    def run_cli(self, *args, stdlib_only=False):
+    def run_cli(self, *args, stdlib_only=False, attempt=1):
         return subprocess.run(
             [
                 sys.executable,
@@ -87,6 +88,7 @@ class BoundPlanTests(unittest.TestCase):
                 "BASE_SHA": self.base,
                 "FULL_REGRESSION": "false",
                 "GITHUB_OUTPUT": str(self.root / "github-output"),
+                "GITHUB_RUN_ATTEMPT": str(attempt),
             },
         )
 
@@ -152,6 +154,37 @@ class BoundPlanTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digest"):
             self.check()
         self.assertFalse(self.marker.exists())
+
+    def test_cli_error_can_be_retried_without_losing_failure_history(self):
+        reports = []
+        for attempt, path in ((1, self.root / "missing.json"), (2, self.plan_path)):
+            report_path = self.root / f"attempt-{attempt}.json"
+            executed = self.run_cli(
+                "check",
+                "--tier",
+                "g2",
+                "--group",
+                "installation_contracts",
+                "--plan",
+                str(path),
+                "--plan-sha256",
+                self.digest,
+                "--report",
+                str(report_path),
+                attempt=attempt,
+            )
+            self.assertEqual(executed.returncode, 2 - attempt, executed.stderr)
+            reports.append(json.loads(report_path.read_bytes()))
+        selected = latest_group_reports(list(reversed(reports)))
+        self.assertEqual(selection_audit(self.report, selected)["status"], "pass")
+        self.assertEqual(
+            selected["installation_contracts"]["attempt_history"],
+            [
+                {"run_attempt": 1, "status": "error"},
+                {"run_attempt": 2, "status": "pass"},
+            ],
+        )
+        self.assertTrue(self.marker.exists())
 
     def test_wrong_head_baseline_and_change_identity_are_rejected(self):
         for field, value in (

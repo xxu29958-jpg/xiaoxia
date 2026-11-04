@@ -152,7 +152,7 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: g2-${{ matrix.group }}-${{ env.HEAD_SHA }}
+          name: g2-${{ matrix.group }}-${{ env.HEAD_SHA }}-attempt-${{ github.run_attempt }}
           path: out/
           if-no-files-found: error
 
@@ -234,7 +234,7 @@ jobs:
           python-version: '3.12.13'
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          pattern: g*-${{ env.HEAD_SHA }}
+          pattern: g*-${{ env.HEAD_SHA }}*
           path: out/checks
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
@@ -253,12 +253,12 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          from tools.quality.ci_results import job_result, selection_audit
+          from tools.quality.ci_results import job_result, latest_group_reports, selection_audit
           outcomes = {k.lower(): os.environ[k] for k in ('PLAN','G1','G2','METRICS','CANDIDATE')}
           report = job_result(outcomes, os.environ['HAS_GROUPS'])
           plan_path = Path('out/plan/plan.json')
           plan = json.loads(plan_path.read_text(encoding='utf-8')) if plan_path.exists() else {}
-          groups = {p.stem.removeprefix('g2-'): json.loads(p.read_text(encoding='utf-8')) for p in Path('out/checks').rglob('g2-*.json')}
+          groups = latest_group_reports([json.loads(p.read_text(encoding='utf-8')) for p in Path('out/checks').rglob('g2-*.json')])
           report['selection_audit'] = selection_audit(plan, groups)
           if report['selection_audit']['status'] != 'pass':
               report['status'] = 'fail'

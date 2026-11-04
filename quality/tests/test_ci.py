@@ -8,13 +8,59 @@ import unittest
 from pathlib import Path
 
 from tools.quality.changes import Change
-from tools.quality.ci_results import job_result, qualify, selection_audit
+from tools.quality.ci_results import (
+    job_result,
+    latest_group_reports,
+    qualify,
+    selection_audit,
+)
 from tools.quality.external_checks import execute
 from tools.quality.impact import consumers, plan
 from tools.quality.test_selection import required_tests
 
 
 class ResultTests(unittest.TestCase):
+    def test_retries_choose_latest_execution_and_retain_failure_history(self):
+        plan = {
+            "status": "planned",
+            "groups": ["cognition"],
+            "head": "candidate",
+            "base": "baseline",
+        }
+        identity = {
+            "group": "cognition",
+            "head": "candidate",
+            "base": "baseline",
+            "stable_candidate": True,
+        }
+        for first, latest in (("fail", "pass"), ("pass", "fail")):
+            with self.subTest(first=first, latest=latest):
+                old = {**identity, "run_attempt": 1, "status": first}
+                new = {**identity, "run_attempt": 2, "status": latest}
+                for reports in ([old, new], [new, old]):
+                    chosen = latest_group_reports(reports)
+                    self.assertEqual(selection_audit(plan, chosen)["status"], latest)
+                    self.assertEqual(
+                        chosen["cognition"]["attempt_history"],
+                        [
+                            {"run_attempt": 1, "status": first},
+                            {"run_attempt": 2, "status": latest},
+                        ],
+                    )
+        stale = latest_group_reports(
+            [{**identity, "run_attempt": 3, "status": "pass", "head": "other"}]
+        )
+        self.assertEqual(selection_audit(plan, stale)["status"], "fail")
+
+    def test_ambiguous_or_invalid_retry_identity_is_rejected(self):
+        report = {"group": "cognition", "run_attempt": 2, "status": "pass"}
+        with self.assertRaisesRegex(ValueError, "Conflicting reports"):
+            latest_group_reports([report, {**report, "status": "fail"}])
+        for attempt in (0, -1, "2", True):
+            with self.subTest(attempt=attempt):
+                with self.assertRaisesRegex(ValueError, "Invalid group"):
+                    latest_group_reports([{**report, "run_attempt": attempt}])
+
     def test_full_regression_identifies_failure_missed_by_incremental_selection(self):
         plan = {
             "status": "planned",

@@ -1,6 +1,7 @@
 """Report executed tests without turning skips or missing execution into success."""
 
 import re
+from collections import defaultdict
 from collections.abc import Mapping
 
 
@@ -82,6 +83,29 @@ def job_result(jobs: Mapping[str, str], has_groups: str) -> dict:
     }
 
 
+def latest_group_reports(reports: list[dict]) -> dict[str, dict]:
+    """Choose the latest attempt, retaining failures and rejecting ambiguity."""
+    history: dict[str, dict[int, dict]] = defaultdict(dict)
+    for report in reports:
+        group, attempt = report.get("group"), report.get("run_attempt", 1)
+        if not isinstance(group, str) or type(attempt) is not int or attempt < 1:
+            raise ValueError("Invalid group execution identity")
+        previous = history[group].get(attempt)
+        if previous is not None and previous != report:
+            raise ValueError("Conflicting reports for the same group attempt")
+        history[group][attempt] = report
+    return {
+        group: {
+            **attempts[max(attempts)],
+            "attempt_history": [
+                {"run_attempt": attempt, "status": report.get("status")}
+                for attempt, report in sorted(attempts.items())
+            ],
+        }
+        for group, attempts in sorted(history.items())
+    }
+
+
 def selection_audit(plan: dict, reports: dict[str, dict]) -> dict:
     expected = set(plan.get("groups", []))
     selected = set(plan.get("incremental_groups", []))
@@ -121,6 +145,8 @@ def selection_audit(plan: dict, reports: dict[str, dict]) -> dict:
                 "elapsed_seconds": report.get("elapsed_seconds"),
                 "head": report.get("head"),
                 "base": report.get("base"),
+                "run_attempt": report.get("run_attempt", 1),
+                "attempt_history": report.get("attempt_history", []),
                 "commands": [
                     {
                         k: command.get(k)
