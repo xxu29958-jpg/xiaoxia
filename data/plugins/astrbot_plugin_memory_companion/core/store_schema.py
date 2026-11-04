@@ -263,3 +263,8 @@ class MemoryStoreSchema:
                 encoding="utf-8"
             )
         )
+        self._conn.executescript(
+            (Path(__file__).parent / "sql" / "appraisal_state.sql").read_text(
+                encoding="utf-8"
+            )
+        )

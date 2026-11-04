@@ -12,6 +12,7 @@ from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent
 from astrbot.core.agent.message import TextPart
 
+from .appraisals import EventUnderstanding
 from .conversation_style import CHAT_STYLE, rhythm_context
 from .meme_controls import meme_feedback
 from .persona_rules import PLATFORM_RULES
@@ -52,6 +53,7 @@ class ContextBuilder:
             )
         history = getattr(req, "contexts", [])
         instructions += await self._conversation_evidence(event, history)
+        instructions += await EventUnderstanding(self.dialogue).prompt(event)
         instructions += CHAT_STYLE
         self._apply_temper(event, req, history)
         # Replace only the exact block this request owns; preserve the card and peers.

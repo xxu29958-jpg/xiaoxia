@@ -7,6 +7,8 @@ import time
 from astrbot.api import logger
 from astrbot.core.agent.message import TextPart
 
+from .appraisals import APPRAISAL_UPDATES_SCHEMA, EventUnderstanding
+
 REPLY_STYLE = """
 [本轮消息格式]
 需要工具时照常调用。最终输出 JSON（工具调用不受此格式约束）：
@@ -18,6 +20,14 @@ reply 保留实际工具结果及选中的表情标记，可以包含代码或�
 新事 save，更新沿用 id，明确办完则 resolve，取消则 cancel；普通感想不用记一项。
 只有明确要持续推进的目标才用 goal；目标不因沉默到期。关闭只记录对方报告，不证明工具已经执行。
 确认已保存前优先调用 ada_threads 并检查 ok/current；不要把生成计划说成已执行。
+对方描述会影响后续互动的具体处境、边界、关切或原因时，用 appraisal_updates 建立事件理解，最多两项。
+首次出现也要记录，不把这类信息只留在本轮口头回应中；新信息改变已有理解时修订原事件：
+{"item_id":"已有事件id或空","title":"事件短名","understanding":"现在的理解及适用情境",
+"response_implication":"这会怎样影响相关的接话选择","uncertainty":"仍不确定的部分或空",
+"status":"active|resolved","evidence_quote":"本轮对方原话的连续引用"}。
+这是小夏的可修订解释，不是给对方贴标签。新事件 id 留空；新信息解释同一件事时必须沿用快照中的 id，
+保留原事件，不再另记一次；一条来信最多建立一个新事件。只根据本轮原话修订，不据沉默、旧回忆或自己说的话学习。
+普通问候、即时知识问答不用记；不知道就保留不确定。解释不会自动执行行动，也不证明长期偏好或外部结果。
 当下真想配一张表情时才加 reaction：
 {"action":"react|requested","shift":true,"evidence":"当前原话或回复的短引用","query":"表情想表达什么"}。
 react 表示本轮新出现的鲜明反应，requested 表示对方正在要图。
@@ -30,6 +40,7 @@ class ChatReplyer:
         self.context, self.config = context, config
         self.owners, self.models = owners, models
         self.dialogue = dialogue
+        self.appraisals = EventUnderstanding(dialogue)
         self.last = {}
 
     async def prepare(self, event, req):
@@ -67,7 +78,10 @@ class ChatReplyer:
                     "strict": False,
                     "schema": {
                         "type": "object",
-                        "properties": {"reply": {"type": "string"}},
+                        "properties": {
+                            "reply": {"type": "string"},
+                            "appraisal_updates": APPRAISAL_UPDATES_SCHEMA,
+                        },
                         "required": ["reply"],
                         "additionalProperties": True,
                     },
@@ -124,6 +138,13 @@ class ChatReplyer:
             )
             if any(not r.get("ok") or not r.get("current") for r in receipts):
                 text += "\n这次后续事项没有保存成功，之后还需要重新确认。"
+                response.completion_text = text
+                event.set_extra("ada_spoken_reply", text)
+            appraisal_receipts = await self.appraisals.apply_updates(
+                event, decision.get("appraisal_updates", [])
+            )
+            if any(not r.get("ok") or not r.get("current") for r in appraisal_receipts):
+                text += "\n这次对事情的理解没能保存，之后可能还需要你提醒。"
                 response.completion_text = text
                 event.set_extra("ada_spoken_reply", text)
             self.last = {
