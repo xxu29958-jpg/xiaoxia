@@ -8,10 +8,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-from .external_checks import complexity_values
+from .external_checks import complexity_by_line
 
 
-def measure(sources: dict[str, str]) -> dict[str, dict[str, int]]:
+def measure(sources: dict[str, str]) -> dict[str, dict[int, int]]:
     if importlib.metadata.version("ruff") != "0.15.22":
         raise RuntimeError("Complexity reports require Ruff 0.15.22")
     with tempfile.TemporaryDirectory(prefix="xiaoxia-c901-") as directory:
@@ -52,10 +52,7 @@ def measure(sources: dict[str, str]) -> dict[str, dict[str, int]]:
                     f"Ruff could not parse {paths[Path(item['filename']).name]}"
                 )
             diagnostics[paths[Path(item["filename"]).name]].append(item)
-        return {
-            path: complexity_values(path, sources[path], items)
-            for path, items in diagnostics.items()
-        }
+        return {path: complexity_by_line(items) for path, items in diagnostics.items()}
 
 
 def distribution(values: list[int]) -> dict:

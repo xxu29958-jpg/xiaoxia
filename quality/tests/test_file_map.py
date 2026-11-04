@@ -7,7 +7,8 @@ import unittest
 from pathlib import Path
 
 from tools.quality import complexity_report, file_map, line_counts, trends
-from tools.quality.inventory import collect
+from tools.quality.git_snapshot import Entry
+from tools.quality.inventory import collect, file_record
 from tools.quality.source_relations import relationships
 
 POLICY = json.loads(
@@ -16,6 +17,15 @@ POLICY = json.loads(
 
 
 class LineTests(unittest.TestCase):
+    def test_verified_modified_vendor_keeps_production_responsibility(self):
+        entry = Entry("vendor/engine/inference.py", "local", "blob", 10)
+        modified, _ = file_record(entry, b"x = 1\n", POLICY, {entry.path: "upstream"})
+        self.assertTrue(modified["first_party_production"])
+        self.assertEqual(modified["category"], "vendor_modified/production")
+        unchanged, _ = file_record(entry, b"x = 1\n", POLICY, {entry.path: "local"})
+        self.assertFalse(unchanged["first_party_production"])
+        self.assertEqual(unchanged["category"], "vendor_unmodified/production")
+
     def test_strings_and_mixed_comments_have_exclusive_line_counts(self):
         source = (
             '"""module documentation"""\n\nx = "# text"  # comment\n# only comment\n'
@@ -63,13 +73,17 @@ class LineTests(unittest.TestCase):
         values = complexity_report.measure(
             {"simple.py": "def simple():\n    return 1\n", "complex.py": complex_source}
         )
-        self.assertEqual(
-            values, {"simple.py": {"simple": 1}, "complex.py": {"choose": 17}}
-        )
+        self.assertEqual(values, {"simple.py": {1: 1}, "complex.py": {1: 17}})
         distribution = complexity_report.distribution([1, 17])
         self.assertEqual(distribution["above_10"], 1)
         self.assertEqual(distribution["above_15"], 1)
         self.assertEqual(distribution["p95"], 17)
+
+    def test_property_getter_and_setter_do_not_overwrite_each_other(self):
+        source = "class State:\n    @property\n    def value(self):\n        return 1\n    @value.setter\n    def value(self, new):\n        if new:\n            self._value = new\n"
+        self.assertEqual(
+            complexity_report.measure({"state.py": source}), {"state.py": {3: 1, 6: 2}}
+        )
 
     def test_sql_resource_reaches_actual_reading_consumer(self):
         graph, evidence = relationships(
@@ -80,6 +94,19 @@ class LineTests(unittest.TestCase):
         )
         self.assertEqual(graph["store.py"], {"sql/state.sql"})
         self.assertEqual(evidence["store.py"]["dynamic_gaps"], [])
+
+    def test_same_basename_runtime_state_is_not_a_quality_policy_consumer(self):
+        graph, evidence = relationships(
+            {
+                "plugins/chat/store.py": b"from pathlib import Path\nstate = Path('policy.json').read_text()"
+            },
+            ["quality/policy.json"],
+        )
+        self.assertEqual(graph["plugins/chat/store.py"], set())
+        self.assertEqual(
+            evidence["plugins/chat/store.py"]["dynamic_gaps"][0]["kind"],
+            "resource_resolution",
+        )
 
 
 class ExactTreeTests(unittest.TestCase):
@@ -113,7 +140,8 @@ class ExactTreeTests(unittest.TestCase):
             before = collect(root, base, POLICY, {})
             (root / "module.py").rename(root / "renamed.py")
             head = commit()
-            after = collect(root, head, POLICY, {})
+            after = collect(root, head, POLICY, {}, previous=before)
+            self.assertEqual(after["incremental"]["reused_file_metrics"], 2)
             report = trends.delta(root, before, after)
             total = after["scale"]["Repository Total"]
             for key in total:

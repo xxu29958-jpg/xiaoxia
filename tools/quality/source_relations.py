@@ -21,6 +21,28 @@ def call_name(node: ast.AST) -> str:
     return ""
 
 
+def resource_matches(
+    source: str, reference: str, resources: Sequence[str]
+) -> list[str]:
+    # A runtime "policy.json" beside a plugin is not quality/policy.json.
+    # Resolve explicit repository paths, then only candidates in the source's
+    # directory tree or ancestor directories. Ambiguity remains a map gap.
+    if reference in resources and "/" in reference:
+        return [reference]
+    origin = PurePosixPath(source).parent
+    matches = []
+    for name in resources:
+        target = PurePosixPath(name)
+        related = (
+            target.parent == origin
+            or origin in target.parents
+            or target.parent in origin.parents
+        )
+        if target.name == PurePosixPath(reference).name and related:
+            matches.append(name)
+    return sorted(matches)
+
+
 def facts(path: str, text: str) -> dict:
     tree = ast.parse(text, filename=path)
     result: dict = {
@@ -63,6 +85,7 @@ def facts(path: str, text: str) -> dict:
             if (
                 node.value.endswith((".sql", ".json", ".yaml", ".yml", ".toml"))
                 and "\n" not in node.value
+                and not PurePosixPath(node.value).name.startswith((".", "*"))
             ):
                 result["resource_references"].append(
                     {"name": node.value, "line": node.lineno}
@@ -125,12 +148,9 @@ def relationships(
                     {"kind": "unresolved_literal_import", "module": name}
                 )
         for reference in record["resource_references"]:
-            matches = [
-                name
-                for name in resources
-                if PurePosixPath(name).name == PurePosixPath(reference["name"]).name
-            ]
-            graph[path].update(matches)
+            matches = resource_matches(path, reference["name"], resources)
+            if len(matches) == 1:
+                graph[path].update(matches)
             if len(matches) != 1:
                 record["dynamic_gaps"].append(
                     {

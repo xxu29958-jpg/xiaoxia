@@ -8,6 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from . import upstream
 from .ci_checks import check
 from .git_snapshot import git, revision
 from .impact import matrix, plan
@@ -89,10 +90,13 @@ def install(repo: Path, group: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("plan", "check", "install", "package"))
+    parser.add_argument(
+        "action", choices=("plan", "check", "install", "package", "sources")
+    )
     parser.add_argument("--report", type=Path, default=Path("out/install.json"))
     parser.add_argument("--tier", choices=("g1", "g2"), default="g1")
     parser.add_argument("--group", default="")
+    parser.add_argument("--cache", type=Path, default=Path("out/upstreams"))
     args = parser.parse_args()
     repo = Path.cwd()
     args.report.parent.mkdir(parents=True, exist_ok=True)
@@ -113,6 +117,9 @@ def main() -> None:
             report = check(repo, base, args.tier, args.group)
         elif args.action == "package":
             report = package(repo, base, args.report.parent)
+        elif args.action == "sources":
+            policy = json.loads(git(repo, "show", "HEAD:quality/policy.json"))
+            report = upstream.prepare(args.cache, upstream.sources(repo, head, policy))
         else:
             install(repo, args.group)
             report = {

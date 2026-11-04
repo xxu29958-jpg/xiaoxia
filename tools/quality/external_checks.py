@@ -256,14 +256,25 @@ def complexity_values(path: str, text: str, diagnostics: list[dict]) -> dict[str
     """Bind a diagnostic to the qualified symbol, not just a shared method name."""
     symbols = python_metrics(text, path).get("symbols", [])
     definitions = {symbol["definition_line"]: symbol["name"] for symbol in symbols}
+    result = {}
+    for line, value in complexity_by_line(diagnostics).items():
+        name = definitions.get(line)
+        if name is None:
+            raise ValueError(
+                "Unsupported Ruff complexity output; update the pinned parser"
+            )
+        result[name] = value
+    return result
+
+
+def complexity_by_line(diagnostics: list[dict]) -> dict[int, int]:
     pattern = re.compile(r"`(.+)` is too complex \((\d+) > \d+\)")
     result = {}
     for finding in diagnostics:
         match = pattern.fullmatch(finding["message"])
-        name = definitions.get(finding["location"]["row"])
-        if match is None or name is None:
+        if match is None:
             raise ValueError(
                 "Unsupported Ruff complexity output; update the pinned parser"
             )
-        result[name] = int(match[2])
+        result[finding["location"]["row"]] = int(match[2])
     return result

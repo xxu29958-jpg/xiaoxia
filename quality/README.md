@@ -17,14 +17,19 @@ $env:BASE_SHA = '<base-commit>'
 .venvs/quality/Scripts/python.exe -B -m tools.quality.ci check --tier g1 --report out/g1.json
 
 # 同一结果包含文件地图、分类总量、复杂度、热点、差分与规则/工具指纹。
+.venvs/quality/Scripts/python.exe -B -m tools.quality.ci sources --cache out/upstreams --report out/sources.json
+.venvs/quality/Scripts/python.exe -B -m tools.quality.inventory --revision HEAD --base <base-commit> --upstream-cache out/upstreams
+# 仅有 AstrBot 原始对象时也可部分对照，其余外部来源明确保留未核验状态。
 .venvs/quality/Scripts/python.exe -B -m tools.quality.inventory --revision HEAD --base <base-commit> --upstream-repo <upstream-checkout>
 .venvs/quality/Scripts/python.exe -B -m tools.quality.inventory --revision HEAD --consumers <relative-path> --upstream-repo <upstream-checkout>
 ```
 
 统计从 Git blob 读取所有文本，包括 SQL、扩展名为空的文件及 UTF-16 BOM 文本。
 分类按来源与用途组成互斥桶，逐桶相加等于 Repository Total；用途、语言和领域是独立维度，不跨维度相加。
-First-party Production Total 表示当前承担维护的生产源码，不表示独占原创；工具、测试、配置、schema、文档、vendor
-以及与固定上游逐 blob 一致的文件分别报告。来源未固定的外部插件标为 upstream_unverified，继续承担本地检查责任。
+First-party Production Total 表示当前承担维护的生产源码，不表示独占原创；包含经固定源对照确认有变化的 vendor 生产文件。
+工具、测试、配置、schema、文档、原样 vendor 及与固定上游逐 blob 一致的文件分别报告。
+`ci sources` 只取得固定 Git 树对象，不安装上游程序；度量入口本身只读。未准备相应对象时保留未核验状态，不能将目录来源当作豁免。
+对照版本与选择依据随报告保存，特别是无对应发布标签的插件，不把与固定版本的差异冒称作者身份或原始下载历史。
 物理行拆成代码、纯注释、空行和非代码内容；混合代码/注释行计为代码，Python 文档串计为注释。
 固定 Ruff 的零阈值采集报告所有具名 Python 函数的 C901，实际审查阈值保持原合同不变。
 固定基线与候选用同一规则测量，未变 blob 的度量可复用；依赖关系和消费者从当前源码重建。

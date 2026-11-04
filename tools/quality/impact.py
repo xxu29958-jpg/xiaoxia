@@ -71,10 +71,25 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
     direct = required_tests(changes)
     gaps = mapping_gaps(paths, routes, direct, new)
     expanded = bool(gaps or selected["unmapped_code_changes"])
+    selection_changed = any(
+        p
+        in {
+            "tools/quality/impact.py",
+            "tools/quality/source_relations.py",
+            "tools/quality/test_selection.py",
+            "tools/quality/ci.py",
+            "tools/quality/ci_checks.py",
+            "tools/quality/external_checks.py",
+            "tools/quality/ci_results.py",
+            ".github/workflows/quality.yml",
+        }
+        for p in paths
+    )
     groups = [
         key
         for key in CONTRACTS
-        if key != "quality_contracts" and (full or expanded or selected[key])
+        if key != "quality_contracts"
+        and (full or selection_changed or expanded or selected[key])
     ]
     runtime_groups = {
         runtime_group(p) for p in paths if p.endswith(".py") and (repo / p).is_file()
@@ -88,6 +103,7 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
         "consumer_routes": routes,
         "groups": groups,
         "full_regression": full,
+        "selection_engine_qualification": selection_changed,
         "coverage_gaps": gaps,
         "expanded_checks": expanded,
         "unmapped_transitive_consumers": selected["unmapped_code_changes"],

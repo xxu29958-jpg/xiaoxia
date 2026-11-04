@@ -10,6 +10,7 @@ from collections import Counter
 from pathlib import Path, PurePosixPath
 
 from . import complexity_report, file_map, line_counts, trends
+from . import upstream as upstream_sources
 from .git_snapshot import BlobReader, Entry, entries, git, revision
 from .metrics import physical_lines, python_metrics
 from .ownership import file_kind, findings, responsibility
@@ -64,7 +65,11 @@ def file_record(
     record["first_party_production"] = (
         record["role"] == "production"
         and record["maintenance"] == "self_maintained"
-        and record["origin"] != "vendor"
+        and (
+            record["origin"] != "vendor"
+            or "source_blob" in record
+            or record.get("verification") == "not_present_in_pinned_source"
+        )
     )
     record["findings"] = findings(record, policy["thresholds"])
     return record, source
@@ -101,8 +106,8 @@ def collect(
     )
     for record in records:
         for symbol in record.get("symbols", []):
-            if symbol["name"] in values.get(record["path"], {}):
-                symbol["complexity"] = values[record["path"]][symbol["name"]]
+            if symbol["definition_line"] in values.get(record["path"], {}):
+                symbol["complexity"] = values[record["path"]][symbol["definition_line"]]
     influence = file_map.attach(records, sources, policy)
     maintained = [r for r in records if r["first_party_production"]]
     return {
@@ -135,7 +140,7 @@ def collect(
         "history": trends.history(repo, commit, records),
         "method": {
             "lines": "physical = code + comment-only + blank + non-code content; mixed code/comment lines count as code; Python docstrings count as comments",
-            "production": "self-maintained executable source excluding tools/tests/vendor and exact unchanged upstream; ownership is maintenance, not authorship",
+            "production": "self-maintained executable source including verified vendor modifications; excludes tools/tests/config/schema and unchanged upstream; maintenance is not authorship",
             "upstream_limit": "Unpinned external plugin origins retain explicit unverified provenance; no size exemption",
             "symbol_totals": "Overlapping function/class spans are never summed into repository LOC",
             "complexity": "Ruff 0.15.22 C901 with report threshold zero; enforcement retains policy thresholds",
@@ -170,7 +175,13 @@ def reuse_or_measure(
 
 def category(record: dict) -> str:
     if record["origin"] == "vendor":
-        origin = "vendor"
+        origin = (
+            "vendor_unmodified"
+            if record["size_exempt"]
+            else "vendor_modified"
+            if "source_blob" in record
+            else "vendor_added_or_unverified"
+        )
     elif record["maintenance"] == "upstream_unmodified":
         origin = "upstream_unmodified"
     elif record["origin"] == "upstream":
@@ -216,21 +227,36 @@ def main() -> None:
     parser.add_argument("--revision", default="HEAD")
     parser.add_argument("--policy", type=Path, default=Path("quality/policy.json"))
     parser.add_argument("--upstream-repo", type=Path)
+    parser.add_argument("--upstream-cache", type=Path)
     parser.add_argument("--base")
     parser.add_argument("--consumers")
     args = parser.parse_args()
     policy_bytes = git(args.repo, "show", f"{args.revision}:{args.policy.as_posix()}")
     policy = json.loads(policy_bytes)
     upstream = {}
+    comparisons = upstream_sources.sources(args.repo, args.revision, policy)
+    if args.upstream_cache:
+        upstream = upstream_sources.index(args.upstream_cache, comparisons)
     if args.upstream_repo:
-        upstream = {
-            e.path: e.oid
-            for e in entries(args.upstream_repo, policy["astrbot_upstream"]["commit"])
-        }
+        upstream.update(
+            {
+                e.path: e.oid
+                for e in entries(
+                    args.upstream_repo, policy["astrbot_upstream"]["commit"]
+                )
+            }
+        )
     before = collect(args.repo, args.base, policy, upstream) if args.base else None
     report = collect(args.repo, args.revision, policy, upstream, previous=before)
     report["policy_sha256"] = hashlib.sha256(policy_bytes).hexdigest()
     report["astrbot_upstream"] = policy["astrbot_upstream"]
+    report["source_comparisons"] = (
+        comparisons
+        if args.upstream_cache
+        else [policy["astrbot_upstream"]]
+        if args.upstream_repo
+        else []
+    )
     if before:
         report["delta"] = trends.delta(args.repo, before, report)
     if args.consumers:

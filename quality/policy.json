@@ -30,11 +30,11 @@
   },
   "origins": [
     {"prefix": "vendor/", "origin": "vendor", "source": "vendor/sources.json; local changes retained, no blanket size exemption"},
-    {"prefix": "data/plugins/astrbot_plugin_anysearch/", "origin": "upstream", "source": "https://github.com/AgIzT/astrbot_plugin_anysearch"},
-    {"prefix": "data/plugins/astrbot_plugin_codex_oauth_plug/", "origin": "upstream", "source": "https://github.com/RhoninSeiei/astrbot_plugin_codex_oauth_plug"},
-    {"prefix": "data/plugins/astrbot_plugin_meme_manager/", "origin": "upstream", "source": "https://github.com/anka-afk/astrbot_plugin_meme_manager"},
-    {"prefix": "data/plugins/astrbot_plugin_memory_companion/", "origin": "upstream", "source": "https://github.com/menglimi/astrbot_plugin_memory_companion"},
-    {"prefix": "data/plugins/astrbot_plugin_turnflow/", "origin": "upstream", "source": "https://github.com/Yuimi-chaya/astrbot_plugin_turnflow"}
+    {"prefix": "data/plugins/astrbot_plugin_anysearch/", "origin": "upstream", "source": "https://github.com/AgIzT/astrbot_plugin_anysearch", "commit": "983a7acb2f6940ab441a521be684085e0913738e", "basis": "metadata v0.3; frozen upstream comparison, not a claim about the original download"},
+    {"prefix": "data/plugins/astrbot_plugin_codex_oauth_plug/", "origin": "upstream", "source": "https://github.com/RhoninSeiei/astrbot_plugin_codex_oauth_plug", "commit": "70bac71a75eecd5d7cb89a536bce0a6169b93838", "basis": "upstream v0.4.1 release metadata commit"},
+    {"prefix": "data/plugins/astrbot_plugin_meme_manager/", "origin": "upstream", "source": "https://github.com/anka-afk/astrbot_plugin_meme_manager", "commit": "b96d6bedecca6d0bef27b70261fd6f787116ee49", "basis": "upstream v5.1.0 tag; local metadata is 5.1.1, no upstream 5.1.1 release found; differences relative to pin, not inferred authorship"},
+    {"prefix": "data/plugins/astrbot_plugin_memory_companion/", "origin": "upstream", "source": "https://github.com/menglimi/astrbot_plugin_memory_companion", "commit": "fc13a00d38e3ccaa560d617f8cd22788250465ae", "basis": "upstream v2.3.1 tag matching local metadata version"},
+    {"prefix": "data/plugins/astrbot_plugin_turnflow/", "origin": "upstream", "source": "https://github.com/Yuimi-chaya/astrbot_plugin_turnflow", "commit": "87a79b69948d407605d58a7a375125790b736a6d", "basis": "metadata 1.0.0; frozen upstream comparison, not a claim about the original download"}
   ],
   "generated_exemption": "none until source, generator, rebuild and classification are verified",
   "thresholds": {

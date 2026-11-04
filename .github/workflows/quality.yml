@@ -139,12 +139,6 @@ jobs:
           ref: ${{ env.HEAD_SHA }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          repository: AstrBotDevs/AstrBot
-          ref: dffe922773725e9c178392c423676ad65044748c
-          path: out/upstream
-          persist-credentials: false
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
@@ -154,12 +148,16 @@ jobs:
       - name: Measure both exact trees with the same rules
         env:
           BASE_SHA: ${{ needs.plan.outputs.base }}
-        run: python -B -m tools.quality.inventory --revision "$HEAD_SHA" --base "$BASE_SHA" --upstream-repo out/upstream > out/metrics.json
+        run: |
+          python -B -m tools.quality.ci sources --cache out/upstreams --report out/sources.json
+          python -B -m tools.quality.inventory --revision "$HEAD_SHA" --base "$BASE_SHA" --upstream-cache out/upstreams > out/metrics.json
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: metrics-${{ env.HEAD_SHA }}
-          path: out/metrics.json
+          path: |
+            out/metrics.json
+            out/sources.json
           if-no-files-found: error
 
   candidate:
