@@ -167,6 +167,8 @@ def main() -> None:
         report = {
             "status": "error",
             "action": args.action,
+            "group": args.group,
+            "run_attempt": int(os.environ.get("GITHUB_RUN_ATTEMPT", "1")),
             "error": str(error),
             "g3": "not_executed",
         }
