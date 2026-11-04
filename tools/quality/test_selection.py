@@ -69,10 +69,13 @@ CONTRACTS = {
         "tests/cognition_state/*",
     ),
     "quality_contracts": (
+        ".github/workflows/*",
+        ".gitignore",
         "tools/quality/*",
         "quality/*",
         "requirements/quality.txt",
         "pyrightconfig.json",
+        "pyproject.toml",
     ),
     "installation_contracts": (
         "setup.ps1",
@@ -97,6 +100,7 @@ CONTRACTS = {
         "services/voice/cover_pipeline.py",
     ),
     "media_pipeline_contracts": (
+        "requirements/ci-signal.txt",
         "services/voice/cover_pipeline.py",
         "tests/media_pipeline/*",
     ),

@@ -1,0 +1,6 @@
+# CPU-only signal contracts. Model inference/voice acceptance remain G3.
+numpy==1.26.4
+librosa==0.11.0
+soundfile==0.13.1
+yt-dlp==2026.10.26
+torch==2.8.0

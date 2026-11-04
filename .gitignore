@@ -4,6 +4,7 @@ __pycache__/
 .runtime/
 /models/
 /outputs/
+/out/
 xiaoxia.local.json
 *.log
 *.pid

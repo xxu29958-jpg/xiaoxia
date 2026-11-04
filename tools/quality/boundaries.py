@@ -34,14 +34,22 @@ def within(module: str, prefix: str) -> bool:
 
 def graph(sources: dict[str, bytes]) -> dict[str, set[str]]:
     known = {module_name(path) for path in sources}
+    # Plugins are loaded with data/plugins on sys.path in the real bot runtime.
+    # Keep the canonical repository name in reports and resolve that actual alias.
+    aliases = {
+        name.removeprefix("data.plugins."): name
+        for name in known
+        if name.startswith("data.plugins.")
+    }
     result = {}
     for path, data in sources.items():
         source = module_name(path)
         imports = imported_modules(path, data.decode("utf-8-sig"))
         edges = set()
         for item in imports:
-            while item and item not in known:
+            while item and item not in known and item not in aliases:
                 item = item.rpartition(".")[0]
+            item = aliases.get(item, item)
             if item and item != source:
                 edges.add(item)
         result[source] = edges
