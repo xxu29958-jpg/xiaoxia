@@ -68,7 +68,7 @@ def install(repo: Path, group: str) -> None:
                 cwd=repo,
                 check=True,
             )
-    elif group == "media_pipeline_contracts":
+    elif group in {"media_pipeline_contracts", "runtime_singing"}:
         subprocess.run(
             [
                 sys.executable,
@@ -81,7 +81,7 @@ def install(repo: Path, group: str) -> None:
             cwd=repo,
             check=True,
         )
-    elif group in {"runtime_gateway", "runtime_singing"}:
+    elif group == "runtime_gateway":
         raise RuntimeError(
             "GPU runtime type checks require an explicitly provisioned matching worker environment"
         )

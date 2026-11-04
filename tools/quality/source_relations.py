@@ -1,0 +1,142 @@
+"""Extract source evidence for shared resources, registrations and runtime imports."""
+
+import ast
+import re
+from collections.abc import Sequence
+from pathlib import PurePosixPath
+
+from . import boundaries
+
+TABLE = re.compile(
+    r"\b(FROM|JOIN|UPDATE|INTO|TABLE(?:\s+IF\s+NOT\s+EXISTS)?)\s+[\"`\[]?([A-Za-z_]\w*)",
+    re.I,
+)
+
+
+def call_name(node: ast.AST) -> str:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return f"{call_name(node.value)}.{node.attr}"
+    return ""
+
+
+def facts(path: str, text: str) -> dict:
+    tree = ast.parse(text, filename=path)
+    result: dict = {
+        "public_interfaces": [],
+        "registrations": [],
+        "tables": [],
+        "resource_references": [],
+        "dynamic_imports": [],
+        "dynamic_gaps": [],
+        "mutable_globals": [],
+        "runtime_patch_candidates": [],
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if not node.name.startswith("_"):
+                result["public_interfaces"].append(
+                    {
+                        "name": node.name,
+                        "line": node.lineno,
+                        "kind": type(node).__name__,
+                    }
+                )
+            for decorator in node.decorator_list:
+                target = (
+                    decorator.func if isinstance(decorator, ast.Call) else decorator
+                )
+                name = call_name(target)
+                if any(
+                    part in name
+                    for part in ("register", "filter.", "route", "llm_tool")
+                ):
+                    result["registrations"].append(
+                        {"symbol": node.name, "entry": name, "line": decorator.lineno}
+                    )
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            result["tables"].extend(
+                {"name": match[2], "operation": match[1].upper(), "line": node.lineno}
+                for match in TABLE.finditer(node.value)
+            )
+            if (
+                node.value.endswith((".sql", ".json", ".yaml", ".yml", ".toml"))
+                and "\n" not in node.value
+            ):
+                result["resource_references"].append(
+                    {"name": node.value, "line": node.lineno}
+                )
+        elif isinstance(node, ast.Call) and call_name(node.func).endswith(
+            ("import_module", "__import__")
+        ):
+            value = node.args[0] if node.args else None
+            if isinstance(value, ast.Constant) and isinstance(value.value, str):
+                result["dynamic_imports"].append(value.value)
+            else:
+                result["dynamic_gaps"].append(
+                    {"line": node.lineno, "kind": "computed_import"}
+                )
+        elif isinstance(node, ast.Assign):
+            attributes = [
+                call_name(target)
+                for target in node.targets
+                if isinstance(target, ast.Attribute)
+            ]
+            if attributes and isinstance(node.value, (ast.Name, ast.Lambda)):
+                result["runtime_patch_candidates"].append(
+                    {"targets": attributes, "line": node.lineno}
+                )
+    for node in tree.body:
+        if isinstance(node, (ast.Assign, ast.AnnAssign)) and isinstance(
+            node.value, (ast.Dict, ast.List, ast.Set)
+        ):
+            result["mutable_globals"].append(
+                {"line": node.lineno, "kind": type(node.value).__name__}
+            )
+    result["state_write_candidates"] = [
+        t for t in result["tables"] if t["operation"] in {"UPDATE", "INTO"}
+    ]
+    return result
+
+
+def relationships(
+    sources: dict[str, bytes], resources: Sequence[str] = ()
+) -> tuple[dict[str, set[str]], dict]:
+    module_paths = {boundaries.module_name(path): path for path in sources}
+    static = boundaries.graph(sources)
+    graph = {
+        module_paths[node]: {module_paths[edge] for edge in edges}
+        for node, edges in static.items()
+    }
+    parsed = {
+        path: facts(path, data.decode("utf-8-sig")) for path, data in sources.items()
+    }
+    aliases = {
+        name.removeprefix("data.plugins."): path for name, path in module_paths.items()
+    }
+    all_modules = module_paths | aliases
+    for path, record in parsed.items():
+        for name in record["dynamic_imports"]:
+            if name in all_modules:
+                graph[path].add(all_modules[name])
+            else:
+                record["dynamic_gaps"].append(
+                    {"kind": "unresolved_literal_import", "module": name}
+                )
+        for reference in record["resource_references"]:
+            matches = [
+                name
+                for name in resources
+                if PurePosixPath(name).name == PurePosixPath(reference["name"]).name
+            ]
+            graph[path].update(matches)
+            if len(matches) != 1:
+                record["dynamic_gaps"].append(
+                    {
+                        "kind": "resource_resolution",
+                        "reference": reference,
+                        "matches": matches,
+                    }
+                )
+    return graph, parsed

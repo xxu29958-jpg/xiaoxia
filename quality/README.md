@@ -1,8 +1,34 @@
 # v1.3 工程基线
 
-当前状态：EQ1 基线采集和 EQ2 静态变更入口已实现；完整 G1 的消费者／前端映射及 CI、G2、G3 仍在推进。规则来自
+规则与验收范围来自
 [`v1.3` 主合同](../docs/reference/v1.3/contract/Xiaoxia_Project_Contract_v1.3.md)。
 `policy.json` 保存本次采用的统计口径和来源，不能把历史存量当成已经批准的例外。
+
+FM-01～08 补充见 [文件地图与 CI 合同](../docs/file-map-ci-contract-v1.3.md)。
+`.github/workflows/quality.yml` 对 PR 运行影响计划、G1、按消费者选择的 G2、固定源码度量和候选源码归档。
+单一 `Required quality result` 汇总真实状态；依赖失败、跳过的必需检查和未执行测试均不能算全部通过。
+每周计划和手动 `full` 执行全部已登记集成组；范围以报告为准，不能冒充 GPU／真实渠道／人工体验的 G3。
+源码候选制品带 commit、tree 和 SHA-256，不表示生产部署。当前执行证据与剩余工作只在施工台账维护。
+
+```powershell
+# 云端使用相同入口；本地 BASE_SHA 指定明确基线。
+$env:BASE_SHA = '<base-commit>'
+.venvs/quality/Scripts/python.exe -B -m tools.quality.ci plan --report out/plan.json
+.venvs/quality/Scripts/python.exe -B -m tools.quality.ci check --tier g1 --report out/g1.json
+
+# 同一结果包含文件地图、分类总量、复杂度、热点、差分与规则/工具指纹。
+.venvs/quality/Scripts/python.exe -B -m tools.quality.inventory --revision HEAD --base <base-commit> --upstream-repo <upstream-checkout>
+.venvs/quality/Scripts/python.exe -B -m tools.quality.inventory --revision HEAD --consumers <relative-path> --upstream-repo <upstream-checkout>
+```
+
+统计从 Git blob 读取所有文本，包括 SQL、扩展名为空的文件及 UTF-16 BOM 文本。
+分类按来源与用途组成互斥桶，逐桶相加等于 Repository Total；用途、语言和领域是独立维度，不跨维度相加。
+First-party Production Total 表示当前承担维护的生产源码，不表示独占原创；工具、测试、配置、schema、文档、vendor
+以及与固定上游逐 blob 一致的文件分别报告。来源未固定的外部插件标为 upstream_unverified，继续承担本地检查责任。
+物理行拆成代码、纯注释、空行和非代码内容；混合代码/注释行计为代码，Python 文档串计为注释。
+固定 Ruff 的零阈值采集报告所有具名 Python 函数的 C901，实际审查阈值保持原合同不变。
+固定基线与候选用同一规则测量，未变 blob 的度量可复用；依赖关系和消费者从当前源码重建。
+动态计算导入、无法唯一解析的资源及未登记消费者保留地图缺口；选测会扩展，未映射的变更不能静默通过。
 
 ## 独立环境
 
@@ -46,7 +72,7 @@ npm ci --prefix quality --ignore-scripts
 .venvs/quality/Scripts/ruff.exe check --no-cache tools/quality quality/tests
 ```
 
-采集器仅使用 Python 标准库和 Git，成功完成采集退出 0；输入、Git 对象或 I/O
+采集器使用 Git、固定 Ruff 和 Pygments 内置词法器，不导入被测源码。成功完成采集退出 0；输入、Git 对象或 I/O
 失败退出非零。报告内的历史超线与语法问题是调查结果，不能用采集退出 0 宣称仓库合格。
 省略上游 checkout 时不会赋予任何上游规模豁免。该参数不触发联网、下载或改写 checkout。
 

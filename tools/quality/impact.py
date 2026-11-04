@@ -3,34 +3,50 @@
 from collections import deque
 from pathlib import Path
 
-from . import boundaries
 from .changes import Change, capture
 from .external_checks import runtime_group
 from .gate import dependency_sources
-from .ownership import CONFIG
+from .git_snapshot import entries
+from .ownership import CONFIG, DOCUMENT
+from .source_relations import facts, relationships
 from .test_selection import CONTRACTS, required_tests
 
 
-def consumers(sources: dict[str, bytes], paths: list[str]) -> dict[str, list[str]]:
-    graph = boundaries.graph(sources)
-    paths_by_module = {boundaries.module_name(path): path for path in sources}
+def consumers(
+    sources: dict[str, bytes], paths: list[str], resources: list[str] | None = None
+) -> dict[str, list[str]]:
+    graph, _ = relationships(sources, resources or [])
     reverse: dict[str, set[str]] = {}
     for source, targets in graph.items():
         for target in targets:
             reverse.setdefault(target, set()).add(source)
-    routes = {boundaries.module_name(path): [path] for path in paths}
+    routes = {path: [path] for path in paths}
     queue = deque(routes)
     while queue:
         node = queue.popleft()
         for parent in sorted(reverse.get(node, set())):
             if parent not in routes:
-                routes[parent] = [*routes[node], paths_by_module[parent]]
+                routes[parent] = [*routes[node], parent]
                 queue.append(parent)
-    return {
-        paths_by_module[node]: route
-        for node, route in routes.items()
-        if node in paths_by_module
+    return routes
+
+
+def mapping_gaps(paths: list[str], routes: dict, direct: dict, new: dict) -> list[str]:
+    mapped = {
+        p
+        for p in routes
+        if any(required_tests([Change(p, None, "M")])[k] for k in CONTRACTS)
     }
+    gaps = []
+    for path in paths:
+        reaches_test = path in mapped or any(
+            route[0] == path and end in mapped for end, route in routes.items()
+        )
+        if not reaches_test and Path(path).suffix not in DOCUMENT:
+            gaps.append(path)
+        if path in new and facts(path, new[path].decode("utf-8-sig"))["dynamic_gaps"]:
+            gaps.append(path)
+    return sorted(set(gaps + direct["frontend_checks_required"]))
 
 
 def plan(repo: Path, base: str, *, full: bool = False) -> dict:
@@ -39,30 +55,26 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
     old, new = dependency_sources(repo, snapshot["base"], changes)
     paths = [c.path for c in changes]
     previous = [c.previous_path or c.path for c in changes]
-    routes = consumers(old, previous) | consumers(new, paths)
+    resources = sorted(
+        {
+            e.path
+            for ref in (snapshot["base"], snapshot["head"])
+            for e in entries(repo, ref)
+            if Path(e.path).suffix in CONFIG | {".sql"}
+        }
+        | {p for p in paths if Path(p).suffix in CONFIG | {".sql"}}
+    )
+    routes = consumers(old, previous, resources) | consumers(new, paths, resources)
     selected = required_tests(
         [Change(p, None, "M") for p in sorted(set(paths) | routes.keys())]
     )
     direct = required_tests(changes)
-    # Existing unmapped transitive consumers are coverage gaps, not grounds to
-    # silently drop them. Expand to all known contracts and retain the gap.
-    unmapped = [
-        p
-        for p in direct["unmapped_code_changes"]
-        if p not in routes
-        or not any(len(route) > 1 and route[0] == p for route in routes.values())
-    ]
-    unknown_config = [
-        p
-        for p in paths
-        if Path(p).suffix in CONFIG | {".sql"}
-        and not any(required_tests([Change(p, None, "M")])[k] for k in CONTRACTS)
-    ]
-    gaps = sorted(set(unmapped + unknown_config + direct["frontend_checks_required"]))
+    gaps = mapping_gaps(paths, routes, direct, new)
+    expanded = bool(gaps or selected["unmapped_code_changes"])
     groups = [
         key
         for key in CONTRACTS
-        if key != "quality_contracts" and (full or gaps or selected[key])
+        if key != "quality_contracts" and (full or expanded or selected[key])
     ]
     runtime_groups = {
         runtime_group(p) for p in paths if p.endswith(".py") and (repo / p).is_file()
@@ -77,7 +89,7 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
         "groups": groups,
         "full_regression": full,
         "coverage_gaps": gaps,
-        "expanded_checks": bool(gaps),
+        "expanded_checks": expanded,
         "unmapped_transitive_consumers": selected["unmapped_code_changes"],
         "g1": ["changed-source", "quality-counterexamples"],
         "g3": "not_executed; requires release journey and target environment",

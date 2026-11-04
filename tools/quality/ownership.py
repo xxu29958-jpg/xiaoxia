@@ -16,10 +16,24 @@ SOURCE = {
     ".scss",
     ".ps1",
     ".sh",
+    ".bat",
+    ".cmd",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".cu",
+    ".cuh",
+    ".pyx",
+    ".rs",
+    ".go",
+    ".java",
+    ".kt",
+    ".swift",
 }
-CONFIG = {".json", ".toml", ".yaml", ".yml", ".ini", ".cfg", ".xml"}
+CONFIG = {".json", ".toml", ".yaml", ".yml", ".ini", ".cfg", ".xml", ".service"}
 DOCUMENT = {".md", ".rst", ".txt", ".csv", ".mmd"}
-TEXT = SOURCE | CONFIG | DOCUMENT | {".html", ".lock", ".svg"}
+TEXT = SOURCE | CONFIG | DOCUMENT | {".html", ".lock", ".svg", ".sql"}
 
 
 def file_kind(name: str) -> str:

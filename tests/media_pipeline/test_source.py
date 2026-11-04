@@ -74,7 +74,9 @@ class SourceTests(unittest.TestCase):
             recovered, elapsed = prepare_source(
                 pinned, root / "jobs/recovered", {}, control
             )
-            self.assertEqual(recovered, downloaded)
+            # Windows runners can spell one temp directory as RUNNER~1 or its
+            # long name. Recovery must use the same file, independent of spelling.
+            self.assertTrue(recovered.samefile(downloaded))
             self.assertEqual(elapsed, 0)
             store.cancel(job["id"], "owner")
             with self.assertRaisesRegex(InterruptedJob, "job_cancelled"):

@@ -43,7 +43,7 @@ class ResultTests(unittest.TestCase):
 
     def test_missing_or_failed_job_never_passes_even_with_zero_exit_elsewhere(self):
         jobs: dict[str, str] = dict.fromkeys(
-            ("plan", "g1", "g2", "candidate"), "success"
+            ("plan", "g1", "g2", "metrics", "candidate"), "success"
         )
         for state in ("failure", "skipped", "cancelled", ""):
             self.assertEqual(

@@ -58,7 +58,9 @@ def qualify(commands: list[dict]) -> bool:
 
 
 def job_result(jobs: Mapping[str, str], has_groups: str) -> dict:
-    ok = all(jobs.get(key) == "success" for key in ("plan", "g1", "candidate"))
+    ok = all(
+        jobs.get(key) == "success" for key in ("plan", "g1", "metrics", "candidate")
+    )
     ok = ok and (
         jobs.get("g2") == "success"
         or (has_groups == "false" and jobs.get("g2") == "skipped")

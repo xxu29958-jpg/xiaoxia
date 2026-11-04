@@ -1,5 +1,21 @@
 {
   "contract_version": "1.3",
+  "measurement_version": "FM-1",
+  "domains": [
+    {"name": "frontend", "patterns": ["dashboard/*", "*/pages/*", "*/static/*", "*.html", "*.css", "*.vue"]},
+    {"name": "platform", "patterns": ["astrbot/core/platform/*", "*/contact_channels.py", "*/delivery*.py"]},
+    {"name": "singing", "patterns": ["services/voice/cover*", "services/voice/*sing*", "vendor/soulx_singer/*", "tests/media_pipeline/*", "tests/performance_delivery/*", "*/performance*.py"]},
+    {"name": "voice", "patterns": ["services/voice/*", "vendor/*", "*local_voice*", "*cloud_voice*", "*voice*", "*audio*"]},
+    {"name": "cognition", "patterns": ["data/plugins/astrbot_plugin_memory_companion/*", "tests/cognition_state/*", "*/shared_core.py", "*/appraisals.py", "*/memory_tools.py", "*/owner_memory.py", "*/thread_review.py", "*/dialogue.py"]},
+    {"name": "engineering", "patterns": ["tools/*", "quality/*", "maintenance/*", "scripts/*", ".github/*", "tests/installation/*", "requirements/*", "*.ps1", "*.sh"]},
+    {"name": "backend", "patterns": ["astrbot/*", "data/plugins/*", "services/*", "tests/*", "*.py", "typings/*"]},
+    {"name": "project", "patterns": ["*"]}
+  ],
+  "state_authorities": [
+    {"id": "native-memory-state", "patterns": ["data/plugins/astrbot_plugin_memory_companion/core/*state*", "data/plugins/astrbot_plugin_memory_companion/core/store*", "data/plugins/astrbot_plugin_memory_companion/core/sql/*"], "owner": "MemoryStore", "change_reason": "Current memory facts, interpretations and working-state revisions"},
+    {"id": "media-job-state", "patterns": ["services/jobs/*"], "owner": "JobStore", "change_reason": "Persistent execution, cancellation and recovery"},
+    {"id": "reading-source-state", "patterns": ["data/plugins/astrbot_plugin_ada_companion/reading_store*"], "owner": "ReadingStore", "change_reason": "Immutable reading sources and delivered ranges"}
+  ],
   "adoption_state": "EQ2_static_change_checks_product_gates_separate",
   "dependency_contracts": [
     {"id": "ARC-01-worker-channel-boundary", "source": "services", "forbidden": ["astrbot", "data.plugins"]},
