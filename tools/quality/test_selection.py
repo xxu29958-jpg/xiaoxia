@@ -6,6 +6,19 @@ from pathlib import Path
 from .ownership import SOURCE
 
 CONTRACTS = {
+    "registration_contracts": (
+        "astrbot/core/provider/register.py",
+        "astrbot/core/provider/manager.py",
+        "astrbot/core/provider/provider.py",
+        "astrbot/core/provider/entities.py",
+        "astrbot/core/platform/register.py",
+        "astrbot/core/platform/manager.py",
+        "astrbot/core/platform/platform.py",
+        "astrbot/core/platform/platform_metadata.py",
+        "tests/registration/*",
+        "data/plugins/astrbot_plugin_codex_oauth_plug/tests/test_astrbot_registration.py",
+        "tools/quality/registration_checks.py",
+    ),
     "frontend_contracts": ("dashboard/*", "tools/quality/frontend*"),
     "reading_contracts": (
         "data/plugins/astrbot_plugin_ada_companion/reading_*.py",

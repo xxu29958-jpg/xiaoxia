@@ -1,6 +1,6 @@
 {
   "contract_version": "1.3",
-  "measurement_version": "FM-2",
+  "measurement_version": "FM-3",
   "domains": [
     {"name": "frontend", "patterns": ["dashboard/*", "*/pages/*", "*/static/*", "*.html", "*.css", "*.vue"]},
     {"name": "platform", "patterns": ["astrbot/core/platform/*", "*/contact_channels.py", "*/delivery*.py"]},

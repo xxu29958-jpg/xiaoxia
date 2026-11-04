@@ -174,12 +174,23 @@ def relation_changes(before: dict, after: dict, changes: list[dict]) -> dict:
     def facts(report: dict, translate: dict) -> dict:
         result: dict[str, set[tuple]] = {
             k: set()
-            for k in ("edges", "interfaces", "authorities", "exceptions", "cycles")
+            for k in (
+                "edges",
+                "business_edges",
+                "interfaces",
+                "authorities",
+                "exceptions",
+                "cycles",
+            )
         }
         for record in report["files"]:
             path = translate.get(record["path"], record["path"])
             result["edges"].update(
                 (path, translate.get(p, p)) for p in record["dependencies"]
+            )
+            result["business_edges"].update(
+                (path, translate.get(p, p))
+                for p in record.get("business_dependencies", [])
             )
             result["interfaces"].update(
                 (path, s["name"], s["kind"], s.get("signature", ""))
@@ -279,7 +290,12 @@ def history(repo: Path, ref: str, records: list[dict], limit: int = 100) -> dict
                         (s.get("complexity", 0) for s in record.get("symbols", [])),
                         default=0,
                     ),
-                    "consumers": len(record["consumers"]),
+                    "source_consumers": len(record["consumers"]),
+                    "business_consumers": len(record.get("business_consumers", [])),
+                    "consumers": len(
+                        set(record["consumers"])
+                        | set(record.get("business_consumers", []))
+                    ),
                     "state_authority": bool(record["state_authorities"]),
                     "lines": record.get("lines", 0),
                 }

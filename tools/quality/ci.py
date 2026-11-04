@@ -64,6 +64,7 @@ def install(repo: Path, group: str) -> None:
         "performance_contracts",
         "cognition_contracts",
         "reading_contracts",
+        "registration_contracts",
         "runtime_bot",
     }:
         subprocess.run(
