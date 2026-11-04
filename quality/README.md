@@ -71,5 +71,6 @@ npm ci --prefix quality --ignore-scripts
 - 共享核心记忆映射使用临时 ASTRBOT_ROOT、真实 AstrMessageEvent 与原生 MemoryStore，覆盖跨渠道当前值／来源历史、原子回滚、双连接 CAS、消息重放、提交前后强杀、旧 schema 备份迁移及来源撤销。旧记忆、纠错、来源采集和聊天消费者同时回归；详见 [事务边界](../docs/core-memory-transactions.md)。复杂度入口在 Windows 写入 Ruff stdin 前归一换行，CRLF 的诊断位置有真实命令级反例。
 - gate 的 JSON 保留基线、HEAD、候选文件哈希、工具退出码和结果；源码在运行期间发生变化时结果作废。命令本身不生成工作树缓存或改写文件，输出由调用者重定向到证据目录。
 - 工作事项映射覆盖原生目标／话题、全部实际读写消费者、旧 JSON 原子迁移、重放、取消及关闭屏障、进程强杀、备份恢复搬迁和私人／全量清除。管理组件使用 bot 环境已安装的 Python Playwright 与本机 Chrome 无头模式，执行真实页面脚本和原生存储读回；缺少浏览器直接失败，不记为跳过。详见 [工作状态边界](../docs/working-state-transactions.md)。
+- 阅读映射覆盖来源／范围事务、旧库迁移、版本变化、进程强杀、恢复搬迁、原生工具注册和 QQ／微信身份隔离，以及 RSS、字幕、主动材料和浏览器消费者。需先执行 `npm ci --prefix maintenance/browser --ignore-scripts --no-audit --no-fund`，安装锁定的 MCP 包；测试实际运行 Chrome／MCP，缺包或缺浏览器均失败，不用跳过代替。真实 LLM 四阶段旅程在快速门外保留独立候选证据，详见 [阅读边界](../docs/reading-evidence.md)。
 
 工具和规则变化后，重新测同一原始提交，保留旧证据，避免把计数器变化误认成产品改善。

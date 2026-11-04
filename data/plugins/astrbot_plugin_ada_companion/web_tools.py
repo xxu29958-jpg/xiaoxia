@@ -4,11 +4,11 @@ import base64
 import json
 from pathlib import Path
 
-from mcp.types import CallToolResult, ImageContent, TextContent
+from mcp.types import CallToolResult, ContentBlock, ImageContent, TextContent
 
 from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, MessageChain
-from astrbot.api.message_components import File, Image, Plain
+from astrbot.api.message_components import BaseMessageComponent, File, Image, Plain
 
 from .online_memes import CollectionError
 from .public_transport import browse_url
@@ -73,7 +73,7 @@ class WebTools:
                 options=options,
             )
             screenshot = result.pop("screenshot_path", None)
-            content = [
+            content: list[ContentBlock] = [
                 TextContent(type="text", text=json.dumps(result, ensure_ascii=False))
             ]
             if screenshot:
@@ -151,8 +151,11 @@ class WebTools:
         next_step: str = "",
         query: str = "",
         item_id: str = "",
+        source_id: str = "",
+        offset: int = -1,
+        limit: int = 4000,
     ) -> str:
-        """Keep web discoveries separate from personal relationship memory.
+        """Keep source evidence, its reading progress and personal commentary distinct.
 
         Save an exact short source_quote from a page actually read; put your own
         reaction in comment and an unfinished reading idea in next_step. These are
@@ -160,7 +163,7 @@ class WebTools:
         Notes are local and persistent; nothing schedules future work.
 
         Args:
-            action(string): list, save or delete.
+            action(string): list, read, save or delete. read continues a captured source, including after restart.
             page_id(string): Verified page id for save.
             kind(string): interesting, unfinished or next.
             source_quote(string): Exact quote present in the page text, at most 600 characters.
@@ -168,9 +171,24 @@ class WebTools:
             next_step(string): What to read next, not a scheduled task.
             query(string): Search the local notes.
             item_id(string): Existing note ID to delete when asked.
+            source_id(string): Source ID from reading metadata for read; alternatively supply item_id or page_id.
+            offset(number): -1 continues after prepared ranges; nonnegative values reread, including after uncertain delivery.
+            limit(number): Characters to return, 1–24000, normally 4000.
         """
         try:
             scope = self.owners.scope(event)
+            if action == "read":
+                return json.dumps(
+                    self.public_browser.store.read(
+                        scope,
+                        source_id=source_id,
+                        page_id=page_id,
+                        item_id=item_id,
+                        offset=offset,
+                        limit=limit,
+                    ),
+                    ensure_ascii=False,
+                )
             result = self.public_browser.store.notes(
                 scope,
                 action,
@@ -212,7 +230,7 @@ class WebTools:
             if event.get_extra("ada_web_shared"):
                 raise BackpackError("A web discovery was already shared in this reply.")
             page = self.public_browser.store.visit(scope, page_id)
-            chain = [
+            chain: list[BaseMessageComponent] = [
                 Plain(
                     f"{page['title']}\n{page['url']}"
                     + ("\n" + introduction[:400] if introduction else "")

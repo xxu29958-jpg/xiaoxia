@@ -5,8 +5,11 @@ import sqlite3
 import time
 import uuid
 from contextlib import closing
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+
+from . import reading_store
+from .reading_evidence import encoded, note_provenance
 
 
 class BackpackError(ValueError):
@@ -40,6 +43,7 @@ class WebNotebook:
                 conn.execute(
                     "ALTER TABLE visits ADD COLUMN images TEXT NOT NULL DEFAULT '[]'"
                 )
+            reading_store.initialize(conn, self.db)
 
     def enabled(self) -> bool:
         with closing(sqlite3.connect(self.db)) as conn:
@@ -86,10 +90,19 @@ class WebNotebook:
             ],
         }
 
-    def save_visit(self, scope: str, data: dict, screenshot: Path):
+    def save_visit(self, scope: str, data: dict, screenshot: Path | str):
         with closing(sqlite3.connect(self.db)) as conn, conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                reading = (
+                    reading_store.capture(conn, scope, data)
+                    if data.get("ok", True)
+                    else {"source_kind": "access_error", "coverage": "none"}
+                )
+            except ValueError as exc:
+                raise BackpackError(str(exc)) from exc
             conn.execute(
-                "INSERT OR REPLACE INTO visits(id,scope,url,title,text,screenshot,visited_at,images) VALUES(?,?,?,?,?,?,?,?)",
+                "INSERT OR REPLACE INTO visits(id,scope,url,title,text,screenshot,visited_at,images,reading) VALUES(?,?,?,?,?,?,?,?,?)",
                 (
                     data["page_id"],
                     scope,
@@ -99,21 +112,46 @@ class WebNotebook:
                     str(screenshot),
                     time.time(),
                     json.dumps(data.get("images", []), ensure_ascii=False),
+                    encoded(reading),
                 ),
             )
-            old = list(
-                conn.execute(
-                    "SELECT id,screenshot FROM visits WHERE scope=? ORDER BY visited_at DESC LIMIT -1 OFFSET 30",
-                    (scope,),
-                )
+            self._prune_visits(conn, scope)
+        data["reading"] = reading
+        data.pop("_source_text", None)
+
+    def read(self, scope: str, **kwargs) -> dict:
+        """Continue an immutable captured source, retaining its original provenance."""
+        with closing(sqlite3.connect(self.db)) as conn, conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                result = reading_store.read(conn, scope, **kwargs)
+            except ValueError as exc:
+                raise BackpackError(str(exc)) from exc
+            conn.execute(
+                "INSERT INTO visits(id,scope,url,title,text,screenshot,visited_at,images,reading) VALUES(?,?,?,?,?,'',?,'[]',?)",
+                (
+                    result["page_id"],
+                    scope,
+                    result["url"],
+                    result["title"],
+                    result["text"],
+                    time.time(),
+                    encoded(result["reading"]),
+                ),
             )
-            for item_id, path in old:
-                candidate = Path(path)
-                if candidate.parent == self.folder and candidate.suffix == ".jpg":
-                    candidate.unlink(missing_ok=True)
-                conn.execute(
-                    "DELETE FROM visits WHERE id=? AND scope=?", (item_id, scope)
-                )
+            self._prune_visits(conn, scope)
+        return result
+
+    def _prune_visits(self, conn, scope):
+        old = conn.execute(
+            "SELECT id,screenshot FROM visits WHERE scope=? ORDER BY visited_at DESC LIMIT -1 OFFSET 30",
+            (scope,),
+        ).fetchall()
+        for item_id, path in old:
+            candidate = Path(path)
+            if candidate.parent == self.folder and candidate.suffix == ".jpg":
+                candidate.unlink(missing_ok=True)
+            conn.execute("DELETE FROM visits WHERE id=? AND scope=?", (item_id, scope))
 
     def visit(self, scope: str, page_id: str) -> dict:
         with closing(sqlite3.connect(self.db)) as conn:
@@ -127,16 +165,23 @@ class WebNotebook:
             )
         result = dict(row)
         result["images"] = json.loads(result["images"])
+        result["reading"] = json.loads(result["reading"])
         return result
 
     def bookmarks(
         self, scope: str, action: str, page_id="", note="", query="", item_id=""
     ) -> dict:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with closing(sqlite3.connect(self.db)) as conn, conn:
             conn.row_factory = sqlite3.Row
             if action == "save":
+                conn.execute("BEGIN IMMEDIATE")
                 page = self.visit(scope, page_id)
+                self._require_source(conn, scope, page)
+                if page["reading"].get("coverage") == "none":
+                    raise BackpackError(
+                        "An access error is not a successfully read source."
+                    )
                 if not note.strip() or len(note) > 240:
                     raise BackpackError(
                         "Supply one short bookmark note, at most 240 characters."
@@ -155,8 +200,8 @@ class WebNotebook:
                     raise BackpackError("The 500-bookmark limit is reached.")
                 item_id = existing[0] if existing else uuid.uuid4().hex
                 conn.execute(
-                    """INSERT INTO bookmarks VALUES(?,?,?,?,?,?,?)
-                    ON CONFLICT(scope,url) DO UPDATE SET title=excluded.title,note=excluded.note,updated_at=excluded.updated_at""",
+                    """INSERT INTO bookmarks(id,scope,url,title,note,created_at,updated_at,reading) VALUES(?,?,?,?,?,?,?,?)
+                    ON CONFLICT(scope,url) DO UPDATE SET title=excluded.title,note=excluded.note,updated_at=excluded.updated_at,reading=excluded.reading""",
                     (
                         item_id,
                         scope,
@@ -165,6 +210,7 @@ class WebNotebook:
                         note.strip(),
                         now,
                         now,
+                        encoded(note_provenance(page, "")),
                     ),
                 )
                 row = conn.execute(
@@ -173,7 +219,7 @@ class WebNotebook:
                 return {
                     "ok": True,
                     "duplicate": bool(existing),
-                    "bookmark": {k: row[k] for k in row.keys() if k != "scope"},
+                    "bookmark": self._public_record(row),
                 }
             if action == "delete":
                 count = conn.execute(
@@ -190,9 +236,7 @@ class WebNotebook:
             ).fetchall()
             return {
                 "ok": True,
-                "bookmarks": [
-                    {k: r[k] for k in r.keys() if k != "scope"} for r in rows
-                ],
+                "bookmarks": [self._public_record(r) for r in rows],
             }
 
     def notes(
@@ -212,9 +256,13 @@ class WebNotebook:
         with closing(sqlite3.connect(self.db)) as conn, conn:
             conn.row_factory = sqlite3.Row
             if action == "save":
-                if only_if_new:
-                    conn.execute("BEGIN IMMEDIATE")
+                conn.execute("BEGIN IMMEDIATE")
                 page = self.visit(scope, page_id)
+                self._require_source(conn, scope, page)
+                if page["reading"].get("coverage") == "none":
+                    raise BackpackError(
+                        "An access error is not a successfully read source."
+                    )
                 if (
                     only_if_new
                     and conn.execute(
@@ -223,22 +271,7 @@ class WebNotebook:
                     ).fetchone()
                 ):
                     return {"ok": False, "reason": "existing_note_preserved"}
-                if kind not in ("interesting", "unfinished", "next"):
-                    raise BackpackError(
-                        "Note kind must be interesting, unfinished or next."
-                    )
-                if (
-                    len(source_quote) > 600
-                    or len(comment) > 600
-                    or len(next_step) > 400
-                ):
-                    raise BackpackError("Keep the note short.")
-                if source_quote and source_quote not in page["text"]:
-                    raise BackpackError(
-                        "The source quote is not present in the page text actually read."
-                    )
-                if not (source_quote or comment.strip() or next_step.strip()):
-                    raise BackpackError("An empty note cannot be saved.")
+                self._validate_note(page, kind, source_quote, comment, next_step)
                 existing = conn.execute(
                     "SELECT id FROM notes WHERE scope=? AND url=? AND kind=?",
                     (scope, page["url"], kind),
@@ -252,10 +285,10 @@ class WebNotebook:
                 ):
                     raise BackpackError("The 500-note limit is reached.")
                 item_id = existing[0] if existing else uuid.uuid4().hex
-                now = datetime.now(timezone.utc).isoformat()
+                now = datetime.now(UTC).isoformat()
                 conn.execute(
-                    """INSERT INTO notes VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(scope,url,kind)
-                    DO UPDATE SET source_quote=excluded.source_quote,comment=excluded.comment,next_step=excluded.next_step,updated_at=excluded.updated_at""",
+                    """INSERT INTO notes(id,scope,url,title,kind,source_quote,comment,next_step,created_at,updated_at,reading) VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(scope,url,kind)
+                    DO UPDATE SET title=excluded.title,source_quote=excluded.source_quote,comment=excluded.comment,next_step=excluded.next_step,updated_at=excluded.updated_at,reading=excluded.reading""",
                     (
                         item_id,
                         scope,
@@ -267,12 +300,14 @@ class WebNotebook:
                         next_step.strip(),
                         now,
                         now,
+                        encoded(note_provenance(page, source_quote)),
                     ),
                 )
                 return {
                     "ok": True,
                     "id": item_id,
                     "source_url": page["url"],
+                    "reading": note_provenance(page, source_quote),
                     "meaning": "Web source and personal commentary are separate; this is not shared life memory.",
                 }
             if action == "delete":
@@ -290,20 +325,56 @@ class WebNotebook:
             ).fetchall()
             return {
                 "ok": True,
-                "notes": [{k: r[k] for k in r.keys() if k != "scope"} for r in rows],
+                "notes": [self._public_record(r) for r in rows],
             }
+
+    @staticmethod
+    def _validate_note(page, kind, source_quote, comment, next_step):
+        if kind not in ("interesting", "unfinished", "next"):
+            raise BackpackError("Note kind must be interesting, unfinished or next.")
+        if len(source_quote) > 600 or len(comment) > 600 or len(next_step) > 400:
+            raise BackpackError("Keep the note short.")
+        if source_quote and source_quote not in page["text"]:
+            raise BackpackError(
+                "The source quote is not present in the page text actually read."
+            )
+        if not (source_quote or comment.strip() or next_step.strip()):
+            raise BackpackError("An empty note cannot be saved.")
+
+    @staticmethod
+    def _require_source(conn, scope, page):
+        source_id = page["reading"].get("source_id")
+        if (
+            source_id
+            and not conn.execute(
+                "SELECT 1 FROM reading_sources WHERE scope=? AND id=?",
+                (scope, source_id),
+            ).fetchone()
+        ):
+            raise BackpackError(
+                "The unpinned source cache expired; reopen it before saving a note."
+            )
+
+    @staticmethod
+    def _public_record(row):
+        result = {key: row[key] for key in row.keys() if key != "scope"}
+        result["reading"] = json.loads(result["reading"]) or {
+            "source_kind": "legacy_unknown",
+            "coverage": "unknown",
+        }
+        return result
 
     def export(self, scope: str) -> Path:
         with closing(sqlite3.connect(self.db)) as conn:
+            conn.execute("BEGIN")
             conn.row_factory = sqlite3.Row
-            data = {"version": 1, "exported_at": datetime.now(timezone.utc).isoformat()}
+            data = {"version": 2, "exported_at": datetime.now(UTC).isoformat()}
             for table in ("bookmarks", "notes"):
                 rows = conn.execute(
                     f"SELECT * FROM {table} WHERE scope=?", (scope,)
                 ).fetchall()
-                data[table] = [
-                    {k: r[k] for k in r.keys() if k != "scope"} for r in rows
-                ]
+                data[table] = [self._public_record(r) for r in rows]
+            data["reading_evidence"] = reading_store.export(conn, scope)
         target = self.folder / f"backpack-{scope}.json"
         temporary = target.with_suffix(".tmp")
         temporary.write_text(

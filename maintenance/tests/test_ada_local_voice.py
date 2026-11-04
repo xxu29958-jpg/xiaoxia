@@ -1,6 +1,5 @@
 """Check voice input survives recognition and reaches spoken reply routing."""
 
-import asyncio
 import io
 import shutil
 import sys
@@ -198,7 +197,7 @@ async def test_singing_uses_platform_audio_and_does_not_add_spoken_duplicate(
 
 
 @pytest.mark.asyncio
-async def test_failed_singing_does_not_claim_or_send_audio(monkeypatch):
+async def test_failed_singing_does_not_claim_or_send_audio(monkeypatch, tmp_path):
     voice = SimpleNamespace(
         synthesize=AsyncMock(side_effect=VoiceError("local_voice_unavailable"))
     )
@@ -212,9 +211,7 @@ async def test_failed_singing_does_not_claim_or_send_audio(monkeypatch):
         raising=False,
     )
     monkeypatch.setattr(plugin, "local_voice", voice, raising=False)
-    monkeypatch.setattr(
-        plugin, "media", SimpleNamespace(voice_lock=asyncio.Lock()), raising=False
-    )
+    plugin.media = ResponseMedia(plugin.config, tmp_path, voice)
     current = native_event("aiocqhttp", "唱两句")
     results = [
         result

@@ -3,7 +3,6 @@
 import asyncio
 import contextlib
 import json
-import time
 from pathlib import Path
 
 from astrbot.api.event import AstrMessageEvent, filter
@@ -13,7 +12,7 @@ from .admin_api import AdminApi
 from .bili_discovery import BiliDiscovery
 from .chat_controls import ChatControls
 from .chat_replyer import ChatReplyer
-from .cloud_voice import CloudVoice, VoiceError
+from .cloud_voice import CloudVoice
 from .contact_channels import ContactChannels
 from .desktop_tools import DesktopTools
 from .dialogue import DialogueState
@@ -198,32 +197,8 @@ class AdaCompanion(Star):
         """
         async with self.lifecycle.operation():
             self.owner_memory.scope(event)
-            event.set_extra("ada_voice_done", True)
-            if not self.config.get("voice_enabled", False):
-                yield event.plain_result("语音现在停用了，开启后我再唱给你。")
-                return
-            try:
-                async with self.media.voice_lock:
-                    audio = await self.local_voice.synthesize(lyrics, mode="singing")
-                    component = await self.media.audio_files.create(
-                        audio, lyrics, event.get_platform_name()
-                    )
-                self.media.last_voice = {
-                    "state": "attached_to_reply",
-                    "at": time.time(),
-                    "platform": event.get_platform_name(),
-                    "bytes": len(audio),
-                    "mode": "singing",
-                }
-                yield event.chain_result([component])
-            except VoiceError as exc:
-                self.media.last_voice = {
-                    "state": "failed",
-                    "mode": "singing",
-                    "error": str(exc),
-                    "at": time.time(),
-                }
-                yield event.plain_result("这次歌声没生成出来，等我缓一下。")
+            async for result in self.media.sing(event, lyrics):
+                yield result
 
     @filter.llm_tool(name="ada_cover")
     async def cover_song(
@@ -386,11 +361,14 @@ class AdaCompanion(Star):
         next_step: str = "",
         query: str = "",
         item_id: str = "",
+        source_id: str = "",
+        offset: int = -1,
+        limit: int = 4000,
     ) -> str:
-        """Keep web discoveries separate from personal relationship memory.
+        """Read source excerpts, continue the same version, and retain attributed notes.
 
         Args:
-            action(string): list, save or delete.
+            action(string): list, read, save or delete. read resumes the captured version after restart.
             page_id(string): Verified page id for save.
             kind(string): interesting, unfinished or next.
             source_quote(string): Exact quote present in the page text, at most 600 characters.
@@ -398,18 +376,24 @@ class AdaCompanion(Star):
             next_step(string): What to read next, not a scheduled task.
             query(string): Search the local notes.
             item_id(string): Existing note ID to delete when asked.
+            source_id(string): Source ID from reading metadata; read also accepts item_id or page_id.
+            offset(number): -1 continues after prepared ranges; nonnegative values reread, including after uncertain delivery.
+            limit(number): Characters to return, 1–24000, normally 4000.
         """
         async with self.lifecycle.operation():
             return await self.web.web_notes(
                 event,
-                action=action,
-                page_id=page_id,
-                kind=kind,
-                source_quote=source_quote,
-                comment=comment,
-                next_step=next_step,
-                query=query,
-                item_id=item_id,
+                action,
+                page_id,
+                kind,
+                source_quote,
+                comment,
+                next_step,
+                query,
+                item_id,
+                source_id,
+                offset,
+                limit,
             )
 
     @filter.llm_tool(name="ada_share_web")
