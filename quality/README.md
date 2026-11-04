@@ -10,11 +10,23 @@ FM-01～08 补充见 [文件地图与 CI 合同](../docs/file-map-ci-contract-v1
 每周计划和手动 `full` 执行全部已登记集成组；范围以报告为准，不能冒充 GPU／真实渠道／人工体验的 G3。
 源码候选制品带 commit、tree 和 SHA-256，不表示生产部署。当前执行证据与剩余工作只在施工台账维护。
 
+云端只在 plan 作业计算一次影响图，发布实际计划文件的 SHA-256，再把同一运行的制品交给 G1／G2。
+执行器核对摘要、HEAD、base、完整变更清单和候选字节哈希，G2 还核对本组确在计划内；执行后再次核对候选身份。
+显式传入的计划缺失、损坏或过期时直接失败并保存错误回执，不静默换成空集合或丢弃地图缺口。
+每份执行回执的 `impact_plan` 记录来源、摘要和处理耗时。消费者仍独立运行原有检查，定期全量／增量核对保持原范围。
+计划和源码归档入口保持标准库可启动；Pygments 仅在实际词法度量时加载，`python -S` 子进程反例验证这条边界。
+
 ```powershell
 # 云端使用相同入口；本地 BASE_SHA 指定明确基线。
 $env:BASE_SHA = '<base-commit>'
 .venvs/quality/Scripts/python.exe -B -m tools.quality.ci plan --report out/plan.json
 .venvs/quality/Scripts/python.exe -B -m tools.quality.ci check --tier g1 --report out/g1.json
+
+# 本地省略 --plan 时现场重算；明确复用自己刚生成的计划时，同时传入摘要。
+# 之后编辑、改名、增加文件或改变提交／基线，需要重新生成计划。
+$taskPlanSha = (Get-FileHash -Algorithm SHA256 out/plan.json).Hash.ToLowerInvariant()
+.venvs/quality/Scripts/python.exe -B -m tools.quality.ci check --tier g1 --report out/g1.json `
+  --plan out/plan.json --plan-sha256 $taskPlanSha
 
 # 同一结果包含文件地图、分类总量、复杂度、热点、差分与规则/工具指纹。
 .venvs/quality/Scripts/python.exe -B -m tools.quality.ci sources --cache out/upstreams --report out/sources.json
@@ -28,6 +40,10 @@ $env:BASE_SHA = '<base-commit>'
 分类按来源与用途组成互斥桶，逐桶相加等于 Repository Total；用途、语言和领域是独立维度，不跨维度相加。
 First-party Production Total 表示当前承担维护的生产源码，不表示独占原创；包含经固定源对照确认有变化的 vendor 生产文件。
 工具、测试、配置、schema、文档、原样 vendor 及与固定上游逐 blob 一致的文件分别报告。
+FM-4 将各层独立 `scripts/` 内的可执行评测／运维脚本按工具用途统计，避免插件脚本因不在仓库根目录而混入生产总量。
+产品 `skills/` 包内由技能调用的脚本仍是生产代码；这些包由原生 SkillManager 发现，入口由各 `SKILL.md` 声明。
+测试／配置／schema 的优先分类不变；`core/tools/` 等运行时工具模块也仍属生产代码，来源和本地维护责任不因用途变化而豁免。
+生产文件移动到测试或脚本用途时触发维护责任审查；所有可执行源码的规模、复杂度及改名追踪门禁保持原标准。
 `ci sources` 只取得固定 Git 树对象，不安装上游程序；度量入口本身只读。未准备相应对象时保留未核验状态，不能将目录来源当作豁免。
 对照版本与选择依据随报告保存，特别是无对应发布标签的插件，不把与固定版本的差异冒称作者身份或原始下载历史。
 物理行拆成代码、纯注释、空行和非代码内容；混合代码/注释行计为代码，Python 文档串计为注释。
@@ -44,7 +60,8 @@ FM-3 另从 Python 顶层字面量容器、直接读写、别名导入／再导�
 这是一份容器级、未区分键的可能影响图，保留测试中的写入者，不证明所有适配器同时激活或所有消费者都需要修改。
 参数同名、重绑定和直接别名逃逸会留下缺口；受影响容器的未知消费者即使没有可靠连边，也会触发扩展检查。
 任意对象字段、函数返回值别名、动态补丁和运行时激活仍不能仅靠这份静态分析判定，不能据此宣称完整调用图。
-基线和候选均用 FM-3 重测；新发现的边与真实代码耦合变化分开理解，旧 FM-2 报告保留。
+基线和候选均用 FM-4 重测；旧 FM-2／FM-3 报告保留，规则修正导致的归类变化与源码增删分开说明。
+新发现的边与真实代码耦合变化分开理解；FM-4 保留 FM-3 的共享状态分析口径。
 只有已确认由 `typing` 导入且未重绑定的 `TYPE_CHECKING` 分支才不算运行时边；其 else、未知条件和普通导入仍参与阻断。
 跨层禁止规则继续检查全部源码依赖。此区分依据 [Python TYPE_CHECKING 语义](https://docs.python.org/3.12/library/typing.html#typing.TYPE_CHECKING)，不表示消除了组合类的耦合。
 重复语法、同名表或内部路径只构成调查候选，不直接判定业务规则重复或多头权威。

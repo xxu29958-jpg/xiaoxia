@@ -1,5 +1,6 @@
 """Run structural and selected consumer gates, preserving partial outcomes."""
 
+import hashlib
 import json
 import platform
 import sys
@@ -104,13 +105,63 @@ def g2(repo: Path, snapshot: dict, group: str) -> dict:
     return {"group": group, "commands": commands, "blocked": not commands}
 
 
-def check(repo: Path, base: str, tier: str, group: str = "") -> dict:
+def execution_plan(
+    repo: Path, snapshot: dict, path: Path | None, expected_sha256: str
+) -> tuple[dict, dict]:
+    """Reuse only an intact planner artifact bound to this exact working candidate."""
+    started = time.perf_counter()
+    digest = None
+    if path is None:
+        if expected_sha256:
+            raise ValueError("An impact-plan digest requires its artifact path")
+        report = plan(repo, snapshot["base"])
+    else:
+        data = path.read_bytes()
+        digest = hashlib.sha256(data).hexdigest()
+        if not expected_sha256 or digest != expected_sha256:
+            raise ValueError("Impact-plan artifact digest does not match the planner")
+        report = json.loads(data)
+        if not isinstance(report, dict) or report.get("status") != "planned":
+            raise ValueError("Impact-plan artifact is not a completed plan")
+    expected = {
+        "head": snapshot["head"],
+        "base": snapshot["base"],
+        "candidate_hashes": snapshot["content_sha256"],
+        "changes": [vars(change) for change in snapshot["changes"]],
+    }
+    mismatches = [key for key, value in expected.items() if report.get(key) != value]
+    if mismatches:
+        raise ValueError("Impact-plan candidate mismatch: " + ", ".join(mismatches))
+    if any(
+        not isinstance(report.get(key), list)
+        or not all(isinstance(value, str) for value in report[key])
+        for key in ("groups", "coverage_gaps")
+    ):
+        raise ValueError("Impact-plan groups or coverage gaps are missing or invalid")
+    return report, {
+        "source": "artifact" if path is not None else "recomputed",
+        "sha256": digest,
+        "elapsed_seconds": round(time.perf_counter() - started, 6),
+    }
+
+
+def check(
+    repo: Path,
+    base: str,
+    tier: str,
+    group: str = "",
+    *,
+    plan_path: Path | None = None,
+    plan_sha256: str = "",
+) -> dict:
     started = time.monotonic()
     snapshot = capture(repo, base)
+    impact, plan_evidence = execution_plan(repo, snapshot, plan_path, plan_sha256)
+    if plan_path is not None and tier == "g2" and group not in impact["groups"]:
+        raise ValueError(f"Integration group is absent from the bound plan: {group}")
     policy = json.loads((repo / "quality/policy.json").read_text(encoding="utf-8"))
     result = g1(repo, snapshot, policy) if tier == "g1" else g2(repo, snapshot, group)
-    impact = plan(repo, base)
-    stable = capture(repo, base)["content_sha256"] == snapshot["content_sha256"]
+    stable = capture(repo, base) == snapshot
     commands_passed = qualify(result["commands"])
     failed = result["blocked"] or not stable or not commands_passed
     failed = failed or (tier == "g1" and bool(impact["coverage_gaps"]))
@@ -123,6 +174,7 @@ def check(repo: Path, base: str, tier: str, group: str = "") -> dict:
         "base": snapshot["base"],
         "candidate_hashes": snapshot["content_sha256"],
         "stable_candidate": stable,
+        "impact_plan": plan_evidence,
         "coverage_gaps": impact["coverage_gaps"],
         "g3": "not_executed",
         "elapsed_seconds": round(time.monotonic() - started, 3),

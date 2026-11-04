@@ -36,6 +36,7 @@ jobs:
       matrix: ${{ steps.plan.outputs.matrix }}
       has_groups: ${{ steps.plan.outputs.has_groups }}
       base: ${{ steps.plan.outputs.base }}
+      plan_sha256: ${{ steps.plan.outputs.plan_sha256 }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -83,10 +84,18 @@ jobs:
           cache-dependency-path: quality/package-lock.json
       - run: python -m pip install -r requirements/quality.txt
       - run: npm ci --prefix quality --ignore-scripts --no-audit --no-fund
+      - name: Retrieve this run's bound impact plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: impact-${{ env.HEAD_SHA }}
+          path: ${{ runner.temp }}/xiaoxia-impact
       - name: Check affected source and gate counterexamples
         env:
           BASE_SHA: ${{ needs.plan.outputs.base }}
-        run: python -B -m tools.quality.ci check --tier g1 --report out/g1.json
+        run: >-
+          python -B -m tools.quality.ci check --tier g1 --report out/g1.json
+          --plan '${{ runner.temp }}/xiaoxia-impact/plan.json'
+          --plan-sha256 '${{ needs.plan.outputs.plan_sha256 }}'
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -127,10 +136,19 @@ jobs:
       - name: Install this consumer's isolated dependencies
         run: python -B -m tools.quality.ci install --group '${{ matrix.group }}'
       - run: npm ci --prefix quality --ignore-scripts --no-audit --no-fund --logs-dir '${{ github.workspace }}/out/npm-logs'
+      - name: Retrieve this run's bound impact plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: impact-${{ env.HEAD_SHA }}
+          path: ${{ runner.temp }}/xiaoxia-impact
       - name: Exercise affected consumers
         env:
           BASE_SHA: ${{ needs.plan.outputs.base }}
-        run: python -B -m tools.quality.ci check --tier g2 --group '${{ matrix.group }}' --report 'out/g2-${{ matrix.group }}.json'
+        run: >-
+          python -B -m tools.quality.ci check --tier g2 --group '${{ matrix.group }}'
+          --report 'out/g2-${{ matrix.group }}.json'
+          --plan '${{ runner.temp }}/xiaoxia-impact/plan.json'
+          --plan-sha256 '${{ needs.plan.outputs.plan_sha256 }}'
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
