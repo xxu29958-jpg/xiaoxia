@@ -16,10 +16,24 @@ SOURCE = {
     ".scss",
     ".ps1",
     ".sh",
+    ".bat",
+    ".cmd",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".cu",
+    ".cuh",
+    ".pyx",
+    ".rs",
+    ".go",
+    ".java",
+    ".kt",
+    ".swift",
 }
-CONFIG = {".json", ".toml", ".yaml", ".yml", ".ini", ".cfg", ".xml"}
+CONFIG = {".json", ".toml", ".yaml", ".yml", ".ini", ".cfg", ".xml", ".service"}
 DOCUMENT = {".md", ".rst", ".txt", ".csv", ".mmd"}
-TEXT = SOURCE | CONFIG | DOCUMENT | {".html", ".lock", ".svg"}
+TEXT = SOURCE | CONFIG | DOCUMENT | {".html", ".lock", ".svg", ".sql"}
 
 
 def file_kind(name: str) -> str:
@@ -40,7 +54,7 @@ def responsibility(name: str, oid: str, policy: dict, upstream: dict) -> dict:
     if name in upstream:
         unchanged = oid == upstream[name]
         return {
-            "origin": "upstream",
+            "origin": "vendor" if name.startswith("vendor/") else "upstream",
             "maintenance": "upstream_unmodified" if unchanged else "self_maintained",
             "source_blob": upstream[name],
             "size_exempt": unchanged,
@@ -51,7 +65,9 @@ def responsibility(name: str, oid: str, policy: dict, upstream: dict) -> dict:
                 "origin": scope["origin"],
                 "maintenance": "self_maintained",
                 "source": scope["source"],
-                "verification": "local_or_unverified_delta",
+                "verification": "not_present_in_pinned_source"
+                if any(path.startswith(scope["prefix"]) for path in upstream)
+                else "local_or_unverified_delta",
                 "size_exempt": False,
             }
     return {"origin": "project", "maintenance": "self_maintained", "size_exempt": False}
@@ -84,7 +100,7 @@ def findings(record: dict, limits: dict) -> list[dict]:
                     result.append(
                         {
                             "metric": metric,
-                            "symbol": symbol["name"],
+                            "symbol": symbol["key"],
                             "line": symbol["start"],
                             "value": value,
                             "level": level,

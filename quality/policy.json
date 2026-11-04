@@ -1,6 +1,27 @@
 {
   "contract_version": "1.3",
+  "measurement_version": "FM-1",
+  "domains": [
+    {"name": "frontend", "patterns": ["dashboard/*", "*/pages/*", "*/static/*", "*.html", "*.css", "*.vue"]},
+    {"name": "platform", "patterns": ["astrbot/core/platform/*", "*/contact_channels.py", "*/delivery*.py"]},
+    {"name": "singing", "patterns": ["services/voice/cover*", "services/voice/*sing*", "vendor/soulx_singer/*", "tests/media_pipeline/*", "tests/performance_delivery/*", "*/performance*.py"]},
+    {"name": "voice", "patterns": ["services/voice/*", "vendor/*", "*local_voice*", "*cloud_voice*", "*voice*", "*audio*"]},
+    {"name": "cognition", "patterns": ["data/plugins/astrbot_plugin_memory_companion/*", "tests/cognition_state/*", "*/shared_core.py", "*/appraisals.py", "*/memory_tools.py", "*/owner_memory.py", "*/thread_review.py", "*/dialogue.py"]},
+    {"name": "engineering", "patterns": ["tools/*", "quality/*", "maintenance/*", "scripts/*", ".github/*", "tests/installation/*", "requirements/*", "*.ps1", "*.sh"]},
+    {"name": "backend", "patterns": ["astrbot/*", "data/plugins/*", "services/*", "tests/*", "*.py", "typings/*"]},
+    {"name": "project", "patterns": ["*"]}
+  ],
+  "state_authorities": [
+    {"id": "native-memory-state", "patterns": ["data/plugins/astrbot_plugin_memory_companion/core/*state*", "data/plugins/astrbot_plugin_memory_companion/core/store*", "data/plugins/astrbot_plugin_memory_companion/core/sql/*"], "owner": "MemoryStore", "change_reason": "Current memory facts, interpretations and working-state revisions"},
+    {"id": "media-job-state", "patterns": ["services/jobs/*"], "owner": "JobStore", "change_reason": "Persistent execution, cancellation and recovery"},
+    {"id": "reading-source-state", "patterns": ["data/plugins/astrbot_plugin_ada_companion/reading_store*"], "owner": "ReadingStore", "change_reason": "Immutable reading sources and delivered ranges"}
+  ],
   "adoption_state": "EQ2_static_change_checks_product_gates_separate",
+  "representative_changes": [
+    {"id": "replace-voice-model", "seeds": ["services/voice/server_voice.py", "models.manifest.json"], "reason": "Voice gateway protocol and model identity"},
+    {"id": "add-chat-channel", "seeds": ["astrbot/core/platform/register.py"], "reason": "Actual platform adapter registration entry"},
+    {"id": "revise-cognitive-state", "seeds": ["data/plugins/astrbot_plugin_memory_companion/core/appraisal_rules.py", "data/plugins/astrbot_plugin_memory_companion/core/appraisal_state.py"], "reason": "Authoritative interpretation revision rules and storage"}
+  ],
   "dependency_contracts": [
     {"id": "ARC-01-worker-channel-boundary", "source": "services", "forbidden": ["astrbot", "data.plugins"]},
     {"id": "STR-02-quality-import-isolation", "source": "tools.quality", "forbidden": ["astrbot", "services", "data.plugins", "torch", "fastapi", "requests"]},
@@ -14,11 +35,11 @@
   },
   "origins": [
     {"prefix": "vendor/", "origin": "vendor", "source": "vendor/sources.json; local changes retained, no blanket size exemption"},
-    {"prefix": "data/plugins/astrbot_plugin_anysearch/", "origin": "upstream", "source": "https://github.com/AgIzT/astrbot_plugin_anysearch"},
-    {"prefix": "data/plugins/astrbot_plugin_codex_oauth_plug/", "origin": "upstream", "source": "https://github.com/RhoninSeiei/astrbot_plugin_codex_oauth_plug"},
-    {"prefix": "data/plugins/astrbot_plugin_meme_manager/", "origin": "upstream", "source": "https://github.com/anka-afk/astrbot_plugin_meme_manager"},
-    {"prefix": "data/plugins/astrbot_plugin_memory_companion/", "origin": "upstream", "source": "https://github.com/menglimi/astrbot_plugin_memory_companion"},
-    {"prefix": "data/plugins/astrbot_plugin_turnflow/", "origin": "upstream", "source": "https://github.com/Yuimi-chaya/astrbot_plugin_turnflow"}
+    {"prefix": "data/plugins/astrbot_plugin_anysearch/", "origin": "upstream", "source": "https://github.com/AgIzT/astrbot_plugin_anysearch", "commit": "983a7acb2f6940ab441a521be684085e0913738e", "basis": "metadata v0.3; frozen upstream comparison, not a claim about the original download"},
+    {"prefix": "data/plugins/astrbot_plugin_codex_oauth_plug/", "origin": "upstream", "source": "https://github.com/RhoninSeiei/astrbot_plugin_codex_oauth_plug", "commit": "70bac71a75eecd5d7cb89a536bce0a6169b93838", "basis": "upstream v0.4.1 release metadata commit"},
+    {"prefix": "data/plugins/astrbot_plugin_meme_manager/", "origin": "upstream", "source": "https://github.com/anka-afk/astrbot_plugin_meme_manager", "commit": "b96d6bedecca6d0bef27b70261fd6f787116ee49", "basis": "upstream v5.1.0 tag; local metadata is 5.1.1, no upstream 5.1.1 release found; differences relative to pin, not inferred authorship"},
+    {"prefix": "data/plugins/astrbot_plugin_memory_companion/", "origin": "upstream", "source": "https://github.com/menglimi/astrbot_plugin_memory_companion", "commit": "fc13a00d38e3ccaa560d617f8cd22788250465ae", "basis": "upstream v2.3.1 tag matching local metadata version"},
+    {"prefix": "data/plugins/astrbot_plugin_turnflow/", "origin": "upstream", "source": "https://github.com/Yuimi-chaya/astrbot_plugin_turnflow", "commit": "87a79b69948d407605d58a7a375125790b736a6d", "basis": "metadata 1.0.0; frozen upstream comparison, not a claim about the original download"}
   ],
   "generated_exemption": "none until source, generator, rebuild and classification are verified",
   "thresholds": {
@@ -32,5 +53,21 @@
     "manual_document_lines": {"warn_above": 600, "navigation_review_above": 1200}
   },
   "mccabe_tool": "ruff==0.15.22; C901 output measured separately, no custom complexity formula",
-  "exceptions": []
+  "exceptions": [
+    {
+      "id": "COD-03-proactive-candidate-span",
+      "metric": "function_lines",
+      "path": "data/plugins/astrbot_plugin_ada_companion/initiative.py",
+      "symbol": "ProactiveChat._candidate",
+      "fingerprint": "caa1fdc05bc69a7706375b9b7767bfb6586f00e843e029af1dadb137ac3b662e",
+      "maximum": 102,
+      "reason": "Restore the explicit multi-line attend call. This bounded candidate-assembly responsibility was 102 lines in the real-model evidence; compressing the call to 99 lines was not decomposition or a quality improvement. Existing delivery, quota and candidate interpretation are already separate responsibilities.",
+      "alternative_guarantees": "Exact AST identity; bounded input windows and model timeout; appraisals unavailable fail closed; existing candidate and delivery consumer contracts remain required. No complexity, correctness or state-authority exemption.",
+      "validation": ["cognition_contracts", "performance_contracts", "PR6 six real-model cases; normalized whole-module AST sha256 7e63c8da989b04155a1e785dbd7745ce70f275f59dddfd8ed64e69fb096a1c7e"],
+      "owner": "Codex under v1.3 local technical-exception authority",
+      "exit_trigger": "Any semantic change, expanded dependencies, span above 102, or review date requires a new evidence-based decision; extract only a demonstrated independently changing responsibility.",
+      "review_by": "2026-12-04",
+      "history": [{"date": "2026-11-04", "source_commit": "96ff59c44dffee5411e929b17fff98eaef636093", "decision": "Restore readable layout and record the real span instead of avoiding review by compression."}]
+    }
+  ]
 }

@@ -1,6 +1,9 @@
 """Physical spans and Python syntax measurements, without executing source."""
 
 import ast
+import copy
+import hashlib
+from collections import Counter
 
 DEFINITIONS = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
 CONTROL = (
@@ -18,6 +21,13 @@ CONTROL = (
 
 def physical_lines(text: str) -> int:
     return len(text.splitlines())
+
+
+def fingerprint(node: ast.AST) -> str:
+    stable = copy.deepcopy(node)
+    if isinstance(stable, DEFINITIONS):
+        stable.name = "__definition__"
+    return hashlib.sha256(ast.dump(stable).encode()).hexdigest()
 
 
 def nesting(node: ast.AST, depth: int = 0) -> int:
@@ -56,6 +66,7 @@ def symbols(tree: ast.AST, prefix: str = "") -> list[dict]:
                 "end": child.end_lineno,
                 "lines": child.end_lineno - start + 1,
                 "control_nesting": nesting(child),
+                "fingerprint": fingerprint(child),
             }
         )
         result.extend(symbols(child, name))
@@ -73,7 +84,14 @@ def python_metrics(text: str, filename: str) -> dict:
             imports.extend(alias.name for alias in node.names)
         elif isinstance(node, ast.ImportFrom):
             imports.append("." * node.level + (node.module or ""))
-    return {"symbols": symbols(tree), "imports": sorted(set(imports))}
+    definitions = symbols(tree)
+    counts = Counter(s["name"] for s in definitions)
+    occurrences = Counter()
+    for symbol in definitions:
+        name = symbol["name"]
+        occurrences[name] += 1
+        symbol["key"] = name if counts[name] == 1 else f"{name}#{occurrences[name]}"
+    return {"symbols": definitions, "imports": sorted(set(imports))}
 
 
 def threshold(value: int, limits: dict) -> str | None:

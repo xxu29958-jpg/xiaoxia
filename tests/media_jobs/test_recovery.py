@@ -85,7 +85,7 @@ class RecoveryTests(unittest.TestCase):
                 actual = verify_artifact(root, saved["result"])
                 self.assertEqual(actual.read_bytes(), wav_bytes())
                 self.assertEqual(saved["attempt"], 1 if committed else 2)
-                self.assertEqual(actual == orphan, committed)
+                self.assertEqual(actual.samefile(orphan), committed)
                 self.assertTrue(orphan.exists())
                 completed = [
                     e

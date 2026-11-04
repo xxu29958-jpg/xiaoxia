@@ -9,7 +9,7 @@ from tools.quality import boundaries
 from tools.quality.changes import Change
 from tools.quality.content_checks import secret_findings, verify_reference_bundle
 from tools.quality.external_checks import complexity_values
-from tools.quality.gate import required_tests
+from tools.quality.gate import complexity_changes, required_tests
 from tools.quality.size_gate import compare
 
 POLICY = json.loads((Path(__file__).parents[1] / "policy.json").read_text())
@@ -22,6 +22,25 @@ def long_function(name="f", lines=105):
 
 
 class SizeRulesTests(unittest.TestCase):
+    def test_property_setter_cannot_hide_worsening_getter_complexity(self):
+        def source(branches):
+            getter = "class State:\n    @property\n    def value(self):\n" + "".join(
+                f"        if self.x == {n}:\n            return {n}\n"
+                for n in range(branches)
+            )
+            setter = "    @value.setter\n    def value(self, x):\n" + "".join(
+                f"        if x == {n}:\n            self.x = {n}\n" for n in range(20)
+            )
+            return (getter + setter).encode()
+
+        changes = complexity_changes(
+            Path.cwd(), "state.py", source(16), source(18), POLICY
+        )
+        self.assertEqual(
+            [(r["symbol"], r["previous_value"], r["value"]) for r in changes],
+            [("State.value#1", 17, 19)],
+        )
+
     def test_new_review_fails_and_warning_does_not(self):
         big = compare("x.py", "x.py", None, long_function(), POLICY)
         small = compare("x.py", "x.py", None, long_function(lines=80), POLICY)
@@ -33,7 +52,7 @@ class SizeRulesTests(unittest.TestCase):
         same = compare("x.py", "x.py", old, old, POLICY)
         reduced = compare("x.py", "x.py", old, long_function(), POLICY)
         self.assertEqual(same[0]["state"], "unchanged")
-        self.assertEqual(reduced[0]["state"], "reduced")
+        self.assertEqual(reduced[0]["state"], "layout_only")
         self.assertFalse(any(f["blocking"] for f in [*same, *reduced]))
 
     def test_worsening_a_renamed_file_is_not_a_new_baseline(self):

@@ -6,6 +6,7 @@ from pathlib import Path
 from .ownership import SOURCE
 
 CONTRACTS = {
+    "frontend_contracts": ("dashboard/*", "tools/quality/frontend*"),
     "reading_contracts": (
         "data/plugins/astrbot_plugin_ada_companion/reading_*.py",
         "data/plugins/astrbot_plugin_ada_companion/web_notebook.py",
@@ -69,10 +70,13 @@ CONTRACTS = {
         "tests/cognition_state/*",
     ),
     "quality_contracts": (
+        ".github/workflows/*",
+        ".gitignore",
         "tools/quality/*",
         "quality/*",
         "requirements/quality.txt",
         "pyrightconfig.json",
+        "pyproject.toml",
     ),
     "installation_contracts": (
         "setup.ps1",
@@ -83,6 +87,7 @@ CONTRACTS = {
         "tests/installation/*",
         "requirements/fish*",
         "models-manifests/*",
+        "models.manifest.json",
     ),
     "media_job_contracts": (
         "services/jobs/*",
@@ -97,6 +102,7 @@ CONTRACTS = {
         "services/voice/cover_pipeline.py",
     ),
     "media_pipeline_contracts": (
+        "requirements/ci-signal.txt",
         "services/voice/cover_pipeline.py",
         "tests/media_pipeline/*",
     ),

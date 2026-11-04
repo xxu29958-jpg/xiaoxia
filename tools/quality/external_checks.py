@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from .metrics import python_metrics
@@ -14,26 +15,40 @@ from .metrics import python_metrics
 def execute(
     repo: Path, argv: list[str], *, timeout: int = 180, extra_env: dict | None = None
 ) -> dict:
-    result = subprocess.run(
-        argv,
-        cwd=repo,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        timeout=timeout,
-        env={
-            **os.environ,
-            "PYTHONDONTWRITEBYTECODE": "1",
-            "NO_COLOR": "1",
-            **(extra_env or {}),
-        },
-    )
+    started = time.monotonic()
+    try:
+        result = subprocess.run(
+            argv,
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+            env={
+                **os.environ,
+                "PYTHONDONTWRITEBYTECODE": "1",
+                "NO_COLOR": "1",
+                **(extra_env or {}),
+            },
+        )
+        code, stdout, stderr = result.returncode, result.stdout, result.stderr
+        status = "pass" if code == 0 else "fail"
+    except subprocess.TimeoutExpired as error:
+        code, status = 124, "timeout"
+        stdout = (error.stdout or b"").decode("utf-8", errors="replace")
+        stderr = (error.stderr or b"").decode(
+            "utf-8", errors="replace"
+        ) + "\nCommand timed out."
+    except OSError as error:
+        code, status, stdout, stderr = 127, "not_executed", "", str(error)
     return {
         "command": argv,
-        "exit_code": result.returncode,
-        "stdout": result.stdout,
-        "stderr": result.stderr,
+        "exit_code": code,
+        "status": status,
+        "stdout": stdout,
+        "stderr": stderr,
+        "elapsed_seconds": round(time.monotonic() - started, 3),
         "explicit_environment": extra_env or {},
     }
 
@@ -210,6 +225,7 @@ def complexity(repo: Path, path: str, text: str) -> list[dict]:
             "check",
             "--isolated",
             "--no-cache",
+            "--ignore-noqa",
             "--select",
             "C901",
             "--config",
@@ -240,15 +256,26 @@ def complexity(repo: Path, path: str, text: str) -> list[dict]:
 def complexity_values(path: str, text: str, diagnostics: list[dict]) -> dict[str, int]:
     """Bind a diagnostic to the qualified symbol, not just a shared method name."""
     symbols = python_metrics(text, path).get("symbols", [])
-    definitions = {symbol["definition_line"]: symbol["name"] for symbol in symbols}
+    definitions = {symbol["definition_line"]: symbol["key"] for symbol in symbols}
+    result = {}
+    for line, value in complexity_by_line(diagnostics).items():
+        name = definitions.get(line)
+        if name is None:
+            raise ValueError(
+                "Unsupported Ruff complexity output; update the pinned parser"
+            )
+        result[name] = value
+    return result
+
+
+def complexity_by_line(diagnostics: list[dict]) -> dict[int, int]:
     pattern = re.compile(r"`(.+)` is too complex \((\d+) > \d+\)")
     result = {}
     for finding in diagnostics:
         match = pattern.fullmatch(finding["message"])
-        name = definitions.get(finding["location"]["row"])
-        if match is None or name is None:
+        if match is None:
             raise ValueError(
                 "Unsupported Ruff complexity output; update the pinned parser"
             )
-        result[name] = int(match[2])
+        result[finding["location"]["row"]] = int(match[2])
     return result
