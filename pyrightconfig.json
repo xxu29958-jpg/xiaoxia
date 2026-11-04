@@ -8,6 +8,7 @@
   "exclude": ["**/node_modules", "**/__pycache__", ".venvs", ".runtime"],
   "executionEnvironments": [
     {"root": "tests/cognition_state", "pythonVersion": "3.12", "extraPaths": [".", "data/plugins"]},
+    {"root": "tests/registration", "pythonVersion": "3.12", "extraPaths": [".", "data/plugins"]},
     {"root": "services/memory", "pythonVersion": "3.12", "extraPaths": ["."]},
     {"root": "services/voice", "pythonVersion": "3.11", "extraPaths": [".", "vendor/soulx_singer"]},
     {"root": "services", "pythonVersion": "3.11", "extraPaths": ["."]},

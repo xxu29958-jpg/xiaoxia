@@ -4,6 +4,7 @@ from collections import deque
 from fnmatch import fnmatchcase
 
 from .quality_exceptions import for_record
+from .shared_state import extend_impact, uncertainties
 from .source_relations import relationships
 from .test_selection import CONTRACTS
 
@@ -23,7 +24,10 @@ def query(report: dict, path: str) -> dict:
     queue = deque([path])
     while queue:
         current = queue.popleft()
-        for consumer in records[current]["consumers"]:
+        for consumer in sorted(
+            set(records[current]["consumers"])
+            | set(records[current].get("business_consumers", []))
+        ):
             if consumer not in routes:
                 routes[consumer] = [*routes[current], consumer]
                 queue.append(consumer)
@@ -32,13 +36,16 @@ def query(report: dict, path: str) -> dict:
         "tree": report["tree"],
         "file": records[path],
         "consumer_routes": routes,
+        "consumer_route_kinds": {
+            target: [
+                "source" if b in records[a]["consumers"] else "shared_state"
+                for a, b in zip(route, route[1:])
+            ]
+            for target, route in routes.items()
+        },
         "domains": sorted({records[p]["domain"] for p in routes}),
         "test_groups": sorted({g for p in routes for g in records[p]["test_groups"]}),
-        "coverage_gaps": {
-            p: records[p]["dynamic_gaps"]
-            for p in routes
-            if records[p].get("dynamic_gaps")
-        },
+        "coverage_gaps": uncertainties(routes, records),
     }
 
 
@@ -50,6 +57,12 @@ def attach(
         [r["path"] for r in records],
     )
     reverse: dict[str, list[str]] = {}
+    business: dict[str, set[str]] = {}
+    extend_impact(sources, business, facts)
+    business_reverse: dict[str, list[str]] = {}
+    for source, targets in business.items():
+        for target in targets:
+            business_reverse.setdefault(target, []).append(source)
     for source, targets in edges.items():
         for target in sorted(targets):
             reverse.setdefault(target, []).append(source)
@@ -59,6 +72,8 @@ def attach(
         record["domain"] = domain(path, policy)
         record["dependencies"] = sorted(edges.get(path, set()))
         record["consumers"] = sorted(reverse.get(path, []))
+        record["business_dependencies"] = sorted(business.get(path, set()))
+        record["business_consumers"] = sorted(business_reverse.get(path, []))
         record["test_groups"] = [
             name
             for name, patterns in CONTRACTS.items()
@@ -73,7 +88,9 @@ def attach(
             "state"
             if record["state_authorities"] or record.get("state_write_candidates")
             else "integration"
-            if record["consumers"] or record.get("registrations")
+            if record["consumers"]
+            or record["business_consumers"]
+            or record.get("registrations")
             else "local"
         )
         record["quality_gates"] = ["G1"] + (
@@ -81,8 +98,9 @@ def attach(
         )
         record["exceptions"] = for_record(record, policy, as_of)
     return {
-        "scope": "Python and TypeScript/Vue imports, literal dynamic imports and tracked resources; dynamic/template/runtime activation gaps remain explicit",
+        "scope": "Source imports/resources plus separate Python shared-container read/write and registrar-call evidence. Possible consumers, not proof of runtime activation; dynamic/template/binding gaps remain explicit.",
         "edges": sum(len(targets) for targets in edges.values()),
+        "business_edges": sum(len(targets) for targets in business.values()),
         "map_gaps": [
             {"path": r["path"], "gaps": r.get("dynamic_gaps", [])}
             for r in records

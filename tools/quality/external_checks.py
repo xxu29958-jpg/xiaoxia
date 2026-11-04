@@ -117,6 +117,7 @@ def runtime_group(path: str) -> str:
             "tests/performance_delivery/",
             "data/plugins/astrbot_plugin_memory_companion/",
             "tests/cognition_state/",
+            "tests/registration/",
             "maintenance/tests/",
         )
     ) or path in {

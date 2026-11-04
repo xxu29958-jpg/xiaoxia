@@ -45,7 +45,10 @@ def scenario(records: dict[str, dict], item: dict) -> dict:
     queue = deque(routes)
     while queue:
         path = queue.popleft()
-        for consumer in records[path]["consumers"]:
+        for consumer in sorted(
+            set(records[path]["consumers"])
+            | set(records[path].get("business_consumers", []))
+        ):
             if consumer not in routes:
                 routes[consumer] = [*routes[path], consumer]
                 queue.append(consumer)
@@ -59,7 +62,7 @@ def scenario(records: dict[str, dict], item: dict) -> dict:
             {records[p]["domain"] for p in production}
         ),
         "test_groups": sorted({g for p in routes for g in records[p]["test_groups"]}),
-        "scope": "Observed dependency reach; review candidates, not a claim that every consumer requires editing",
+        "scope": "Source and shared-state reach; review candidates, not a claim that every consumer requires editing or is active at runtime",
     }
 
 
@@ -149,6 +152,11 @@ def summarize(records: list[dict], policy: dict) -> dict:
         "duplicate_rule_candidates": duplication(records),
         "multiple_writer_candidates": state_writers(records),
         "registrations": registrations,
+        "shared_state_edges": [
+            {"consumer": r["path"], "writer": writer}
+            for r in records
+            for writer in r.get("business_dependencies", [])
+        ],
         "registration_without_static_consumer": [
             r for r in registrations if not r["static_consumer_count"]
         ],

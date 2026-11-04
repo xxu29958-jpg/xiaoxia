@@ -8,6 +8,7 @@ from .external_checks import runtime_group
 from .gate import dependency_sources
 from .git_snapshot import entries
 from .ownership import CONFIG, DOCUMENT
+from .shared_state import extend_impact, uncertainties
 from .source_relations import relationships
 from .test_selection import CONTRACTS, required_tests
 
@@ -20,6 +21,7 @@ def consumers(
     origins: dict | None = None,
 ) -> dict[str, list[str]]:
     graph, records = relationships(sources, resources or [])
+    extend_impact(sources, graph, records)
     if evidence is not None:
         evidence.update(records)
     reverse: dict[str, set[str]] = {}
@@ -65,6 +67,7 @@ def mapping_gaps(
                 "computed_import",
                 "computed_frontend_import",
                 "unresolved_frontend_import",
+                "shared_state_binding",
             }
             for g in record.get("dynamic_gaps", [])
         )
@@ -113,17 +116,14 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
         [Change(p, None, "M") for p in sorted(set(paths) | routes.keys())]
     )
     gaps = mapping_gaps(paths, routes, evidence, origins)
-    uncertainties = {
-        p: evidence[p]["dynamic_gaps"]
-        for p in routes
-        if evidence.get(p, {}).get("dynamic_gaps")
-    }
-    expanded = bool(gaps or uncertainties or selected["unmapped_code_changes"])
+    unknown = uncertainties(routes, evidence)
+    expanded = bool(gaps or unknown or selected["unmapped_code_changes"])
     selection_changed = any(
         p
         in {
             "tools/quality/impact.py",
             "tools/quality/source_relations.py",
+            "tools/quality/shared_state.py",
             "tools/quality/frontend.py",
             "tools/quality/frontend_ast.cjs",
             "tools/quality/test_selection.py",
@@ -163,7 +163,7 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
         "full_regression": full,
         "selection_engine_qualification": selection_changed,
         "coverage_gaps": gaps,
-        "relationship_uncertainties": uncertainties,
+        "relationship_uncertainties": unknown,
         "expanded_checks": expanded,
         "unmapped_transitive_consumers": selected["unmapped_code_changes"],
         "g1": ["changed-source", "quality-counterexamples"],
