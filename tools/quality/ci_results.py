@@ -38,7 +38,9 @@ def test_result(command: dict) -> dict:
         + counts.get("expected failures", 0)
     )
     status = "fail" if command["exit_code"] else "pass"
-    if total is None or total == 0:
+    if command.get("status") == "timeout":
+        status = "incomplete"
+    elif total is None or total == 0:
         status = "not_executed"
     elif skipped and status == "pass":
         status = "partial"
@@ -57,7 +59,8 @@ def qualify(commands: list[dict]) -> bool:
         failed = (
             failed
             or bool(command["exit_code"])
-            or command["tests"]["status"] in {"partial", "not_executed", "fail"}
+            or command["tests"]["status"]
+            in {"partial", "incomplete", "not_executed", "fail"}
         )
     return not failed
 

@@ -50,9 +50,21 @@ class ResultTests(unittest.TestCase):
     def test_real_process_failure_missing_executable_and_timeout_are_distinct(self):
         failed = execute(Path.cwd(), [sys.executable, "-c", "raise SystemExit(7)"])
         missing = execute(Path.cwd(), ["xiaoxia-nonexistent-test-executable"])
-        timeout = execute(
-            Path.cwd(), [sys.executable, "-c", "import time; time.sleep(5)"], timeout=1
-        )
+        with tempfile.TemporaryDirectory() as root:
+            (Path(root) / "test_wait.py").write_text(
+                "import sys,time,unittest\n"
+                "class Wait(unittest.TestCase):\n"
+                " def test_wait(self):\n"
+                "  print('partial output',flush=True)\n"
+                "  print('failure diagnostic',file=sys.stderr,flush=True)\n"
+                "  time.sleep(5)\n",
+                encoding="utf-8",
+            )
+            timeout = execute(
+                Path(root),
+                [sys.executable, "-B", "-m", "unittest", "discover", "-v"],
+                timeout=1,
+            )
         self.assertEqual(
             [r["status"] for r in (failed, missing, timeout)],
             ["fail", "not_executed", "timeout"],
@@ -60,6 +72,15 @@ class ResultTests(unittest.TestCase):
         self.assertTrue(
             all(r["elapsed_seconds"] >= 0 for r in (failed, missing, timeout))
         )
+        self.assertEqual(timeout["exit_code"], 124)
+        self.assertEqual(timeout["timeout_seconds"], 1)
+        self.assertIn("partial output", timeout["stdout"])
+        self.assertIn("failure diagnostic", timeout["stderr"])
+        self.assertIn("Command timed out", timeout["stderr"])
+        self.assertFalse(qualify([timeout]))
+        self.assertEqual(timeout["tests"]["status"], "incomplete")
+        self.assertIsNone(timeout["tests"]["executed"])
+        json.dumps(timeout)
 
     def test_actual_unittest_skip_cannot_be_an_all_pass(self):
         result = execute(
