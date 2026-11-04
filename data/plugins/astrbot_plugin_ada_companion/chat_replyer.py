@@ -148,10 +148,9 @@ class ChatReplyer:
             appraisal_receipts = await self.appraisals.apply_updates(
                 event, decision.get("appraisal_updates", [])
             )
-            if any(not r.get("ok") or not r.get("current") for r in appraisal_receipts):
-                text += "\n这次对事情的理解没能保存，之后可能还需要你提醒。"
-                response.completion_text = text
-                event.set_extra("ada_spoken_reply", text)
+            appraisal_failed = any(
+                not r.get("ok") or not r.get("current") for r in appraisal_receipts
+            )
             self.last = {
                 "ok": True,
                 "mode": "native_single_pass",
@@ -160,6 +159,7 @@ class ChatReplyer:
                     time.monotonic() - event.get_extra("ada_reply_started"), 2
                 ),
                 "extra_model_calls": 0,
+                "appraisal_save_failed": appraisal_failed,
                 "voice_emotion": event.get_extra("ada_voice_emotion") or "neutral",
             }
         except (ValueError, KeyError, TypeError, AttributeError) as exc:
