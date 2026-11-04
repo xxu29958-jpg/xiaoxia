@@ -17,6 +17,7 @@ def consumers(
     paths: list[str],
     resources: list[str] | None = None,
     evidence: dict | None = None,
+    origins: dict | None = None,
 ) -> dict[str, list[str]]:
     graph, records = relationships(sources, resources or [])
     if evidence is not None:
@@ -25,28 +26,36 @@ def consumers(
     for source, targets in graph.items():
         for target in targets:
             reverse.setdefault(target, set()).add(source)
-    routes = {path: [path] for path in paths}
-    queue = deque(routes)
+    routes: dict[str, list[str]] = {}
+    roots: dict[str, set[str]] = {}
+    queue = deque([path] for path in paths)
     while queue:
-        node = queue.popleft()
+        route = queue.popleft()
+        root, node = route[0], route[-1]
+        if root in roots.setdefault(node, set()):
+            continue
+        roots[node].add(root)
+        routes.setdefault(node, route)
         for parent in sorted(reverse.get(node, set())):
-            if parent not in routes:
-                routes[parent] = [*routes[node], parent]
-                queue.append(parent)
+            queue.append([*route, parent])
+    if origins is not None:
+        origins.update({node: sorted(values) for node, values in roots.items()})
     return routes
 
 
-def mapping_gaps(paths: list[str], routes: dict, evidence: dict) -> list[str]:
+def mapping_gaps(
+    paths: list[str], routes: dict, evidence: dict, origins: dict | None = None
+) -> list[str]:
     mapped = {
         p
         for p in routes
         if any(required_tests([Change(p, None, "M")])[k] for k in CONTRACTS)
     }
+    roots = origins if origins is not None else {p: [r[0]] for p, r in routes.items()}
+    covered = {root for node in mapped for root in roots.get(node, [])}
     gaps = []
     for path in paths:
-        reaches_test = path in mapped or any(
-            route[0] == path and end in mapped for end, route in routes.items()
-        )
+        reaches_test = path in mapped or path in covered
         if not reaches_test and Path(path).suffix not in DOCUMENT:
             gaps.append(path)
         record = evidence.get(path, {})
@@ -64,8 +73,7 @@ def mapping_gaps(paths: list[str], routes: dict, evidence: dict) -> list[str]:
     return sorted(set(gaps))
 
 
-def plan(repo: Path, base: str, *, full: bool = False) -> dict:
-    snapshot = capture(repo, base)
+def changed_consumers(repo: Path, snapshot: dict) -> tuple[dict, dict, dict]:
     changes = snapshot["changes"]
     old, new = dependency_sources(
         repo, snapshot["base"], changes, include_frontend=True
@@ -81,13 +89,30 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
         | {p for p in paths if Path(p).suffix in CONFIG | {".sql"}}
     )
     evidence = {}
-    routes = consumers(old, previous, resources) | consumers(
-        new, paths, resources, evidence
+    old_origins, new_origins = {}, {}
+    routes = consumers(old, previous, resources, origins=old_origins) | consumers(
+        new, paths, resources, evidence, new_origins
     )
+    aliases = dict(zip(previous, paths, strict=True))
+    origins = {
+        node: sorted(
+            {aliases.get(p, p) for p in old_origins.get(node, [])}
+            | set(new_origins.get(node, []))
+        )
+        for node in routes
+    }
+    return routes, evidence, origins
+
+
+def plan(repo: Path, base: str, *, full: bool = False) -> dict:
+    snapshot = capture(repo, base)
+    changes = snapshot["changes"]
+    paths = [c.path for c in changes]
+    routes, evidence, origins = changed_consumers(repo, snapshot)
     selected = required_tests(
         [Change(p, None, "M") for p in sorted(set(paths) | routes.keys())]
     )
-    gaps = mapping_gaps(paths, routes, evidence)
+    gaps = mapping_gaps(paths, routes, evidence, origins)
     uncertainties = {
         p: evidence[p]["dynamic_gaps"]
         for p in routes
@@ -132,6 +157,7 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
         "candidate_hashes": snapshot["content_sha256"],
         "changes": [vars(c) for c in changes],
         "consumer_routes": routes,
+        "consumer_origins": origins,
         "groups": groups,
         "incremental_groups": incremental,
         "full_regression": full,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any, cast
 
 from .astrbot_compat import (
     clean_private_companion_history_text,
@@ -28,11 +28,18 @@ from .service_support import (
     _HookStageTimer,
 )
 
+if TYPE_CHECKING:
+    from .service import MemoryCompanionService
+
+# The facade is the runtime host of this mixin. These local casts bind shared
+# members to its real definitions; they do not suppress member or call checks.
+
 
 class MemoryCompanionServiceRequestCapture:
     """service request capture; the facade owns all shared resources."""
 
     async def handle_llm_request(self, event: Any, req: Any) -> None:
+        self = cast("MemoryCompanionService", self)
         remove_temp_text(
             req, MEMORY_COMPANION_INJECTION_HEADER, MEMORY_COMPANION_INJECTION_FOOTER
         )
@@ -101,7 +108,6 @@ class MemoryCompanionServiceRequestCapture:
         stage_timer.mark("reply_chain")
 
         if capture_enabled:
-            await self._apply_user_reaction_feedback(ctx)
             self._update_address_evolution(ctx, ctx.message_text or "")
         stage_timer.mark("feedback")
 
@@ -190,6 +196,8 @@ class MemoryCompanionServiceRequestCapture:
         包含：稳定事实抽取、时间线写入、关系边记录、画像捕获等。
         所有异常在此被捕获并记录日志，不会传播到请求路径。
         """
+        self = cast("MemoryCompanionService", self)
+        reply_chain = reply_chain or []
         try:
             # 身份双写（user+group）合并单事务，随采集链一并移入后台，不阻塞请求关键路径。
             await self.note_identity(ctx)
@@ -414,6 +422,7 @@ class MemoryCompanionServiceRequestCapture:
             )
 
     async def handle_group_message(self, event: Any) -> None:
+        self = cast("MemoryCompanionService", self)
         self._ensure_lifecycle_maintenance_dispatcher()
         self._ensure_wal_checkpoint_loop()
         self._ensure_acl_projection_reconcile_loop()
@@ -475,6 +484,7 @@ class MemoryCompanionServiceRequestCapture:
         self._schedule_session_summary(ctx, reason="group_conversation")
 
     async def handle_llm_response(self, event: Any, resp: Any) -> None:
+        self = cast("MemoryCompanionService", self)
         if getattr(event, "_memory_capture_receipt", None) is not None:
             return  # Outgoing originals are supplied only by the delivery owner.
         if self._private_companion_internal_generation_event(event):
@@ -541,6 +551,7 @@ class MemoryCompanionServiceRequestCapture:
         content: str = "",
         recent_rows: list[dict[str, Any]] | None = None,
     ) -> str:
+        self = cast("MemoryCompanionService", self)
         message_id = clean_text(ctx.message_id, 120)
         rows = recent_rows
         if rows is None:
@@ -572,7 +583,7 @@ class MemoryCompanionServiceRequestCapture:
                 )
                 if previous_at is not None:
                     gap_seconds = max(
-                        0.0, (datetime.now(timezone.utc) - previous_at).total_seconds()
+                        0.0, (datetime.now(UTC) - previous_at).total_seconds()
                     )
                     if gap_seconds <= 3:
                         return clean_text(row.get("id"), 160)
@@ -585,6 +596,7 @@ class MemoryCompanionServiceRequestCapture:
         source: str,
         recent_rows: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
+        self = cast("MemoryCompanionService", self)
         metadata: dict[str, Any] = {
             "source": clean_text(source, 80),
             "conversation_memory": True,
@@ -611,7 +623,7 @@ class MemoryCompanionServiceRequestCapture:
             )
             if previous_at is not None:
                 gap_minutes = max(
-                    0.0, (datetime.now(timezone.utc) - previous_at).total_seconds() / 60
+                    0.0, (datetime.now(UTC) - previous_at).total_seconds() / 60
                 )
                 metadata["previous_gap_minutes"] = round(gap_minutes, 2)
                 starts_new_segment = gap_minutes >= idle_limit
@@ -630,6 +642,7 @@ class MemoryCompanionServiceRequestCapture:
         return metadata
 
     async def _reply_chain_for_event(self, event: Any) -> list[dict[str, Any]]:
+        self = cast("MemoryCompanionService", self)
         if event is None:
             return []
         try:
@@ -642,11 +655,13 @@ class MemoryCompanionServiceRequestCapture:
         return chain
 
     def _reply_chain_metadata(self, chain: list[dict[str, Any]]) -> dict[str, Any]:
+        self = cast("MemoryCompanionService", self)
         return self.reply_chain.metadata(chain)
 
     def _timeline_content_with_reply_chain(
         self, message_text: str, chain: list[dict[str, Any]]
     ) -> str:
+        self = cast("MemoryCompanionService", self)
         text = clean_text(message_text, 1600)
         reply_context = self.reply_chain.format_for_query(chain, max_chars=520)
         if not reply_context:
@@ -656,6 +671,7 @@ class MemoryCompanionServiceRequestCapture:
         return clean_text(f"[引用链上下文] {reply_context}", 2000)
 
     def _cross_window_event_metadata(self, ctx: SessionContext) -> dict[str, str]:
+        self = cast("MemoryCompanionService", self)
         return {
             "owner_bot_id": clean_text(self._bot_subject_id(ctx), 120),
             "persona_id": clean_text(ctx.persona_id, 96),

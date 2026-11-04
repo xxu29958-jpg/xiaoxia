@@ -139,14 +139,17 @@ def facts(path: str, text: str) -> dict:
 
 
 def relationships(
-    sources: dict[str, bytes], resources: Sequence[str] = ()
+    sources: dict[str, bytes],
+    resources: Sequence[str] = (),
+    *,
+    runtime_only: bool = False,
 ) -> tuple[dict[str, set[str]], dict]:
     scripts = {
         p: data for p, data in sources.items() if PurePosixPath(p).suffix in EXTENSIONS
     }
     sources = {p: data for p, data in sources.items() if p not in scripts}
     module_paths = {boundaries.module_name(path): path for path in sources}
-    static = boundaries.graph(sources)
+    static = boundaries.graph(sources, runtime_only=runtime_only)
     graph = {
         module_paths[node]: {module_paths[edge] for edge in edges}
         for node, edges in static.items()

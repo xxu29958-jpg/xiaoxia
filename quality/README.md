@@ -37,6 +37,9 @@ First-party Production Total 表示当前承担维护的生产源码，不表示
 TypeScript 5.1.6／Vue SFC 3.3.4 从输入文本解析导入和符号，不执行 Vite 或产品代码；实际别名从 Vite AST 取得。
 前端组沿既有 pnpm 10.15.1 与锁文件安装，运行 vue-tsc 和多语言键检查；动态翻译键与页面旅程不因此变成已覆盖。
 同一报告的 architecture 部分保存依赖环、跨域边、扇入／扇出、重复规则候选、多写入者候选和三个代表改动的消费者路径。
+源码图与影响选测保留类型引用；门禁另报告 `new_source_cycles` 与阻断性的运行时 `new_cycles`。
+只有已确认由 `typing` 导入且未重绑定的 `TYPE_CHECKING` 分支才不算运行时边；其 else、未知条件和普通导入仍参与阻断。
+跨层禁止规则继续检查全部源码依赖。此区分依据 [Python TYPE_CHECKING 语义](https://docs.python.org/3.12/library/typing.html#typing.TYPE_CHECKING)，不表示消除了组合类的耦合。
 重复语法、同名表或内部路径只构成调查候选，不直接判定业务规则重复或多头权威。
 历史沿 Git 识别到的改名追踪，差分同时保留原／新路径、绝对规模、增删量和函数／接口／依赖／例外变化。
 局部规模例外绑定 AST 指纹、上限、责任人、验证、退出条件、复查日期及不可删的历史；排版缩短和改名不能抹掉原审查记录。

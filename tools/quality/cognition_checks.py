@@ -50,6 +50,8 @@ def cognition_checks(repo: Path, interpreter: str) -> list[dict]:
             "data/plugins/astrbot_plugin_memory_companion/tests/test_source_capture.py",
             "data/plugins/astrbot_plugin_memory_companion/tests/test_memory_atom_v2.py",
             "data/plugins/astrbot_plugin_memory_companion/tests/test_message_sources.py",
+            "data/plugins/astrbot_plugin_memory_companion/tests/test_remember_tool_contract.py",
+            "data/plugins/astrbot_plugin_memory_companion/tests/test_reply_continuity.py",
         ],
     ]
     results = []

@@ -4,6 +4,7 @@ import asyncio
 import secrets
 import threading
 import time
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -58,7 +59,6 @@ from .service_memory_tools import MemoryCompanionServiceMemoryTools
 from .service_navigation import MemoryCompanionServiceNavigation
 from .service_operations import MemoryCompanionServiceOperations
 from .service_provider_selection import MemoryCompanionServiceProviderSelection
-from .service_reaction_feedback import MemoryCompanionServiceReactionFeedback
 from .service_recall_routing import MemoryCompanionServiceRecallRouting
 from .service_recent_context import MemoryCompanionServiceRecentContext
 from .service_relationship_phase import MemoryCompanionServiceRelationshipPhase
@@ -162,7 +162,6 @@ class MemoryCompanionService(
     MemoryCompanionServiceActorFiltering,
     MemoryCompanionServiceExpressionPolicy,
     MemoryCompanionServiceCompanionDedupe,
-    MemoryCompanionServiceReactionFeedback,
     MemoryCompanionServiceRelationshipPhase,
 ):
     """Own shared runtime resources; domain classes never create separate state."""
@@ -397,8 +396,6 @@ class MemoryCompanionService(
             getattr(_event, "message_obj", None),
             _event,
         ):
-            if source is None:
-                continue
             for attr in ("bot_user_id", "bot_self_id", "self_id", "client_self_id"):
                 add(getattr(source, attr, ""))
 
@@ -415,6 +412,8 @@ class MemoryCompanionService(
             try:
                 stars = getter() or []
             except Exception:
+                stars = []
+            if not isinstance(stars, Iterable):
                 stars = []
             for star in stars:
                 for attr in ("bot_user_id", "bot_self_id", "self_id"):

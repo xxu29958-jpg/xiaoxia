@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from .memory_atom import (
     DURABILITY_LEVELS,
@@ -29,12 +29,19 @@ from .models import (
 )
 from .sensitive_data import redact_sensitive_text, redact_sensitive_value
 
+if TYPE_CHECKING:
+    from .store import MemoryStore
+
+# The facade is the runtime host of this mixin. These local casts bind shared
+# members to its real definitions; they do not suppress member or call checks.
+
 
 class MemoryStoreRecordUpdates:
     """store record updates; the facade owns all shared resources."""
 
     async def update_memory_owner_bot(self, memory_id: str, owner_bot_id: str) -> bool:
         """Update the Memory Atom owner and its mirrored metadata field."""
+        self = cast("MemoryStore", self)
         return await self._run_recoverable_database_operation(
             self._update_memory_owner_bot_sync,
             memory_id,
@@ -42,6 +49,7 @@ class MemoryStoreRecordUpdates:
         )
 
     def _update_memory_owner_bot_sync(self, memory_id: str, owner_bot_id: str) -> bool:
+        self = cast("MemoryStore", self)
         memory_id = clean_text(memory_id, 120)
         owner_bot_id = clean_text(owner_bot_id, 120)
         if (
@@ -100,6 +108,7 @@ class MemoryStoreRecordUpdates:
         profile_polarity="",
         trace_id="",
     ):
+        self = cast("MemoryStore", self)
         return await self._run_recoverable_database_operation(
             self._correct_user_memory_sync,
             ctx,
@@ -125,6 +134,7 @@ class MemoryStoreRecordUpdates:
         profile_polarity,
         trace_id,
     ):
+        self = cast("MemoryStore", self)
         if (
             action not in {"correct", "lookup"}
             or not correction_id
@@ -232,6 +242,7 @@ class MemoryStoreRecordUpdates:
         durability: str | None = None,
         sensitivity: str | None = None,
     ) -> bool:
+        self = cast("MemoryStore", self)
         return await self._run_recoverable_database_operation(
             self._update_memory_payload_sync,
             memory_id,
@@ -271,6 +282,7 @@ class MemoryStoreRecordUpdates:
         durability: str | None,
         sensitivity: str | None,
     ) -> bool:
+        self = cast("MemoryStore", self)
         memory_id = clean_text(memory_id, 120)
         with self._lock:
             with self._transaction_sync():
@@ -483,130 +495,6 @@ class MemoryStoreRecordUpdates:
                 self._upsert_memory_fts_row(row)
                 return cur.rowcount > 0
 
-    async def update_memory_reaction_feedback(
-        self,
-        memory_id: str,
-        *,
-        reaction: str,
-        evidence: str,
-        source_id: str = "",
-        mention_delta: float = 0.0,
-        confidence_delta: float = 0.0,
-        emotional_delta: float = 0.0,
-    ) -> bool:
-        return await asyncio.to_thread(
-            self._update_memory_reaction_feedback_sync,
-            memory_id,
-            reaction,
-            evidence,
-            source_id,
-            mention_delta,
-            confidence_delta,
-            emotional_delta,
-        )
-
-    def _update_memory_reaction_feedback_sync(
-        self,
-        memory_id: str,
-        reaction: str,
-        evidence: str,
-        source_id: str,
-        mention_delta: float,
-        confidence_delta: float,
-        emotional_delta: float,
-    ) -> bool:
-        memory_id = clean_text(memory_id, 120)
-        reaction = clean_text(reaction, 60)
-        evidence = clean_text(redact_sensitive_text(evidence), 500)
-        with self._lock:
-            row = self._conn.execute(
-                "SELECT metadata, confidence FROM memories WHERE id=?", (memory_id,)
-            ).fetchone()
-            if not row:
-                return False
-            metadata = json_loads(row["metadata"], {})
-            if not isinstance(metadata, dict):
-                metadata = {}
-            feedback = metadata.get("mention_feedback")
-            if not isinstance(feedback, dict):
-                feedback = {}
-            source_id = clean_text(source_id, 120)
-            applied_sources = feedback.get("applied_sources")
-            if not isinstance(applied_sources, list):
-                applied_sources = []
-            if source_id and source_id in applied_sources:
-                return False
-            if source_id:
-                applied_sources.append(source_id)
-                feedback["applied_sources"] = applied_sources[-12:]
-            count_key = f"{reaction}_count"
-            try:
-                feedback[count_key] = int(feedback.get(count_key) or 0) + 1
-            except Exception:
-                feedback[count_key] = 1
-            now = utc_now()
-            feedback["last_reaction"] = reaction
-            feedback["last_reaction_at"] = now
-            if evidence:
-                feedback["last_evidence"] = evidence
-            metadata["mention_feedback"] = feedback
-            try:
-                mentionability = float(metadata.get("mentionability_score", 0.5) or 0.5)
-            except Exception:
-                mentionability = 0.5
-            mentionability = max(
-                0.0, min(1.0, mentionability + float(mention_delta or 0.0))
-            )
-            metadata["mentionability_score"] = round(mentionability, 3)
-            if reaction in {"awkward", "denied"} and mentionability <= 0.35:
-                metadata["mention_policy"] = "avoid_unless_asked"
-            elif (
-                reaction in {"accepted", "comforted", "touched", "nostalgic"}
-                and mentionability >= 0.62
-            ):
-                metadata["mention_policy"] = "soft_echo"
-            if reaction == "corrected" and evidence:
-                metadata["user_correction"] = {
-                    "text": evidence,
-                    "created_at": now,
-                }
-                metadata["mention_policy"] = "avoid_unless_asked"
-            try:
-                confidence = max(
-                    0.0,
-                    min(
-                        1.0,
-                        float(row["confidence"] or 0.5)
-                        + float(confidence_delta or 0.0),
-                    ),
-                )
-            except Exception:
-                confidence = float(row["confidence"] or 0.5)
-            if emotional_delta:
-                try:
-                    emotional = float(metadata.get("emotional_weight") or 0.0)
-                except Exception:
-                    emotional = 0.0
-                metadata["emotional_weight"] = round(
-                    max(0.0, min(1.0, emotional + float(emotional_delta or 0.0))), 3
-                )
-            cur = self._conn.execute(
-                """
-                UPDATE memories
-                SET metadata=?,
-                    confidence=?,
-                    updated_at=?
-                WHERE id=?
-                """,
-                (json_dumps(metadata), confidence, now, memory_id),
-            )
-            row = self._conn.execute(
-                "SELECT * FROM memories WHERE id=?", (memory_id,)
-            ).fetchone()
-            self._upsert_memory_fts_row(row)
-            self._conn.commit()
-            return cur.rowcount > 0
-
     async def delete_memory(self, memory_id: str) -> bool:
         return await asyncio.to_thread(self._delete_memory_sync, memory_id)
 
@@ -630,6 +518,7 @@ class MemoryStoreRecordUpdates:
     def _timeline_reference_memories_sync(
         self, event_ids: set[str]
     ) -> list[tuple[str, dict[str, Any]]]:
+        self = cast("MemoryStore", self)
         if not event_ids:
             return []
         matches: list[tuple[str, dict[str, Any]]] = []
@@ -644,6 +533,7 @@ class MemoryStoreRecordUpdates:
         return matches
 
     def _mark_timeline_sources_expired_sync(self, event_ids: list[str]) -> int:
+        self = cast("MemoryStore", self)
         targets = {
             clean_text(value, 160)
             for value in event_ids
@@ -682,6 +572,7 @@ class MemoryStoreRecordUpdates:
     def _delete_memories_referencing_timeline_ids_sync(
         self, event_ids: list[str]
     ) -> int:
+        self = cast("MemoryStore", self)
         targets = {
             clean_text(value, 160)
             for value in event_ids
@@ -715,6 +606,7 @@ class MemoryStoreRecordUpdates:
         return len(memory_ids)
 
     def _delete_memory_sync(self, memory_id: str) -> bool:
+        self = cast("MemoryStore", self)
         memory_id = clean_text(memory_id, 120)
         with self._lock:
             with self._transaction_sync():
