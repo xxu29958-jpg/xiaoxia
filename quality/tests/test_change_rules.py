@@ -88,16 +88,17 @@ class SizeRulesTests(unittest.TestCase):
                 )
 
     def test_tool_named_runtime_modules_keep_production_responsibility(self):
-        findings = compare(
+        for path in (
             "plugins/p/core/tools/moved.py",
-            "app/original.py",
-            long_function(),
-            long_function(),
-            POLICY,
-        )
-        self.assertFalse(
-            any(f["metric"] == "maintenance_responsibility" for f in findings)
-        )
+            "plugins/p/skills/documents/scripts/moved.py",
+        ):
+            with self.subTest(path=path):
+                findings = compare(
+                    path, "app/original.py", long_function(), long_function(), POLICY
+                )
+                self.assertFalse(
+                    any(f["metric"] == "maintenance_responsibility" for f in findings)
+                )
 
     def test_complexity_does_not_mix_identically_named_methods(self):
         source = "class A:\n    def run(self):\n        pass\nclass B:\n    def run(self):\n        pass\n"

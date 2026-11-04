@@ -88,6 +88,16 @@ class LineTests(unittest.TestCase):
         self.assertEqual(record["code_lines"], 2)
         self.assertEqual(parsed, source)
 
+    def test_runtime_skill_scripts_remain_production_when_locally_changed(self):
+        path = "astrbot/builtin_stars/astrbot/skills/documents/scripts/inspect_docx.py"
+        source = b"def inspect_document():\n    return 1\n"
+        entry = Entry(path, "local", "blob", len(source))
+        record, parsed = file_record(entry, source, POLICY, {path: "upstream"})
+        self.assertEqual(record["category"], "upstream_modified/production")
+        self.assertTrue(record["first_party_production"])
+        self.assertFalse(record["size_exempt"])
+        self.assertEqual(parsed, source)
+
     def test_actual_ruff_measures_below_ten_and_above_fifteen_without_custom_formula(
         self,
     ):
