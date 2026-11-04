@@ -99,7 +99,7 @@ def render(report: dict) -> str:
     lines += [
         "## 影响与覆盖",
         "",
-        "以下是实际源码的反向可达消费者；是否必须修改仍需审查对应规则。",
+        "以下是源码、共享注册状态和 HTTP 地址的反向可达消费者；默认配置不证明运行时激活，是否必须修改仍需审查对应规则。",
         "",
     ]
     lines += table(
@@ -115,7 +115,7 @@ def render(report: dict) -> str:
         ],
     )
     lines += [
-        f"源码依赖边：{report['influence']['edges']}；依赖环组：{len(report['architecture']['cycles'])}；显式关系缺口文件：{len(report['influence']['map_gaps'])}。",
+        f"源码依赖边：{report['influence']['edges']}；HTTP 服务影响边：{report['influence'].get('protocol_edges', 0)}；源码依赖环组：{len(report['architecture']['cycles'])}；显式关系缺口文件：{len(report['influence']['map_gaps'])}。",
         "",
         "解析到的注册与实际运行激活分别标注；重复代码、同名表、多写入者是调查线索。未覆盖的动态关系与产品旅程不能算通过。",
         "",

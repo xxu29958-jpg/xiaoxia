@@ -48,6 +48,7 @@ def scenario(records: dict[str, dict], item: dict) -> dict:
         for consumer in sorted(
             set(records[path]["consumers"])
             | set(records[path].get("business_consumers", []))
+            | set(records[path].get("protocol_consumers", []))
         ):
             if consumer not in routes:
                 routes[consumer] = [*routes[path], consumer]
@@ -62,7 +63,7 @@ def scenario(records: dict[str, dict], item: dict) -> dict:
             {records[p]["domain"] for p in production}
         ),
         "test_groups": sorted({g for p in routes for g in records[p]["test_groups"]}),
-        "scope": "Source and shared-state reach; review candidates, not a claim that every consumer requires editing or is active at runtime",
+        "scope": "Source, shared-state and HTTP service reach; review candidates, not proof that every consumer requires editing or is active at runtime",
     }
 
 
@@ -156,6 +157,11 @@ def summarize(records: list[dict], policy: dict) -> dict:
             {"consumer": r["path"], "writer": writer}
             for r in records
             for writer in r.get("business_dependencies", [])
+        ],
+        "http_protocol_relations": [
+            {"consumer": r["path"], **site}
+            for r in records
+            for site in r.get("protocol_relations", [])
         ],
         "registration_without_static_consumer": [
             r for r in registrations if not r["static_consumer_count"]

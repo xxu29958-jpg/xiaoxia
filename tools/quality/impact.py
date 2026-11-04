@@ -3,6 +3,7 @@
 from collections import deque
 from pathlib import Path
 
+from . import http_protocol
 from .changes import Change, capture
 from .external_checks import runtime_group
 from .gate import dependency_sources
@@ -22,6 +23,7 @@ def consumers(
 ) -> dict[str, list[str]]:
     graph, records = relationships(sources, resources or [])
     extend_impact(sources, graph, records)
+    http_protocol.extend_impact(graph, records)
     if evidence is not None:
         evidence.update(records)
     reverse: dict[str, set[str]] = {}
@@ -68,6 +70,9 @@ def mapping_gaps(
                 "computed_frontend_import",
                 "unresolved_frontend_import",
                 "shared_state_binding",
+                "http_target",
+                "http_binding",
+                "http_listener",
             }
             for g in record.get("dynamic_gaps", [])
         )
@@ -116,7 +121,9 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
         [Change(p, None, "M") for p in sorted(set(paths) | routes.keys())]
     )
     gaps = mapping_gaps(paths, routes, evidence, origins)
-    unknown = uncertainties(routes, evidence)
+    unknown = http_protocol.uncertainties(routes, evidence) | uncertainties(
+        routes, evidence
+    )
     expanded = bool(gaps or unknown or selected["unmapped_code_changes"])
     selection_changed = any(
         p
@@ -124,6 +131,7 @@ def plan(repo: Path, base: str, *, full: bool = False) -> dict:
             "tools/quality/impact.py",
             "tools/quality/source_relations.py",
             "tools/quality/shared_state.py",
+            "tools/quality/http_protocol.py",
             "tools/quality/frontend.py",
             "tools/quality/frontend_ast.cjs",
             "tools/quality/test_selection.py",
