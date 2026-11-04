@@ -117,6 +117,8 @@ class JourneyTests(unittest.IsolatedAsyncioTestCase):
         self.assertLess(time.monotonic() - before, 2)
         self.component.worker.start()
         await until(lambda: self.gateway.started.is_set(), bool)
+        # Remote rendering may start before the POST response binds the local job.
+        await until(lambda: self.saved(request_id), lambda row: bool(row["job_id"]))
         status = json.loads(
             await self.plugin.performance_status(
                 self.events["weixin_oc"], request_id=request_id

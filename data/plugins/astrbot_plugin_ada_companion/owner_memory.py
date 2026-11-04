@@ -33,11 +33,17 @@ class OwnerMemory:
             event: A real incoming platform event.
         """
         origin = event.unified_msg_origin
-        if not self.healthy or origin not in self.owners or not event.is_private_chat():
+        if not self.healthy:
+            return
+        try:
+            self.scope(event)
+        except PermissionError:
             return
         if not getattr(event, "_ada_memory_received_ns", 0):
             self.last_received_ns = max(time.time_ns(), self.last_received_ns + 1)
             event._ada_memory_received_ns = self.last_received_ns
+        if origin not in self.owners:
+            return
         context = {
             "session_id": origin,
             "scope": "private",

@@ -85,6 +85,7 @@ def bot_checks(repo: Path, interpreter: str) -> list[dict]:
                         "ASTRBOT_ROOT": root,
                         "ASTRBOT_TEST_MODE": "true",
                         "TESTING": "true",
+                        "PYTHONPATH": str(repo / "data/plugins"),
                     },
                 )
             )
@@ -98,6 +99,7 @@ def runtime_group(path: str) -> str:
             "tests/performance_delivery/",
             "data/plugins/astrbot_plugin_memory_companion/",
             "tests/cognition_state/",
+            "maintenance/tests/",
         )
     ) or path in {
         "astrbot/core/star/register/star_handler.py",

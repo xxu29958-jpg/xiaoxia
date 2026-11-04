@@ -7,6 +7,11 @@ from datetime import datetime
 from types import SimpleNamespace
 
 from astrbot.core.astr_main_agent import _ensure_persona_and_skills
+from astrbot.core.message.components import Plain
+from astrbot.core.platform.astr_message_event import AstrMessageEvent
+from astrbot.core.platform.astrbot_message import AstrBotMessage, MessageMember
+from astrbot.core.platform.message_type import MessageType
+from astrbot.core.platform.platform_metadata import PlatformMetadata
 from astrbot.core.provider.entities import ProviderRequest
 
 from .policy import LOCAL_TZ
@@ -19,6 +24,7 @@ class AdminApi:
 
     async def status(self):
         now = time.time()
+        working = await self.plugin.dialogue.snapshot(self.plugin.target)
         enabled = bool(
             self.plugin.config.get("proactive_enabled", False)
             and self.plugin.policy.healthy
@@ -48,8 +54,9 @@ class AdminApi:
                 "channel_revision": self.plugin.policy.data["channel_revision"],
                 "memory_connected": self.plugin.services.memory() is not None,
                 "linked_memory": self.plugin.owner_memory.last,
-                "dialogue_healthy": self.plugin.dialogue.healthy,
-                "open_threads": len(self.plugin.dialogue.visible(self.plugin.target)),
+                "dialogue_healthy": working["ok"],
+                "open_threads": working.get("total"),
+                "working_state_error": working.get("error"),
                 "voice_enabled": bool(self.plugin.config.get("voice_enabled", False)),
                 "cloud_voice": self.plugin.cloud_voice.status(),
                 "local_voice": self.plugin.local_voice.status(),
@@ -230,16 +237,7 @@ class AdminApi:
             }:
                 continue
             identity = self.plugin.owner_memory.contexts[origin]
-            extras = {}
-            event = SimpleNamespace(
-                unified_msg_origin=origin,
-                is_private_chat=lambda: True,
-                get_platform_name=lambda: identity["platform"],
-                get_sender_id=lambda: identity["user_id"],
-                get_message_str=lambda: "继续聊我们刚才的事",
-                set_extra=lambda key, value: extras.update({key: value}),
-                get_extra=lambda key, default=None: extras.get(key, default),
-            )
+            event = inspection_event(origin, identity)
             cid = await cm.get_curr_conversation_id(origin)
             conversation = await cm.get_conversation(origin, cid)
             req = ProviderRequest(conversation=conversation, system_prompt="")
@@ -267,7 +265,7 @@ class AdminApi:
                 {
                     "channel": origin.split(":", 1)[0],
                     "persona": persona_id,
-                    "tools": sorted(req.func_tool.names()),
+                    "tools": sorted(req.func_tool.names()) if req.func_tool else [],
                     "tool_scope": self.plugin.owner_memory.scope(event),
                     "core_ok": core["ok"],
                     "core_blocks": len(core.get("blocks", [])),
@@ -277,3 +275,20 @@ class AdminApi:
                 }
             )
         return {"status": "ok", "data": results}
+
+
+def inspection_event(origin, identity):
+    """A non-delivering native event for the authenticated tool/persona probe."""
+    message = AstrBotMessage()
+    message.type = MessageType.FRIEND_MESSAGE
+    message.self_id = identity["bot_id"]
+    message.sender = MessageMember(identity["user_id"], "Owner")
+    message.message_str = "继续聊我们刚才的事"
+    message.message = [Plain(message.message_str)]
+    message.message_id = "management-read-only-probe"
+    return AstrMessageEvent(
+        message.message_str,
+        message,
+        PlatformMetadata(identity["platform"], "inspection", origin.split(":", 1)[0]),
+        origin.split(":", 2)[-1],
+    )

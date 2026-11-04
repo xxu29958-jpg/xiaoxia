@@ -34,17 +34,22 @@ export function renderConversation(data = {}, action) {
   for (const topic of data.topics || []) {
     const row = element("div", "");
     row.className = "bookmark";
-    const button = element("button", "不再追问");
+    const button = element("button", topic.kind === "goal" ? "结束目标" : "不再追问");
     button.onclick = () =>
       action("topic_close", { id: topic.id, expected: topic });
     row.append(
-      element("strong", topic.title),
+      element("strong", (topic.kind === "goal" ? "目标 · " : "") + topic.title),
       element("p", topic.content),
       button,
     );
     topics.append(row);
   }
-  if (!topics.children.length) topics.append(element("p", "没有待续话题。"));
+  if (data.working_state?.ok === false)
+    topics.replaceChildren(element("p", "后续事项暂时无法读取，请稍后刷新。"));
+  else if (!topics.children.length)
+    topics.append(element("p", "没有待续话题或进行中的目标。"));
+  if (data.working_state?.next_offset != null)
+    topics.append(element("p", `当前显示 ${(data.topics || []).length} 项，共 ${data.working_state.total} 项；其余可在聊天中按名称查找。`));
   const materials = document.getElementById("discoveries");
   materials.replaceChildren();
   for (const material of data.materials || []) {

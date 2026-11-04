@@ -1,184 +1,206 @@
-"""Evidence-backed conversational threads, separate from biographical facts."""
+"""Owner-scoped working state; JSON is a read-only migration source."""
 
-import json
-import math
-import os
+import hashlib
 import time
-import uuid
 from pathlib import Path
 
 
 class DialogueState:
-    """Persist a small, per-conversation set of explicitly grounded callbacks."""
+    def __init__(self, path: Path, owners, services):
+        self.path, self.owners, self.services = path, owners, services
+        self.healthy = False
+        self.last = {"error": "not_read"}
 
-    def __init__(self, path: Path, linked_sessions=()):
-        self.linked_sessions = tuple(dict.fromkeys(linked_sessions))
-        self.path = path
-        self.healthy = True
-        self.data = {"version": 1, "sessions": {}}
-        if path.exists():
-            try:
-                value = json.loads(path.read_text(encoding="utf-8"))
-                if (
-                    not isinstance(value, dict)
-                    or value.get("version") != 1
-                    or not isinstance(value.get("sessions"), dict)
-                ):
-                    raise ValueError("Unsupported dialogue state")
-                for origin, entries in value["sessions"].items():
-                    if not isinstance(origin, str) or not isinstance(entries, list):
-                        raise ValueError("Invalid dialogue session")
-                    for item in entries:
-                        if not isinstance(item, dict) or any(
-                            not isinstance(item.get(key), str)
-                            for key in ("id", "title", "content", "evidence_quote")
-                        ):
-                            raise ValueError("Invalid dialogue entry")
-                        if item.get("kind") not in {"topic", "shared_joke"} or item.get(
-                            "status"
-                        ) not in {"open", "resolved"}:
-                            raise ValueError("Invalid dialogue kind or status")
-                        for key in ("created_at", "updated_at", "expires_at"):
-                            timestamp = item.get(key)
-                            if not isinstance(
-                                timestamp, (int, float)
-                            ) or not math.isfinite(timestamp):
-                                raise ValueError("Invalid dialogue timestamp")
-                self.data = value
-            except (ValueError, OSError):
-                self.healthy = False
-
-    def visible(self, origin: str, now: float | None = None) -> list[dict]:
-        now = time.time() if now is None else now
-        if not self.healthy:
-            return []
-        return [
-            dict(item)
-            for source in (
-                self.linked_sessions if origin in self.linked_sessions else (origin,)
-            )
-            for item in self.data["sessions"].get(source, [])
-            if item["status"] == "open" and item["expires_at"] > now
-        ][-12:]
-
-    def update(
-        self,
-        origin: str,
-        user_message: str,
-        *,
-        action: str,
-        kind: str = "topic",
-        title: str = "",
-        content: str = "",
-        evidence_quote: str = "",
-        item_id: str = "",
-        now: float | None = None,
-    ) -> dict:
-        """Apply one scoped update whose evidence occurs in the current user message.
-
-        Args:
-            origin: Complete private-chat identity, including platform.
-            user_message: Current human message; never an assistant completion.
-            action: list, save, resolve or forget.
-            kind: topic or shared_joke for a save.
-            title: Short stable label for the conversational thread.
-            content: Concise thread or joke description.
-            evidence_quote: Exact supporting text from the current user message.
-            item_id: Existing scoped ID when changing or closing a thread.
-            now: Optional timestamp used by behavioral checks.
-
-        Returns:
-            Operation result with visible scoped entries or a fixed error code.
-        """
-        if not self.healthy:
-            return {"ok": False, "error": "state_unreadable"}
-        now = time.time() if now is None else now
-        if action == "list":
-            return {"ok": True, "items": self.visible(origin, now)}
-        if action not in {"save", "resolve", "forget"}:
-            return {"ok": False, "error": "invalid_action"}
-        quote = evidence_quote.strip()
-        if (
-            len(quote) < (3 if action == "save" else 1)
-            or len(quote) > 400
-            or quote not in user_message
-        ):
-            return {"ok": False, "error": "current_user_evidence_required"}
-        if origin in self.linked_sessions:
-            origin = next(
-                (
-                    source
-                    for source in self.linked_sessions
-                    if any(
-                        x["id"] == item_id
-                        for x in self.data["sessions"].get(source, [])
-                    )
-                ),
-                self.linked_sessions[0],
-            )
-        items = [dict(x) for x in self.data["sessions"].get(origin, [])]
-        existing = next((x for x in items if x["id"] == item_id), None)
-        if item_id and existing is None:
-            return {"ok": False, "error": "scoped_item_not_found"}
-        if action in {"resolve", "forget"} and existing is None:
-            return {"ok": False, "error": "item_id_required"}
-        if action == "save":
-            try:
-                existing = self._save_thread(
-                    items, existing, kind, title, content, quote, now
-                )
-            except ValueError as exc:
-                return {"ok": False, "error": str(exc)}
-        elif action == "resolve":
-            existing.update(status="resolved", resolution_quote=quote, updated_at=now)
+    def _identity(self, origin, event):
+        if not self.owners.healthy:
+            raise ValueError("working_identity_unavailable")
+        if event is not None:
+            owner = self.owners.scope(event)
+            if event.unified_msg_origin != origin or event.get_extra(
+                "ada_web_read_active"
+            ):
+                raise PermissionError("private_owner_only")
+        elif origin not in self.owners.owners:
+            raise PermissionError("private_owner_only")
         else:
-            items.remove(existing)
-        retained = [x for x in items if x["expires_at"] > now - 7 * 86400]
-        updated = {
-            "version": 1,
-            "sessions": {**self.data["sessions"], origin: retained},
-        }
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        temp = self.path.with_suffix(".tmp")
-        with temp.open("w", encoding="utf-8") as handle:
-            json.dump(updated, handle, ensure_ascii=False, indent=2)
-            handle.flush()
-            os.fsync(handle.fileno())
-        temp.replace(self.path)
-        self.data = updated
-        return {"ok": True, "id": existing["id"], "action": action}
+            owner = self.owners.shared_scope
+        if origin in self.owners.owners:
+            origins = tuple(self.owners.owners)
+            scopes = [
+                ctx for peer in origins for ctx in self.owners.context_variants(peer)
+            ]
+        else:
+            if event is None:
+                raise PermissionError("private_owner_only")
+            origins = (origin,)
+            scopes = [
+                {
+                    "session_id": origin,
+                    "platform": event.get_platform_name(),
+                    "user_id": str(event.get_sender_id()),
+                    "bot_id": str(event.get_self_id()),
+                }
+            ]
+        return owner, origins, scopes
+
+    async def _access(self, origin, event):
+        from astrbot_plugin_memory_companion.core.working_state import WorkingState
+        from astrbot_plugin_memory_companion.core.working_state_import import adopt
+
+        identity = self._identity(origin, event)
+        bridge = self.services.memory()
+        store = getattr(getattr(bridge, "_plugin", None), "store", None)
+        if store is None:
+            raise RuntimeError("working_memory_unavailable")
+
+        def authorize():
+            return (
+                getattr(getattr(self.services.memory(), "_plugin", None), "store", None)
+                is store
+                and self._identity(origin, event) == identity
+                and (event is None or not event.is_stopped())
+            )
+
+        owner, origins, scopes = identity
+        state = WorkingState(store)
+        await adopt(state, self.path, owner, origins, authorize)
+        return state, owner, scopes, authorize
+
+    def _result(self, result):
+        self.healthy = result.get("ok", False)
+        self.last = {k: v for k, v in result.items() if k not in {"items", "history"}}
+        return result
+
+    def _failure(self, exc):
+        return self._result(
+            {
+                "ok": False,
+                "error": str(exc)
+                if isinstance(exc, (ValueError, PermissionError, RuntimeError))
+                else type(exc).__name__,
+            }
+        )
+
+    async def snapshot(self, origin, *, event=None, **query):
+        try:
+            state, owner, _, authorize = await self._access(origin, event)
+            result = await state.snapshot(owner, authorize=authorize, **query)
+            if event is not None:
+                previous = event.get_extra("ada_working_observed", {})
+                event.set_extra(
+                    "ada_working_observed",
+                    {**previous, **{r["id"]: r for r in result["items"]}},
+                )
+            return self._result(result)
+        except Exception as exc:
+            return self._failure(exc)
+
+    async def visible(self, origin, now=None, *, event=None):
+        result = await self.snapshot(origin, event=event, now=now)
+        if not result["ok"]:
+            raise RuntimeError(result["error"])
+        return result["items"]
+
+    async def update(self, event, *, action, expected_version=None, now=None, **change):
+        try:
+            state, owner, scopes, authorize = await self._access(
+                event.unified_msg_origin, event
+            )
+            source = state.store.core_event_source(event)
+            change = {**change, "action": action}
+            if expected_version is None:
+                expected_version = self._observed_version(event, change)
+            change["expected_version"] = expected_version
+            result = await state.change(
+                owner=owner,
+                change=change,
+                source=source,
+                scopes=scopes,
+                authorize=authorize,
+                now=now,
+            )
+            return self._result(result)
+        except Exception as exc:
+            return self._failure(exc)
 
     @staticmethod
-    def _save_thread(items, existing, kind, title, content, quote, now):
-        """Validate a thread replacement before mutating the transaction copy."""
-        if (
-            kind not in {"topic", "shared_joke"}
-            or not title.strip()
-            or not content.strip()
-        ):
-            raise ValueError("invalid_thread")
-        if len(title) > 80 or len(content) > 400:
-            raise ValueError("thread_too_long")
-        if existing is None:
-            existing = next(
-                (x for x in items if x["title"] == title.strip() and x["kind"] == kind),
-                None,
+    def _observed_version(event, change):
+        observed = event.get_extra("ada_working_observed", {})
+        item = observed.get(change.get("item_id"))
+        if not item and not change.get("item_id"):
+            matches = [
+                r
+                for r in observed.values()
+                if (not change.get("kind") or r["kind"] == change["kind"])
+                and r["title"].casefold() == change.get("title", "").strip().casefold()
+            ]
+            item = matches[0] if len(matches) == 1 else None
+            if item:
+                change["item_id"] = item["id"]
+        return item["version"] if item else ""
+
+    async def history(self, event, item_id, before=0):
+        try:
+            state, owner, _, authorize = await self._access(
+                event.unified_msg_origin, event
             )
-        if existing is None:
+            return self._result(
+                await state.history(owner, item_id, authorize=authorize, before=before)
+            )
+        except Exception as exc:
+            return self._failure(exc)
+
+    async def apply_updates(self, event, updates):
+        """Apply optional native reply intents against the original prompt snapshot."""
+        results = []
+        if not isinstance(updates, list) or event.is_stopped():
+            return results
+        for update in updates[:2]:
+            fields = ("item_id", "title", "content", "evidence_quote")
             if (
-                sum(x["status"] == "open" and x["expires_at"] > now for x in items)
-                >= 12
+                not isinstance(update, dict)
+                or update.get("action") not in {"save", "resolve", "cancel"}
+                or any(not isinstance(update.get(k, ""), str) for k in fields)
             ):
-                raise ValueError("thread_limit")
-            existing = {"id": uuid.uuid4().hex[:12], "created_at": now}
-            items.append(existing)
-        existing.update(
-            kind=kind,
-            title=title.strip(),
-            content=content.strip(),
-            evidence_quote=quote,
-            status="open",
-            updated_at=now,
-            expires_at=now + (30 if kind == "shared_joke" else 7) * 86400,
-        )
-        return existing
+                results.append({"ok": False, "error": "invalid_working_intent"})
+                continue
+            results.append(
+                await self.update(
+                    event,
+                    action=update["action"],
+                    kind=update.get("kind", ""),
+                    **{k: update.get(k, "") for k in fields},
+                )
+            )
+        event.set_extra("ada_working_receipts", results)
+        return results
+
+    async def manage(self, origin, item_id, expected_version):
+        try:
+            state, owner, scopes, authorize = await self._access(origin, None)
+            quote = "Authenticated management: close this working object."
+            source = {
+                "kind": "management",
+                "text": quote,
+                "origin": origin,
+                "received_ns": time.time_ns(),
+                "request_id": hashlib.sha256(
+                    (owner + item_id + expected_version).encode()
+                ).hexdigest(),
+            }
+            return self._result(
+                await state.change(
+                    owner=owner,
+                    source=source,
+                    scopes=scopes,
+                    authorize=authorize,
+                    change={
+                        "action": "resolve",
+                        "item_id": item_id,
+                        "expected_version": expected_version,
+                        "evidence_quote": quote,
+                    },
+                )
+            )
+        except Exception as exc:
+            return self._failure(exc)

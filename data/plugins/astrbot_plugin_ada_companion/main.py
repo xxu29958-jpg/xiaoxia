@@ -39,6 +39,7 @@ from .qq_tools import QQTools
 from .response_media import ResponseMedia
 from .services import PluginServices
 from .tool_policy import ToolPolicy
+from .web_routes import register_management_routes
 from .web_tools import WebTools
 
 
@@ -59,7 +60,7 @@ class AdaCompanion(Star):
         self.policy = DeliveryPolicy(self.folder / "state.json", self.target)
         self.contacts = ContactChannels(self.policy, self.owner_memory, context)
         self.dialogue = DialogueState(
-            self.folder / "dialogue.json", linked_sessions=self.owner_memory.owners
+            self.folder / "dialogue.json", self.owner_memory, self.services
         )
         self.replyer = ChatReplyer(
             context, config, self.owner_memory, self.models, self.dialogue
@@ -135,25 +136,7 @@ class AdaCompanion(Star):
         self.public_browser.maintenance_task = asyncio.create_task(
             self.public_browser.maintain()
         )
-        routes = (
-            ("manage/overview", "GET", self.management.overview),
-            ("manage/action", "POST", self.management.action),
-            ("manage/image", "GET", self.management.image),
-            ("manage/memory", "GET", self.management.memory),
-            ("manage/memory", "POST", self.management.memory),
-            ("status", "GET", self.admin.status),
-            ("preview-proactive", "POST", self.admin.preview_proactive),
-            ("preview-linked-memory", "GET", self.admin.preview_linked_memory),
-            ("verify-continuity", "POST", self.admin.verify_continuity),
-            ("shared-state", "GET", self.admin.shared_state),
-        )
-        for path, method, handler in routes:
-            self.context.register_web_api(
-                "/astrbot_plugin_ada_companion/" + path,
-                self.lifecycle.wrap(handler),
-                [method],
-                handler.__name__,
-            )
+        register_management_routes(self)
         self.job = asyncio.create_task(self.initiative.loop())
         self.performances.worker.start()
 
@@ -550,21 +533,32 @@ class AdaCompanion(Star):
         self,
         event: AstrMessageEvent,
         action: str = "list",
-        kind: str = "topic",
+        kind: str = "",
         title: str = "",
         content: str = "",
         evidence_quote: str = "",
         item_id: str = "",
+        query: str = "",
+        offset: int = 0,
+        revision: str = "",
+        include_closed: bool = False,
     ) -> str:
-        """Manage explicitly shared jokes and unfinished conversational topics.
+        """Manage source-backed goals, jokes and unfinished topics. List before edits.
+
+        Confirm writes only when ok/current are true. Goals persist across days;
+        closing records the user's report, never proof of external execution.
 
         Args:
-            action(string): list, save, resolve or forget.
-            kind(string): topic or shared_joke.
+            action(string): list, history, save, resolve, cancel or forget.
+            kind(string): topic, shared_joke or goal; empty preserves an existing kind.
             title(string): Short topic or joke label.
             content(string): What to continue; explicitly identify a joke as fictional.
             evidence_quote(string): Exact supporting quote from the current user message.
             item_id(string): An existing ID from this conversation when updating or closing.
+            query(string): Literal keywords for list; continue searching when the snapshot is insufficient.
+            offset(number): next_offset for list or next_before for history.
+            revision(string): Returned snapshot revision when continuing a list.
+            include_closed(boolean): Also read resolved, cancelled or expired objects.
         """
         async with self.lifecycle.operation():
             return await self.memory.threads(
@@ -575,6 +569,10 @@ class AdaCompanion(Star):
                 content=content,
                 evidence_quote=evidence_quote,
                 item_id=item_id,
+                query=query,
+                offset=offset,
+                revision=revision,
+                include_closed=include_closed,
             )
 
     @filter.llm_tool(name="ada_contact_channels")

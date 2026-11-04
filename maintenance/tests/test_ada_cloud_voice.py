@@ -12,6 +12,7 @@ import wave
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from imageio_ffmpeg import get_ffmpeg_exe
@@ -173,7 +174,10 @@ class CloudVoiceTests(unittest.IsolatedAsyncioTestCase):
         from astrbot.api.message_components import File, Plain, Record
 
         plugin = ResponseMedia(
-            {"voice_enabled": True, "ffmpeg_path": shutil.which("ffmpeg") or get_ffmpeg_exe()},
+            {
+                "voice_enabled": True,
+                "ffmpeg_path": shutil.which("ffmpeg") or get_ffmpeg_exe(),
+            },
             self.folder,
             self.voice,
         )
@@ -181,7 +185,7 @@ class CloudVoiceTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(platform=platform):
                 extra = {"ada_voice_requested": True}
                 result = SimpleNamespace(chain=[Plain("晚安，好梦。")])
-                event = SimpleNamespace(
+                event: Any = SimpleNamespace(
                     get_extra=extra.get,
                     set_extra=extra.__setitem__,
                     get_result=lambda result=result: result,
@@ -209,7 +213,6 @@ class CloudVoiceTests(unittest.IsolatedAsyncioTestCase):
         plugin.policy = DeliveryPolicy(self.folder / "state.json", plugin.target)
         from astrbot_plugin_ada_companion.dialogue import DialogueState
 
-        plugin.dialogue = DialogueState(self.folder / "dialogue.json")
         plugin.context = SimpleNamespace(
             get_all_stars=lambda: [],
             conversation_manager=SimpleNamespace(
@@ -220,6 +223,9 @@ class CloudVoiceTests(unittest.IsolatedAsyncioTestCase):
         from astrbot_plugin_ada_companion.owner_memory import OwnerMemory
 
         plugin.owner_memory = OwnerMemory(self.folder / "owners.json", [plugin.target])
+        plugin.dialogue = DialogueState(
+            self.folder / "dialogue.json", plugin.owner_memory, plugin.services
+        )
         ContextBuilder.__init__(
             plugin,
             plugin.config,
