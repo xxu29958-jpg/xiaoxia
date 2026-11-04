@@ -527,19 +527,19 @@ class AdaCompanion(Star):
         revision: str = "",
         include_closed: bool = False,
     ) -> str:
-        """Manage source-backed goals, jokes and unfinished topics. List before edits.
+        """Manage goals/topics; search revisable event interpretations. List before edits.
 
         Confirm writes only when ok/current are true. Goals persist across days;
         closing records the user's report, never proof of external execution.
 
         Args:
-            action(string): list, history, save, resolve, cancel or forget.
+            action(string): list, history, save, resolve, cancel, forget or interpretations (read-only event search).
             kind(string): topic, shared_joke or goal; empty preserves an existing kind.
             title(string): Short topic or joke label.
             content(string): What to continue; explicitly identify a joke as fictional.
             evidence_quote(string): Exact supporting quote from the current user message.
             item_id(string): An existing ID from this conversation when updating or closing.
-            query(string): Literal keywords for list; continue searching when the snapshot is insufficient.
+            query(string): Keywords for list or interpretations; expand/narrow cues if the initial snapshot is insufficient.
             offset(number): next_offset for list or next_before for history.
             revision(string): Returned snapshot revision when continuing a list.
             include_closed(boolean): Also read resolved, cancelled or expired objects.

@@ -5,6 +5,7 @@ import time
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
+from .appraisal_attention import select
 from .appraisal_rules import check_version, normalize, public_record, revise
 from .core_state_sources import operation_for, source_identity
 from .core_state_versions import CoreStateError, check_source, digest, encoded
@@ -128,15 +129,35 @@ class AppraisalState:
         )
         return {**receipt, "replayed": True, "current": valid}
 
-    async def snapshot(self, owner, *, authorize, limit=8):
+    async def snapshot(
+        self,
+        owner,
+        *,
+        authorize,
+        limit=8,
+        query="",
+        goals="",
+        mode="recent",
+        offset=0,
+        revision="",
+        now=None,
+    ):
         return await self.store._run_recoverable_database_operation(
             self._snapshot,
             owner,
             authorize,
             limit,
+            {
+                "query": query,
+                "goals": goals,
+                "mode": mode,
+                "offset": offset,
+                "cursor": revision,
+                "now": time.time() if now is None else now,
+            },
         )
 
-    def _snapshot(self, owner, authorize, limit):
+    def _snapshot(self, owner, authorize, limit, selection):
         if type(limit) is not int or not 1 <= limit <= 20:
             raise CoreStateError("invalid_appraisal_limit")
         with self.store._lock, self.store._transaction_sync():
@@ -148,15 +169,15 @@ class AppraisalState:
             records = [json.loads(row[0]) for row in rows]
             valid = [r for r in records if self._sources_current(owner, r["id"])]
             revision = digest([(r["id"], r["version"]) for r in valid])
-            valid.sort(key=lambda r: (-r["updated_at"], r["id"]))
+            selected = select(
+                valid, owner=owner, revision=revision, limit=limit, **selection
+            )
             self._authorize(owner, authorize)
             return {
                 "ok": True,
-                "items": [public_record(r) for r in valid[:limit]],
-                "revision": revision,
+                **selected,
                 "total": len(valid),
                 "unavailable": len(records) - len(valid),
-                "truncated": len(valid) > limit,
             }
 
     async def history(self, owner, item_id, *, authorize, before=0):

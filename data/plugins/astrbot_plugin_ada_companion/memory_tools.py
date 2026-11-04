@@ -4,6 +4,7 @@ import json
 
 from astrbot.api.event import AstrMessageEvent
 
+from .appraisals import EventUnderstanding
 from .shared_core import SharedCoreMemory
 from .shared_history import read_shared_history
 
@@ -139,7 +140,7 @@ class MemoryTools:
         never proof of tool execution. Follow next_offset to continue retrieval.
 
         Args:
-            action(string): list, history, save, resolve, cancel or forget.
+            action(string): list, history, save, resolve, cancel, forget or interpretations (read-only event understanding search).
             kind(string): topic, shared_joke or goal; empty preserves an existing kind.
             title(string): Short topic or joke label.
             content(string): What to continue; explicitly identify a joke as fictional.
@@ -161,6 +162,18 @@ class MemoryTools:
             or event.get_extra("ada_web_read_active")
         ):
             return json.dumps({"ok": False, "error": "private_owner_only"})
+        if action == "interpretations":
+            return json.dumps(
+                await EventUnderstanding(self.dialogue).snapshot(
+                    origin,
+                    event=event,
+                    mode="search",
+                    query=query,
+                    offset=offset,
+                    revision=revision,
+                ),
+                ensure_ascii=False,
+            )
         if action == "list":
             result = await self.dialogue.snapshot(
                 origin,
