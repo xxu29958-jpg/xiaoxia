@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from .astrbot_compat import (
     logger,
@@ -14,13 +14,43 @@ from .models import (
     clean_text,
 )
 
+if TYPE_CHECKING:
+    from .service import MemoryCompanionService
+
+# The facade is the runtime host of this mixin. These local casts bind shared
+# members to its real definitions; they do not suppress member or call checks.
+
 
 class MemoryCompanionServiceCompanionDedupe:
     """Reconcile recalled context with the companion current-state owner. Shared resources remain owned by the root service/store."""
 
+    def _flatten_slot_map(self, slot_map: dict[str, list[Any]]) -> list[Any]:
+        items: list[Any] = []
+        seen: set[str] = set()
+        for slot in [
+            "time_window_timeline",
+            "open_loop",
+            "self_timeline",
+            "user_profile",
+            "current_window",
+            "conversation_summary",
+            "stable_memory",
+        ]:
+            for item in slot_map.get(slot) or []:
+                memory_id = clean_text(
+                    getattr(getattr(item, "memory", None), "id", ""), 120
+                )
+                if memory_id and memory_id in seen:
+                    continue
+                if memory_id:
+                    seen.add(memory_id)
+                items.append(item)
+        return items
+
     def _sanitize_request_history_for_companion(
         self, ctx: SessionContext, req: Any
     ) -> None:
+        self = cast("MemoryCompanionService", self)
         sanitized = sanitize_request_history(
             req,
             clean_proactive_guidance=self.config.bool(
@@ -40,6 +70,7 @@ class MemoryCompanionServiceCompanionDedupe:
             )
 
     def companion_coordination_status(self) -> dict[str, Any]:
+        self = cast("MemoryCompanionService", self)
         bridge_enabled = self.config.bool("private_companion_bridge.enabled", True)
         return {
             "available": True,
@@ -79,6 +110,7 @@ class MemoryCompanionServiceCompanionDedupe:
         }
 
     def should_private_companion_defer_section(self, section: str) -> bool:
+        self = cast("MemoryCompanionService", self)
         if not self.config.bool("memory_injection.enabled", True):
             return False
         if not self.config.bool("private_companion_bridge.dedupe_prompt_context", True):
@@ -119,6 +151,7 @@ class MemoryCompanionServiceCompanionDedupe:
     def _companion_memory_context_present(
         self, state: dict[str, Any], deferred_sections: set[str]
     ) -> bool:
+        self = cast("MemoryCompanionService", self)
         if not self.config.bool("private_companion_bridge.dedupe_prompt_context", True):
             return False
         if not bool(state.get("has_any")) and not deferred_sections:
@@ -179,6 +212,7 @@ class MemoryCompanionServiceCompanionDedupe:
         companion_memory_present: bool,
         deferred_sections: set[str] | None = None,
     ) -> tuple[dict[str, list[Any]], list[str]]:
+        self = cast("MemoryCompanionService", self)
         if not companion_memory_present:
             return slot_map, []
         deferred_sections = set(deferred_sections or set())
@@ -255,6 +289,7 @@ class MemoryCompanionServiceCompanionDedupe:
         return cleaned, reasons
 
     def _memory_repeats_companion_current_state(self, memory: MemoryRecord) -> bool:
+        self = cast("MemoryCompanionService", self)
         metadata = memory.metadata if isinstance(memory.metadata, dict) else {}
         if self._memory_has_long_term_explanatory_value(memory, metadata):
             return False
@@ -314,6 +349,7 @@ class MemoryCompanionServiceCompanionDedupe:
     def _memory_has_long_term_explanatory_value(
         self, memory: MemoryRecord, metadata: dict[str, Any]
     ) -> bool:
+        self = cast("MemoryCompanionService", self)
         durable = max(
             self._metadata_weight(metadata, "relationship_weight"),
             self._metadata_weight(metadata, "promise_weight"),

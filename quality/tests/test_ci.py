@@ -95,6 +95,43 @@ class ResultTests(unittest.TestCase):
 
 
 class ImpactTests(unittest.TestCase):
+    def test_overlapping_changes_keep_each_origins_real_consumer(self):
+        state = "state.py"
+        chat = "data/plugins/astrbot_plugin_ada_companion/appraisals.py"
+        native = "tests/cognition_state/test_native.py"
+        with tempfile.TemporaryDirectory() as root:
+            repo = Path(root)
+            subprocess.run(["git", "init", "-q", root], check=True)
+            sources = {
+                state: "value = 1\n",
+                chat: "from state import value\n",
+                native: "from astrbot_plugin_ada_companion.appraisals import value\n",
+            }
+            for path, content in sources.items():
+                (repo / path).parent.mkdir(parents=True, exist_ok=True)
+                (repo / path).write_text(content)
+            subprocess.run(["git", "-C", root, "add", "."], check=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    root,
+                    "-c",
+                    "user.name=Quality",
+                    "-c",
+                    "user.email=quality@example.invalid",
+                    "commit",
+                    "-qm",
+                    "fixture",
+                ],
+                check=True,
+            )
+            for path, content in sources.items():
+                (repo / path).write_text(content + "changed = True\n")
+            report = plan(repo, "HEAD")
+            self.assertEqual(report["coverage_gaps"], [])
+            self.assertIn("cognition_contracts", report["groups"])
+
     def test_model_identity_and_wire_protocol_select_the_real_contracts(self):
         selected = required_tests(
             [

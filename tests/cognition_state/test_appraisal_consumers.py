@@ -9,6 +9,7 @@ from appraisal_support import FIRST, LATER, SAVE, AppraisalHarness
 from astrbot_plugin_ada_companion.chat_replyer import ChatReplyer
 from astrbot_plugin_ada_companion.policy import DeliveryPolicy
 from astrbot_plugin_ada_companion.prompting import ContextBuilder
+from astrbot_plugin_memory_companion.core.models import EntityRef, MemoryRecord
 from support import QQ, WX, event
 
 from astrbot.core.agent.message import Message, TextPart
@@ -137,3 +138,48 @@ class AppraisalConsumerTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIn("没能保存", response.completion_text)
         self.assertEqual((await self.h.snapshot())["total"], 0)
+
+    async def test_feedback_revises_its_context_once_without_rewriting_facts(self):
+        fact_id = await self.h.service.store.insert_memory(
+            MemoryRecord(
+                subject=EntityRef(kind="user", id="owner"),
+                scope="private",
+                session_id=QQ,
+                content="喜欢山歌，也喜欢散步。",
+                evidence="之前独立确认的合成事实",
+                confidence=0.7,
+                metadata={"mention_feedback": {"accepted_count": 2}},
+            )
+        )
+        first = await self.h.change()
+        text = "不是不喜欢山歌，只是在上班时别催。等我到家还想继续听。"
+        source = event(WX, text, "timing-feedback")
+        self.h.capture(source)
+        await self.prepare(source)
+        change = {
+            **SAVE,
+            "item_id": first["id"],
+            "understanding": "希望上班时不被催促听歌，回家后仍愿意听。",
+            "response_implication": "工作时留空间，到家后可承接听歌；不推为讨厌山歌。",
+            "uncertainty": "尚不知道何时到家。",
+            "evidence_quote": text,
+        }
+        await self.reply(source, change)
+        receipt = source.get_extra("ada_appraisal_receipts")[0]
+        self.assertTrue(receipt["current"], receipt)
+        await self.reply(source, change)
+        self.assertTrue(source.get_extra("ada_appraisal_receipts")[0]["replayed"])
+        self.h.reopen()
+        state = await self.h.snapshot()
+        self.assertEqual(state["total"], 1)
+        self.assertEqual(state["items"][0]["revision"], 2)
+        next_request = await self.prepare(
+            event(QQ, "我到家了，刚才那首山歌呢？", "home")
+        )
+        self.assertIn(change["understanding"], next_request.system_prompt)
+        self.assertIn(change["response_implication"], next_request.system_prompt)
+        fact = await self.h.service.store.get_memory(fact_id)
+        assert fact is not None
+        self.assertEqual(fact.content, "喜欢山歌，也喜欢散步。")
+        self.assertEqual(fact.confidence, 0.7)
+        self.assertEqual(fact.metadata, {"mention_feedback": {"accepted_count": 2}})

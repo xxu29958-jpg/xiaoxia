@@ -58,18 +58,25 @@ def check_dependencies(repo: Path, base: str, changes: list, policy: dict) -> di
         {p: b for p, b in after.items() if p.endswith((".py", ".pyi"))},
         policy["dependency_contracts"],
     )
-    old_graph, _ = relationships(before)
-    new_graph, _ = relationships(after)
+    old_source_graph, _ = relationships(before)
+    new_source_graph, _ = relationships(after)
+    old_graph, _ = relationships(before, runtime_only=True)
+    new_graph, _ = relationships(after, runtime_only=True)
     renamed = {c.previous_path: c.path for c in changes if c.status.startswith("R")}
     old_graph = {
         renamed.get(p, p): {renamed.get(t, t) for t in targets}
         for p, targets in old_graph.items()
     }
+    old_source_graph = {
+        renamed.get(p, p): {renamed.get(t, t) for t in targets}
+        for p, targets in old_source_graph.items()
+    }
     return {
-        "scope": "Resolved Python and TypeScript/Vue imports, including plugin aliases; computed registration remains a map gap",
+        "scope": "Runtime cycles block; all source cycles, including type-only references, remain reported and drive impact selection. Uncertain guards remain runtime dependencies; computed registration remains a map gap.",
         "existing_forbidden": old,
         "new_forbidden": [v for v in new if v not in old],
         "new_cycles": boundaries.new_cycles(old_graph, new_graph),
+        "new_source_cycles": boundaries.new_cycles(old_source_graph, new_source_graph),
     }
 
 

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import re
 from copy import deepcopy
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any, cast
 
 from .astrbot_compat import (
     detect_private_companion_request,
@@ -20,6 +20,12 @@ from .models import (
 from .service_recall_routing import MemoryCompanionServiceRecallRouting
 from .time_intent import TimeIntent, parse_time_intent
 from .turn_signal import analyze_turn_signal
+
+if TYPE_CHECKING:
+    from .service import MemoryCompanionService
+
+# The facade is the runtime host of this mixin. These local casts bind shared
+# members to its real definitions; they do not suppress member or call checks.
 
 
 class MemoryCompanionServiceInjectionContext:
@@ -39,6 +45,7 @@ class MemoryCompanionServiceInjectionContext:
         companion_bot_mood: str = "",
         companion_bot_energy: float = 0.0,
     ) -> str:
+        self = cast("MemoryCompanionService", self)
         ctx = self._normalized_session_context(ctx)
         core_memories = await self.core_memories_for_context(ctx)
         core_memory_max_chars = self.config.int("core_memory.max_chars", 800)
@@ -369,10 +376,9 @@ class MemoryCompanionServiceInjectionContext:
         continuity_snapshot: dict[str, Any] | None = None,
         reason_code: str = "",
     ) -> None:
+        self = cast("MemoryCompanionService", self)
         selected_ids: list[str] = []
-        feedback_ids: list[str] = []
         seen: set[str] = set()
-        feedback_seen: set[str] = set()
         for _slot, items in (slot_map or {}).items():
             for item in items or []:
                 memory = getattr(item, "memory", None)
@@ -382,13 +388,6 @@ class MemoryCompanionServiceInjectionContext:
                 if memory_id not in seen:
                     selected_ids.append(memory_id)
                     seen.add(memory_id)
-                if (
-                    self._expression_from_reason(getattr(item, "reason", ""))
-                    == "mention"
-                    and memory_id not in feedback_seen
-                ):
-                    feedback_ids.append(memory_id)
-                    feedback_seen.add(memory_id)
         injected_ids = {ref["id"] for ref in memory_refs or []} if injected else set()
         payload = {
             "active": True,
@@ -396,9 +395,8 @@ class MemoryCompanionServiceInjectionContext:
             "conversation_memory": bool(conversation_memory),
             "slots": [slot for slot, items in slot_map.items() if items],
             "selected_memory_ids": selected_ids,
-            "feedback_target_memory_ids": [
-                key for key in feedback_ids if key in injected_ids
-            ],
+            # Compatibility field: injection alone establishes no feedback target.
+            "feedback_target_memory_ids": [],
             "injected_memory_ids": sorted(injected_ids),
             "memory_refs": list(memory_refs or []) if injected else [],
             "snapshot_id": continuity_snapshot.get("snapshot_id")
@@ -435,6 +433,7 @@ class MemoryCompanionServiceInjectionContext:
     def _retrieval_top_k_for_query(
         self, ctx: SessionContext, query: str, *, time_intent: TimeIntent | None = None
     ) -> int:
+        self = cast("MemoryCompanionService", self)
         base = self.config.int("memory_injection.top_k", 4)
         if (
             time_intent is not None and time_intent.active
@@ -447,6 +446,7 @@ class MemoryCompanionServiceInjectionContext:
     def _injection_max_chars_for_query(
         self, ctx: SessionContext, query: str, *, time_intent: TimeIntent | None = None
     ) -> int:
+        self = cast("MemoryCompanionService", self)
         base = self.config.int("memory_injection.max_chars", 4000)
         if (
             time_intent is not None and time_intent.active
@@ -460,6 +460,7 @@ class MemoryCompanionServiceInjectionContext:
     def _slot_limits(
         self, top_k: int, *, query: str = "", time_intent: TimeIntent | None = None
     ) -> dict[str, int]:
+        self = cast("MemoryCompanionService", self)
         total = max(1, int(top_k or 1))
         conversation_limit = self.config.int(
             "context_orchestration.conversation_summary_limit", 2
@@ -499,6 +500,7 @@ class MemoryCompanionServiceInjectionContext:
         # Both mutable personal timelines and unresolved commitments can be
         # numerous.  Keep them inside their diversity budgets for ordinary
         # questions; an explicit owner/focus may opt one of them into overflow.
+        self = cast("MemoryCompanionService", self)
         capped = {"self_timeline", "open_loop"}
         if self._query_focuses_self_timeline(
             query, time_intent=time_intent, bot_id=bot_id
@@ -538,16 +540,18 @@ class MemoryCompanionServiceInjectionContext:
         try:
             dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            return dt.astimezone(timezone.utc)
+                dt = dt.replace(tzinfo=UTC)
+            return dt.astimezone(UTC)
         except Exception:
             return None
 
     def _config_percent(self, dotted: str, default: int) -> float:
+        self = cast("MemoryCompanionService", self)
         value = max(0, min(100, self.config.int(dotted, default)))
         return value / 100.0
 
     def _context_value(self, ctx: SessionContext, key: str, default: Any) -> Any:
+        self = cast("MemoryCompanionService", self)
         marker = object()
         scope = clean_text(ctx.scope, 40)
         if scope in {"private", "group"}:
@@ -580,6 +584,7 @@ class MemoryCompanionServiceInjectionContext:
     def _intent_context_for_injection(
         self, intent: RetrievalIntent, *, time_intent: TimeIntent | None = None
     ) -> str:
+        self = cast("MemoryCompanionService", self)
         if not self.config.bool("context_orchestration.include_intent_context", True):
             base = ""
         else:
@@ -599,6 +604,7 @@ class MemoryCompanionServiceInjectionContext:
         slot_map: dict[str, list[Any]],
         time_intent: TimeIntent,
     ) -> None:
+        self = cast("MemoryCompanionService", self)
         if not time_intent.active:
             return
         limit = self.config.int("conversation_memory.time_window_timeline_limit", 12)
@@ -629,6 +635,7 @@ class MemoryCompanionServiceInjectionContext:
     def _timeline_row_as_memory(
         self, ctx: SessionContext, row: dict[str, Any]
     ) -> MemoryRecord | None:
+        self = cast("MemoryCompanionService", self)
         content = clean_text(row.get("content"), 600)
         if not content or self._timeline_content_is_internal_placeholder(content):
             return None

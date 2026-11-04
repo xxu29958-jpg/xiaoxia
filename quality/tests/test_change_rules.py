@@ -119,6 +119,47 @@ class DependencyRulesTests(unittest.TestCase):
         self.assertEqual(boundaries.new_cycles(before, before), [])
         self.assertTrue(boundaries.new_cycles(before, {**before, "a": {"b", "c"}}))
 
+    def test_typing_reference_stays_in_source_graph_but_is_not_runtime_cycle(self):
+        before = {"host.py": b"import part\n", "part.py": b"value=1\n"}
+        after = {
+            **before,
+            "part.py": b"from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    import host\nelse:\n    import live\n",
+            "live.py": b"value=2\n",
+        }
+        source = boundaries.graph(after)
+        runtime = boundaries.graph(after, runtime_only=True)
+        self.assertTrue(boundaries.new_cycles(boundaries.graph(before), source))
+        self.assertFalse(boundaries.new_cycles(boundaries.graph(before), runtime))
+        self.assertIn("host", source["part"])
+        self.assertEqual(runtime["part"], {"live"})
+        forbidden = [{"id": "test-boundary", "source": "part", "forbidden": ["host"]}]
+        self.assertTrue(boundaries.violations(after, forbidden))
+        # Moving the same import into an executable branch restores the block.
+        after["part.py"] += b"import host\n"
+        self.assertTrue(
+            boundaries.new_cycles(
+                boundaries.graph(before), boundaries.graph(after, runtime_only=True)
+            )
+        )
+
+    def test_uncertain_or_rebound_typing_guards_keep_runtime_dependencies(self):
+        for prefix in (
+            "",
+            "from somewhere import TYPE_CHECKING\n",
+            "from typing import Any as TYPE_CHECKING\n",
+            "from typing import TYPE_CHECKING\nTYPE_CHECKING=True\n",
+            "from typing import TYPE_CHECKING\nfrom elsewhere import TYPE_CHECKING\n",
+            "from typing import TYPE_CHECKING\ndef f(TYPE_CHECKING):\n    pass\n",
+            "from typing import TYPE_CHECKING\ntry:\n    pass\nexcept Exception as TYPE_CHECKING:\n    pass\n",
+        ):
+            with self.subTest(prefix=prefix):
+                imports = boundaries.imported_modules(
+                    "part.py",
+                    prefix + "if TYPE_CHECKING:\n    import host\n",
+                    runtime_only=True,
+                )
+                self.assertIn("host", imports)
+
     def test_parent_relative_import_resolves_to_project_module(self):
         imports = boundaries.imported_modules(
             "app/sub/a.py", "from ..store import state"
