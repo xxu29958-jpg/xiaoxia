@@ -2,6 +2,7 @@
 
 import hashlib
 import time
+from importlib import import_module
 from pathlib import Path
 
 
@@ -44,14 +45,15 @@ class DialogueState:
         return owner, origins, scopes
 
     async def _access(self, origin, event):
-        from astrbot_plugin_memory_companion.core.working_state import WorkingState
-        from astrbot_plugin_memory_companion.core.working_state_import import adopt
-
         identity = self._identity(origin, event)
         bridge = self.services.memory()
         store = getattr(getattr(bridge, "_plugin", None), "store", None)
         if store is None:
             raise RuntimeError("working_memory_unavailable")
+        # Native plugins use data.plugins; bind helpers to the live store package.
+        package = type(store).__module__.rpartition(".")[0]
+        WorkingState = import_module(".working_state", package).WorkingState
+        adopt = import_module(".working_state_import", package).adopt
 
         def authorize():
             return (

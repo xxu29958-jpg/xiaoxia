@@ -1,6 +1,7 @@
 """One owner-scoped view over the native event-interpretation authority."""
 
 import json
+from importlib import import_module
 
 APPRAISAL_UPDATES_SCHEMA = {
     "type": "array",
@@ -39,10 +40,10 @@ class EventUnderstanding:
         self.dialogue = dialogue
 
     async def _access(self, origin, event):
-        from astrbot_plugin_memory_companion.core.appraisal_state import AppraisalState
-
         # Reuse the live identity/store/recovery boundary, never a second cache or DB.
         working, owner, scopes, authorize = await self.dialogue._access(origin, event)
+        package = type(working.store).__module__.rpartition(".")[0]
+        AppraisalState = import_module(".appraisal_state", package).AppraisalState
         return AppraisalState(working.store), owner, scopes, authorize
 
     @staticmethod
