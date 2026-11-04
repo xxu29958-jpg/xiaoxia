@@ -3,6 +3,7 @@
 from collections import deque
 from fnmatch import fnmatchcase
 
+from . import http_protocol
 from .quality_exceptions import for_record
 from .shared_state import extend_impact, uncertainties
 from .source_relations import relationships
@@ -27,6 +28,7 @@ def query(report: dict, path: str) -> dict:
         for consumer in sorted(
             set(records[current]["consumers"])
             | set(records[current].get("business_consumers", []))
+            | set(records[current].get("protocol_consumers", []))
         ):
             if consumer not in routes:
                 routes[consumer] = [*routes[current], consumer]
@@ -38,14 +40,19 @@ def query(report: dict, path: str) -> dict:
         "consumer_routes": routes,
         "consumer_route_kinds": {
             target: [
-                "source" if b in records[a]["consumers"] else "shared_state"
+                "source"
+                if b in records[a]["consumers"]
+                else "shared_state"
+                if b in records[a].get("business_consumers", [])
+                else "http_protocol"
                 for a, b in zip(route, route[1:])
             ]
             for target, route in routes.items()
         },
         "domains": sorted({records[p]["domain"] for p in routes}),
         "test_groups": sorted({g for p in routes for g in records[p]["test_groups"]}),
-        "coverage_gaps": uncertainties(routes, records),
+        "coverage_gaps": http_protocol.uncertainties(routes, records)
+        | uncertainties(routes, records),
     }
 
 
@@ -59,6 +66,12 @@ def attach(
     reverse: dict[str, list[str]] = {}
     business: dict[str, set[str]] = {}
     extend_impact(sources, business, facts)
+    protocol: dict[str, set[str]] = {}
+    http_protocol.extend_impact(protocol, facts)
+    protocol_reverse: dict[str, list[str]] = {}
+    for source, targets in protocol.items():
+        for target in targets:
+            protocol_reverse.setdefault(target, []).append(source)
     business_reverse: dict[str, list[str]] = {}
     for source, targets in business.items():
         for target in targets:
@@ -74,6 +87,8 @@ def attach(
         record["consumers"] = sorted(reverse.get(path, []))
         record["business_dependencies"] = sorted(business.get(path, set()))
         record["business_consumers"] = sorted(business_reverse.get(path, []))
+        record["protocol_dependencies"] = sorted(protocol.get(path, set()))
+        record["protocol_consumers"] = sorted(protocol_reverse.get(path, []))
         record["test_groups"] = [
             name
             for name, patterns in CONTRACTS.items()
@@ -90,6 +105,7 @@ def attach(
             else "integration"
             if record["consumers"]
             or record["business_consumers"]
+            or record["protocol_consumers"]
             or record.get("registrations")
             else "local"
         )
@@ -98,9 +114,10 @@ def attach(
         )
         record["exceptions"] = for_record(record, policy, as_of)
     return {
-        "scope": "Source imports/resources plus separate Python shared-container read/write and registrar-call evidence. Possible consumers, not proof of runtime activation; dynamic/template/binding gaps remain explicit.",
+        "scope": "Source imports/resources, shared-container access and directly bound HTTP service candidates. Defaults do not prove runtime activation; dynamic/template/binding gaps remain explicit.",
         "edges": sum(len(targets) for targets in edges.values()),
         "business_edges": sum(len(targets) for targets in business.values()),
+        "protocol_edges": sum(len(targets) for targets in protocol.values()),
         "map_gaps": [
             {"path": r["path"], "gaps": r.get("dynamic_gaps", [])}
             for r in records

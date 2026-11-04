@@ -8,6 +8,7 @@ from pathlib import PurePosixPath
 
 from . import boundaries
 from .frontend import EXTENSIONS, analyze
+from .http_protocol import facts as http_facts
 
 TABLE = re.compile(
     r"\b(FROM|JOIN|UPDATE|INTO|TABLE(?:\s+IF\s+NOT\s+EXISTS)?)\s+[\"`\[]?([A-Za-z_]\w*)",
@@ -52,6 +53,7 @@ def resource_matches(
 def facts(path: str, text: str) -> dict:
     tree = ast.parse(text, filename=path)
     result: dict = {
+        **http_facts(path, tree),
         "public_interfaces": [],
         "registrations": [],
         "tables": [],

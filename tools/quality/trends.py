@@ -177,6 +177,7 @@ def relation_changes(before: dict, after: dict, changes: list[dict]) -> dict:
             for k in (
                 "edges",
                 "business_edges",
+                "protocol_edges",
                 "interfaces",
                 "authorities",
                 "exceptions",
@@ -191,6 +192,10 @@ def relation_changes(before: dict, after: dict, changes: list[dict]) -> dict:
             result["business_edges"].update(
                 (path, translate.get(p, p))
                 for p in record.get("business_dependencies", [])
+            )
+            result["protocol_edges"].update(
+                (path, translate.get(p, p))
+                for p in record.get("protocol_dependencies", [])
             )
             result["interfaces"].update(
                 (path, s["name"], s["kind"], s.get("signature", ""))
@@ -292,9 +297,11 @@ def history(repo: Path, ref: str, records: list[dict], limit: int = 100) -> dict
                     ),
                     "source_consumers": len(record["consumers"]),
                     "business_consumers": len(record.get("business_consumers", [])),
+                    "protocol_consumers": len(record.get("protocol_consumers", [])),
                     "consumers": len(
                         set(record["consumers"])
                         | set(record.get("business_consumers", []))
+                        | set(record.get("protocol_consumers", []))
                     ),
                     "state_authority": bool(record["state_authorities"]),
                     "lines": record.get("lines", 0),
