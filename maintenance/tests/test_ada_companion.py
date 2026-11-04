@@ -281,6 +281,12 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
 
         async def generate(**kwargs):
             payload = json.loads(kwargs["prompt"])
+            self.assertEqual(
+                payload["revisable_event_interpretations_not_facts"]["selection"][
+                    "mode"
+                ],
+                "attention",
+            )
             seen = payload["revisable_event_interpretations_not_facts"]["items"][0]
             self.assertEqual(seen["version"], first["version"])
             later = incoming(

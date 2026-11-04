@@ -62,6 +62,24 @@ class AppraisalConsumerTests(unittest.IsolatedAsyncioTestCase):
         await self.replyer.compose(source, response)
         return response
 
+    async def test_native_context_uses_current_query_after_unrelated_events(self):
+        target = await self.h.change()
+        for i in range(9):
+            text = f"包裹{i}暂存在门卫。"
+            await self.h.change(
+                event(text=text, message_id=f"parcel-{i}"),
+                title="包裹",
+                understanding="快递暂存门卫。",
+                response_implication="问到再提。",
+                evidence_quote=text,
+                uncertainty="",
+            )
+        source = event(WX, "山歌那个版本，现在你怎么理解？", "recall")
+        request = await self.prepare(source)
+        observed = source.get_extra("ada_appraisals_observed")
+        self.assertEqual(next(iter(observed)), target["id"])
+        self.assertIn("action='interpretations'", request.system_prompt)
+
     async def test_reply_persists_only_interpretation_metadata_not_spoken_history(self):
         request = await self.prepare(self.h.first)
         response = await self.reply(self.h.first, SAVE)
