@@ -61,6 +61,13 @@ class LineTests(unittest.TestCase):
         )
         self.assertEqual(line_counts.role("plugins/memory/scripts/test_cli.py"), "test")
         self.assertEqual(
+            line_counts.role("plugins/memory/benchmarks/evaluate.py"),
+            "tool_script_build",
+        )
+        self.assertEqual(
+            line_counts.role("plugins/memory/benchmarks/test_eval.py"), "test"
+        )
+        self.assertEqual(
             line_counts.role("plugins/memory/core/scripts.py"), "production"
         )
         self.assertEqual(
@@ -76,17 +83,21 @@ class LineTests(unittest.TestCase):
         self.assertEqual(line_counts.decode(b"\x00\x01")[1], "binary")
 
     def test_nested_script_keeps_local_upstream_responsibility_and_source_metrics(self):
-        path = "data/plugins/astrbot_plugin_memory_companion/scripts/benchmark.py"
         source = b"def run():\n    return 1\n"
-        entry = Entry(path, "local", "blob", len(source))
-        record, parsed = file_record(entry, source, POLICY, {path: "upstream"})
-        self.assertEqual(record["category"], "upstream_modified/tool_script_build")
-        self.assertEqual(record["maintenance"], "self_maintained")
-        self.assertFalse(record["first_party_production"])
-        self.assertFalse(record["size_exempt"])
-        self.assertEqual(record["physical_lines"], 2)
-        self.assertEqual(record["code_lines"], 2)
-        self.assertEqual(parsed, source)
+        for folder in ("scripts", "benchmarks"):
+            with self.subTest(folder=folder):
+                path = f"data/plugins/astrbot_plugin_memory_companion/{folder}/benchmark.py"
+                entry = Entry(path, "local", "blob", len(source))
+                record, parsed = file_record(entry, source, POLICY, {path: "upstream"})
+                self.assertEqual(
+                    record["category"], "upstream_modified/tool_script_build"
+                )
+                self.assertEqual(record["maintenance"], "self_maintained")
+                self.assertFalse(record["first_party_production"])
+                self.assertFalse(record["size_exempt"])
+                self.assertEqual(record["physical_lines"], 2)
+                self.assertEqual(record["code_lines"], 2)
+                self.assertEqual(parsed, source)
 
     def test_runtime_skill_scripts_remain_production_when_locally_changed(self):
         path = "astrbot/builtin_stars/astrbot/skills/documents/scripts/inspect_docx.py"

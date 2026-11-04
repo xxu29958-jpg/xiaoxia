@@ -74,9 +74,9 @@ def role(path: str) -> str:
         return (
             "tool_script_build"
             if item.parts[0] in {"tools", "scripts", "maintenance"}
-            or (
-                "scripts" in item.parts[:-1]
-                and "skills" not in item.parts[: item.parts.index("scripts")]
+            or any(
+                part in {"scripts", "benchmarks"} and "skills" not in item.parts[:index]
+                for index, part in enumerate(item.parts[:-1])
             )
             or item.suffix in {".ps1", ".sh", ".bat", ".cmd"}
             else "production"

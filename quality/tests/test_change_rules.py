@@ -75,7 +75,12 @@ class SizeRulesTests(unittest.TestCase):
         self.assertEqual(findings[0]["state"], "unchanged")
 
     def test_moving_production_into_tests_or_scripts_requires_review(self):
-        for path in ("tests/moved.py", "tools/moved.py", "plugins/p/scripts/moved.py"):
+        for path in (
+            "tests/moved.py",
+            "tools/moved.py",
+            "plugins/p/scripts/moved.py",
+            "plugins/p/benchmarks/moved.py",
+        ):
             with self.subTest(path=path):
                 findings = compare(
                     path, "app/original.py", long_function(), long_function(), POLICY
@@ -91,6 +96,7 @@ class SizeRulesTests(unittest.TestCase):
         for path in (
             "plugins/p/core/tools/moved.py",
             "plugins/p/skills/documents/scripts/moved.py",
+            "plugins/p/core/benchmarks.py",
         ):
             with self.subTest(path=path):
                 findings = compare(
