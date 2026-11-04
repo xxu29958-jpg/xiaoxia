@@ -106,6 +106,20 @@ def install(repo: Path, group: str) -> None:
         )
 
 
+def publish_plan(report: dict, payload: bytes) -> None:
+    """Bind the job matrix and downstream artifact to the bytes actually written."""
+    output = os.environ.get("GITHUB_OUTPUT")
+    if report["status"] != "planned" or not output:
+        return
+    with Path(output).open("a", encoding="utf-8") as stream:
+        stream.write(
+            f"matrix={json.dumps(matrix(report))}\n"
+            f"has_groups={str(bool(report['groups'])).lower()}\n"
+            f"base={report['base']}\n"
+            f"plan_sha256={hashlib.sha256(payload).hexdigest()}\n"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -115,6 +129,8 @@ def main() -> None:
     parser.add_argument("--tier", choices=("g1", "g2"), default="g1")
     parser.add_argument("--group", default="")
     parser.add_argument("--cache", type=Path, default=Path("out/upstreams"))
+    parser.add_argument("--plan", type=Path)
+    parser.add_argument("--plan-sha256", default="")
     args = parser.parse_args()
     repo = Path.cwd()
     args.report.parent.mkdir(parents=True, exist_ok=True)
@@ -126,13 +142,15 @@ def main() -> None:
         if args.action == "plan":
             report = plan(repo, base, full=os.environ.get("FULL_REGRESSION") == "true")
             report["status"] = "planned"
-            if output := os.environ.get("GITHUB_OUTPUT"):
-                with Path(output).open("a", encoding="utf-8") as stream:
-                    stream.write(
-                        f"matrix={json.dumps(matrix(report))}\nhas_groups={str(bool(report['groups'])).lower()}\nbase={base}\n"
-                    )
         elif args.action == "check":
-            report = check(repo, base, args.tier, args.group)
+            report = check(
+                repo,
+                base,
+                args.tier,
+                args.group,
+                plan_path=args.plan,
+                plan_sha256=args.plan_sha256,
+            )
         elif args.action == "package":
             report = package(repo, base, args.report.parent)
         elif args.action == "sources":
@@ -152,9 +170,9 @@ def main() -> None:
             "error": str(error),
             "g3": "not_executed",
         }
-    args.report.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    payload = (json.dumps(report, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    args.report.write_bytes(payload)
+    publish_plan(report, payload)
     print(json.dumps({"status": report["status"], "report": str(args.report)}))
     raise SystemExit(1 if report["status"] in {"fail", "error"} else 0)
 

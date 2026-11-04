@@ -10,11 +10,22 @@ FM-01～08 补充见 [文件地图与 CI 合同](../docs/file-map-ci-contract-v1
 每周计划和手动 `full` 执行全部已登记集成组；范围以报告为准，不能冒充 GPU／真实渠道／人工体验的 G3。
 源码候选制品带 commit、tree 和 SHA-256，不表示生产部署。当前执行证据与剩余工作只在施工台账维护。
 
+云端只在 plan 作业计算一次影响图，发布实际计划文件的 SHA-256，再把同一运行的制品交给 G1／G2。
+执行器核对摘要、HEAD、base、完整变更清单和候选字节哈希，G2 还核对本组确在计划内；执行后再次核对候选身份。
+显式传入的计划缺失、损坏或过期时直接失败并保存错误回执，不静默换成空集合或丢弃地图缺口。
+每份执行回执的 `impact_plan` 记录来源、摘要和处理耗时。消费者仍独立运行原有检查，定期全量／增量核对保持原范围。
+
 ```powershell
 # 云端使用相同入口；本地 BASE_SHA 指定明确基线。
 $env:BASE_SHA = '<base-commit>'
 .venvs/quality/Scripts/python.exe -B -m tools.quality.ci plan --report out/plan.json
 .venvs/quality/Scripts/python.exe -B -m tools.quality.ci check --tier g1 --report out/g1.json
+
+# 本地省略 --plan 时现场重算；明确复用自己刚生成的计划时，同时传入摘要。
+# 之后编辑、改名、增加文件或改变提交／基线，需要重新生成计划。
+$taskPlanSha = (Get-FileHash -Algorithm SHA256 out/plan.json).Hash.ToLowerInvariant()
+.venvs/quality/Scripts/python.exe -B -m tools.quality.ci check --tier g1 --report out/g1.json `
+  --plan out/plan.json --plan-sha256 $taskPlanSha
 
 # 同一结果包含文件地图、分类总量、复杂度、热点、差分与规则/工具指纹。
 .venvs/quality/Scripts/python.exe -B -m tools.quality.ci sources --cache out/upstreams --report out/sources.json
