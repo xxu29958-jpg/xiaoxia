@@ -65,9 +65,16 @@ class BoundPlanTests(unittest.TestCase):
         self.plan_path.write_bytes(data)
         return hashlib.sha256(data).hexdigest()
 
-    def run_cli(self, *args):
+    def run_cli(self, *args, stdlib_only=False):
         return subprocess.run(
-            [sys.executable, "-B", "-m", "tools.quality.ci", *args],
+            [
+                sys.executable,
+                "-B",
+                *(["-S"] if stdlib_only else []),
+                "-m",
+                "tools.quality.ci",
+                *args,
+            ],
             cwd=self.repo,
             capture_output=True,
             text=True,
@@ -92,6 +99,18 @@ class BoundPlanTests(unittest.TestCase):
             plan_path=self.plan_path,
             plan_sha256=self.digest if digest is None else digest,
         )
+
+    def test_planner_and_source_packager_work_without_site_packages(self):
+        for action in ("plan", "package"):
+            with self.subTest(action=action):
+                report = self.root / f"stdlib-{action}.json"
+                result = self.run_cli(action, "--report", str(report), stdlib_only=True)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                payload = json.loads(report.read_text(encoding="utf-8"))
+                self.assertEqual(payload["head"], self.base)
+                self.assertEqual(
+                    payload["status"], "planned" if action == "plan" else "pass"
+                )
 
     def test_cli_publishes_actual_bytes_and_runs_real_consumer_from_bound_plan(self):
         planned = self.run_cli("plan", "--report", str(self.plan_path))

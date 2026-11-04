@@ -2,11 +2,6 @@
 
 from pathlib import PurePosixPath
 
-from pygments import lex
-from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
-from pygments.token import Comment, Literal
-from pygments.util import ClassNotFound
-
 from .ownership import CONFIG, SOURCE
 
 LANGUAGES = {
@@ -94,6 +89,12 @@ def role(path: str) -> str:
 
 
 def measure(path: str, text: str, purpose: str) -> dict:
+    # Planning and source packaging use roles without a lexer environment.
+    from pygments import lex
+    from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
+    from pygments.token import Comment, Literal
+    from pygments.util import ClassNotFound
+
     suffix = PurePosixPath(path).suffix.lower()
     lines = text.replace("\r\n", "\n").replace("\r", "\n").splitlines()
     result = {
