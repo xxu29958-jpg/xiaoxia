@@ -118,38 +118,65 @@ class MemoryTools:
         self,
         event: AstrMessageEvent,
         action: str = "list",
-        kind: str = "topic",
+        kind: str = "",
         title: str = "",
         content: str = "",
         evidence_quote: str = "",
         item_id: str = "",
+        query: str = "",
+        offset: int = 0,
+        revision: str = "",
+        include_closed: bool = False,
     ) -> str:
-        """Manage explicitly shared jokes and unfinished conversational topics.
+        """Manage source-backed goals, shared jokes and unfinished topics.
 
         Save only when the user explicitly establishes a recurring joke or a topic
         to return to. A topic is not a reminder or a claim that an event happened.
         Resolve only the particular matter the user says is done or no longer wanted.
         Read current IDs before updating. Ordinary facts and stable preferences belong
-        in MemoryCompanion. Only confirm success if ok is true.
+        in MemoryCompanion. Confirm success only when ok and current are true.
+        Goals remain open across days until supported closure; closure is a report,
+        never proof of tool execution. Follow next_offset to continue retrieval.
 
         Args:
-            action(string): list, save, resolve or forget.
-            kind(string): topic or shared_joke.
+            action(string): list, history, save, resolve, cancel or forget.
+            kind(string): topic, shared_joke or goal; empty preserves an existing kind.
             title(string): Short topic or joke label.
             content(string): What to continue; explicitly identify a joke as fictional.
             evidence_quote(string): Exact supporting quote from the current user message.
             item_id(string): An existing ID from this conversation when updating or closing.
+            query(string): Optional literal keywords for list.
+            offset(number): next_offset for list, or next_before for history.
+            revision(string): Snapshot revision when continuing a list.
+            include_closed(boolean): Include resolved, cancelled and expired items.
         """
         origin = event.unified_msg_origin
         allowed = origin in self.owner_memory.owners or (
             event.get_platform_name() == "webchat"
             and str(event.get_sender_id()) == "astrbot"
         )
-        if not event.is_private_chat() or not allowed:
+        if (
+            not event.is_private_chat()
+            or not allowed
+            or event.get_extra("ada_web_read_active")
+        ):
             return json.dumps({"ok": False, "error": "private_owner_only"})
-        result = self.dialogue.update(
-            origin,
-            event.get_message_str(),
+        if action == "list":
+            result = await self.dialogue.snapshot(
+                origin,
+                event=event,
+                query=query,
+                offset=offset,
+                revision=revision,
+                include_closed=include_closed,
+            )
+            return json.dumps(result, ensure_ascii=False)
+        if action == "history":
+            return json.dumps(
+                await self.dialogue.history(event, item_id, offset), ensure_ascii=False
+            )
+        result = await self.dialogue.update(
+            event,
             action=action,
             kind=kind,
             title=title,

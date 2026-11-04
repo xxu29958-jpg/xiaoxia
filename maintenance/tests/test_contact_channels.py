@@ -7,6 +7,7 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 from types import MethodType, SimpleNamespace
+from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -14,6 +15,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "data/plugins"))
 
 from astrbot_plugin_ada_companion.main import AdaCompanion
 from astrbot_plugin_ada_companion.policy import LOCAL_TZ
+
+from maintenance.tests.working_state_support import native_dialogue
 
 WX = "wechat-companion:FriendMessage:owner-wx"
 QQ = "qq-personal-companion:FriendMessage:12345678"
@@ -43,7 +46,7 @@ class ContactChannelTests(unittest.IsolatedAsyncioTestCase):
             "wechat_target": WX,
             "proactive_enabled": True,
         }
-        self.platforms = {
+        self.platforms: dict[str, Any] = {
             origin.split(":", 1)[0]: SimpleNamespace(
                 status=SimpleNamespace(value="running"),
                 meta=lambda kind=kind: SimpleNamespace(name=kind),
@@ -62,7 +65,7 @@ class ContactChannelTests(unittest.IsolatedAsyncioTestCase):
         async def update_conversation(origin, cid, history):
             self.histories[origin] = history
 
-        self.context = SimpleNamespace(
+        self.context: Any = SimpleNamespace(
             get_provider_by_id=lambda pid: (
                 SimpleNamespace() if pid == "chatgpt-companion" else None
             ),
@@ -92,6 +95,12 @@ class ContactChannelTests(unittest.IsolatedAsyncioTestCase):
         self.plugin = self.load_plugin()
         for origin in (WX, QQ, OLD_QQ):
             self.plugin.owner_memory.observe(self.event(origin))
+        native_dialogue(
+            self.folder / "dialogue.json",
+            self.addCleanup,
+            self.plugin.owner_memory,
+            self.bridge,
+        )
 
     def load_plugin(self):
         with patch(
@@ -102,7 +111,7 @@ class ContactChannelTests(unittest.IsolatedAsyncioTestCase):
         plugin.services.memory = lambda: self.bridge
         return plugin
 
-    def event(self, origin=WX, text="hello", private=True):
+    def event(self, origin=WX, text="hello", private=True) -> Any:
         return SimpleNamespace(
             unified_msg_origin=origin,
             is_private_chat=lambda: private,
@@ -131,7 +140,7 @@ class ContactChannelTests(unittest.IsolatedAsyncioTestCase):
 
         # Keep AstrBot's session routing, QQ adapter and OneBot encoding real;
         # replace only the network boundary, so this cannot message a phone.
-        adapter = object.__new__(AiocqhttpAdapter)
+        adapter: Any = object.__new__(AiocqhttpAdapter)
         adapter._status = PlatformStatus.RUNNING
         adapter.meta = lambda: SimpleNamespace(
             id="qq-personal-companion", name="aiocqhttp"

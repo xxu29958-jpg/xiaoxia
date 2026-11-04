@@ -110,33 +110,11 @@ class ProactiveChat:
                 bridge, conversation, history, time.time(), manual, destination
             )
             valid, text, thread_id = choice["send"], choice["text"], choice["thread_id"]
-            meme = None
-            if valid and choice["meme_query"]:
-                library = self.services.plugin("astrbot_plugin_meme_manager")
-                if library is not None:
-                    try:
-                        meme = await asyncio.wait_for(
-                            library.select_context_meme(
-                                text=text,
-                                query=choice["meme_query"],
-                                session_id=target,
-                                usage_scope=self.owner_memory.shared_scope,
-                                persona_id=conversation.persona_id or "Ada",
-                                conversation_hint=json.dumps(
-                                    history[-12:], ensure_ascii=False
-                                )[-4000:],
-                                exclude_hashes=[
-                                    x.get("meme_sha256", "")
-                                    for x in self.policy.data["deliveries"][-3:]
-                                ],
-                            ),
-                            timeout=45,
-                        )
-                    except Exception as exc:
-                        logger.warning(
-                            "Ada optional proactive sticker unavailable: %s",
-                            type(exc).__name__,
-                        )
+            meme = (
+                await self._optional_sticker(choice, conversation, history, target)
+                if valid
+                else None
+            )
             if preview:
                 return {
                     "reason": "preview",
@@ -163,9 +141,40 @@ class ProactiveChat:
                 revision,
                 meme,
                 choice.get("material"),
+                choice.get("thread_version", ""),
             )
             self.last_check = {"at": time.time(), **outcome}
             return self.last_check
+
+    async def _optional_sticker(self, choice, conversation, history, target):
+        meme = None
+        if choice["meme_query"]:
+            library = self.services.plugin("astrbot_plugin_meme_manager")
+            if library is not None:
+                try:
+                    meme = await asyncio.wait_for(
+                        library.select_context_meme(
+                            text=choice["text"],
+                            query=choice["meme_query"],
+                            session_id=target,
+                            usage_scope=self.owner_memory.shared_scope,
+                            persona_id=conversation.persona_id or "Ada",
+                            conversation_hint=json.dumps(
+                                history[-12:], ensure_ascii=False
+                            )[-4000:],
+                            exclude_hashes=[
+                                x.get("meme_sha256", "")
+                                for x in self.policy.data["deliveries"][-3:]
+                            ],
+                        ),
+                        timeout=45,
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        "Ada optional proactive sticker unavailable: %s",
+                        type(exc).__name__,
+                    )
+        return meme
 
     async def _candidate(self, bridge, conversation, history, now, manual, destination):
         """Create a bounded candidate without delivering or reserving quota."""
@@ -213,7 +222,7 @@ class ProactiveChat:
             }
             for x in self.policy.data["deliveries"][-6:]
         ]
-        threads = self.dialogue.visible(target)
+        threads = await self.dialogue.visible(target)
         try:
             materials = self.materials.candidates(now) if self.materials else []
         except (ValueError, OSError, sqlite3.Error) as exc:
@@ -256,6 +265,9 @@ class ProactiveChat:
             ),
             timeout=150,
         )
+        return self._interpret_candidate(response, threads, materials)
+
+    def _interpret_candidate(self, response, threads, materials):
         raw = response.completion_text.strip()
         raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw)
         try:
@@ -286,9 +298,50 @@ class ProactiveChat:
             "send": valid,
             "text": text if valid else "",
             "thread_id": thread_id if valid else "",
+            "thread_version": next(
+                (x["version"] for x in threads if x["id"] == thread_id), ""
+            ),
             "meme_query": meme_query if valid else "",
             "material": material if valid else None,
         }
+
+    async def _candidate_change(
+        self,
+        cid,
+        last_user,
+        manual,
+        destination,
+        revision,
+        thread_id,
+        thread_version,
+        material,
+    ):
+        target = destination["origin"]
+        cm = self.context.conversation_manager
+        current_cid = await cm.get_curr_conversation_id(target)
+        try:
+            current_destination = self.contacts.resolve(destination["channel"])
+        except ValueError:
+            return "context_changed"
+        gate = self.policy.gate(time.time(), manual=manual)
+        if (
+            gate != "ready"
+            or not self.config.get("proactive_enabled", False)
+            or last_user != self.policy.data["last_user"]
+            or cid != current_cid
+            or revision != self.policy.data["channel_revision"]
+            or destination != current_destination
+            or destination["channel"] not in self.policy.data["channels"]
+        ):
+            return "context_changed"
+        if thread_id and not any(
+            x["id"] == thread_id and x["version"] == thread_version
+            for x in await self.dialogue.visible(target)
+        ):
+            return "context_changed"
+        if material and (not self.materials or not self.materials.current(material)):
+            return "material_changed"
+        return ""
 
     async def _deliver(
         self,
@@ -302,36 +355,25 @@ class ProactiveChat:
         revision,
         meme=None,
         material=None,
+        thread_version="",
     ):
         """Recheck activity, reserve once and record the actual delivery outcome."""
         cm = self.context.conversation_manager
         target = destination["origin"]
         native = destination["native"]
         async with session_lock_manager.acquire_lock(target):
-            current_cid = await cm.get_curr_conversation_id(target)
-            try:
-                current_destination = self.contacts.resolve(destination["channel"])
-            except ValueError:
-                return {"reason": "context_changed"}
-            gate = self.policy.gate(time.time(), manual=manual)
-            if (
-                gate != "ready"
-                or not self.config.get("proactive_enabled", False)
-                or last_user != self.policy.data["last_user"]
-                or cid != current_cid
-                or revision != self.policy.data["channel_revision"]
-                or destination != current_destination
-                or destination["channel"] not in self.policy.data["channels"]
-            ):
-                return {"reason": "context_changed"}
-            if thread_id and not any(
-                x["id"] == thread_id for x in self.dialogue.visible(target)
-            ):
-                return {"reason": "context_changed"}
-            if material and (
-                not self.materials or not self.materials.current(material)
-            ):
-                return {"reason": "material_changed"}
+            changed = await self._candidate_change(
+                cid,
+                last_user,
+                manual,
+                destination,
+                revision,
+                thread_id,
+                thread_version,
+                material,
+            )
+            if changed:
+                return {"reason": changed}
             library = self.services.plugin("astrbot_plugin_meme_manager")
             usage = getattr(library, "meme_usage", None)
             meme_token = None

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Callable
 from pathlib import Path
+from threading import RLock
 
 from .models import (
     utc_now,
@@ -13,6 +15,29 @@ from .store_support import (
 
 class MemoryStoreSchema:
     """Schema; state and transaction ownership remain in the facade."""
+
+    _conn: sqlite3.Connection
+    _lock: RLock
+    _read_only: bool
+    SCHEMA_VERSION: str
+    _backup_before_schema_upgrade_sync: Callable[[], str]
+    _repair_internal_control_tables_sync: Callable[[], object]
+    _ensure_memory_columns_sync: Callable[[], object]
+    _ensure_timeline_columns_sync: Callable[[], object]
+    _ensure_acl_columns_sync: Callable[[], object]
+    _ensure_portrait_columns_sync: Callable[[], object]
+    _ensure_memory_fts_sync: Callable[[], object]
+    _ensure_knowledge_trgm_sync: Callable[[], object]
+    _remove_legacy_redaction_tracking_triggers_sync: Callable[[], object]
+    _ensure_retrieval_revision_sync: Callable[[], object]
+    _ensure_source_query_indexes_sync: Callable[[], object]
+    _redact_existing_sensitive_rows_sync: Callable[[], object]
+    _cleanup_placeholder_memory_indexes_sync: Callable[[], object]
+    _initialize_summary_batches: Callable[[], object]
+    _initialize_recallable_memory_view: Callable[[], object]
+    _migrate_summary_batch_retry_state_sync: Callable[[], object]
+    rebuild_acl_projection_sync: Callable[[], object]
+    _memory_revision_sync: Callable[[], int]
 
     def initialize(self) -> None:
         if self._read_only:
@@ -54,22 +79,7 @@ class MemoryStoreSchema:
             self._remove_legacy_redaction_tracking_triggers_sync()
             self._ensure_retrieval_revision_sync()
             self._ensure_source_query_indexes_sync()
-            from .source_watches import initialize as initialize_life_source_watches
-
-            initialize_life_source_watches(self._conn)
-            from .source_capture import initialize as initialize_capture
-
-            initialize_capture(self._conn)
-            from .source_semantic import initialize as initialize_source_semantic
-
-            initialize_source_semantic(self._conn)
-            self._conn.execute("""
-                CREATE TABLE IF NOT EXISTS memory_correction_receipts (
-                    scope_ref TEXT NOT NULL, correction_id TEXT NOT NULL,
-                    request_hash TEXT NOT NULL, receipt TEXT NOT NULL,
-                    PRIMARY KEY(scope_ref, correction_id)
-                )
-            """)
+            self._initialize_state_domains_sync()
             self._conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_memories_fingerprint ON memories(content_fingerprint)"
             )
@@ -232,3 +242,24 @@ class MemoryStoreSchema:
             self._migrate_summary_batch_retry_state_sync()
             self.rebuild_acl_projection_sync()
             self._acl_projection_revision = self._memory_revision_sync()
+
+    def _initialize_state_domains_sync(self):
+        from .source_capture import initialize as initialize_capture
+        from .source_semantic import initialize as initialize_source_semantic
+        from .source_watches import initialize as initialize_life_source_watches
+
+        initialize_life_source_watches(self._conn)
+        initialize_capture(self._conn)
+        initialize_source_semantic(self._conn)
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS memory_correction_receipts (
+                scope_ref TEXT NOT NULL, correction_id TEXT NOT NULL,
+                request_hash TEXT NOT NULL, receipt TEXT NOT NULL,
+                PRIMARY KEY(scope_ref, correction_id)
+            )
+        """)
+        self._conn.executescript(
+            (Path(__file__).parent / "sql" / "working_state.sql").read_text(
+                encoding="utf-8"
+            )
+        )

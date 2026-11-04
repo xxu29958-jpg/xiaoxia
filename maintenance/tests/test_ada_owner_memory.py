@@ -9,10 +9,13 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
+from maintenance.tests.working_state_support import native_dialogue, save
+
 ROOT = Path(__file__).resolve().parents[2] / "data/plugins/astrbot_plugin_ada_companion"
 modules = {}
 for name in ("owner_memory", "dialogue"):
     spec = importlib.util.spec_from_file_location(name, ROOT / f"{name}.py")
+    assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     modules[name] = module
@@ -150,10 +153,13 @@ class OwnerMemoryTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(self.links.contexts[self.qq], previous)
 
-    def test_joke_saved_on_qq_is_visible_and_resolvable_on_wechat_after_restart(self):
+    async def test_joke_saved_on_qq_is_visible_and_resolvable_on_wechat_after_restart(
+        self,
+    ):
         path = self.root / "dialogue.json"
-        d = DialogueState(path, linked_sessions=[self.qq, self.wx])
-        saved = d.update(
+        d = native_dialogue(path, self.addCleanup, self.links)
+        saved = await save(
+            d,
             self.qq,
             "以后叫这事周日特种兵",
             action="save",
@@ -163,10 +169,11 @@ class OwnerMemoryTests(unittest.IsolatedAsyncioTestCase):
             evidence_quote="以后叫这事周日特种兵",
             now=100,
         )
-        d = DialogueState(path, linked_sessions=[self.qq, self.wx])
-        self.assertEqual(d.visible(self.wx, 101)[0]["id"], saved["id"])
-        self.assertEqual(d.visible("qq:FriendMessage:stranger", 101), [])
-        result = d.update(
+        d = native_dialogue(path, self.addCleanup, self.links)
+        self.assertEqual((await d.visible(self.wx, 101))[0]["id"], saved["id"])
+        self.assertFalse((await d.snapshot("qq:FriendMessage:stranger", now=101))["ok"])
+        result = await save(
+            d,
             self.wx,
             "不再聊周日特种兵了",
             action="resolve",
@@ -175,7 +182,7 @@ class OwnerMemoryTests(unittest.IsolatedAsyncioTestCase):
             now=102,
         )
         self.assertTrue(result["ok"])
-        self.assertEqual(d.visible(self.qq, 103), [])
+        self.assertEqual(await d.visible(self.qq, 103), [])
 
     async def test_actual_prompt_hook_includes_other_channel_evidence(self):
         sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -189,7 +196,9 @@ class OwnerMemoryTests(unittest.IsolatedAsyncioTestCase):
         plugin.target = self.wx
         plugin.policy = DeliveryPolicy(self.root / "policy.json", self.wx)
         plugin.services = SimpleNamespace(plugin=lambda name: None)
-        plugin.dialogue = SimpleNamespace(visible=lambda origin: [])
+        plugin.dialogue = SimpleNamespace(
+            snapshot=AsyncMock(return_value={"ok": True, "items": []})
+        )
         plugin.services.memory = lambda: SimpleNamespace(
             compose_context=AsyncMock(return_value="微信中明确约定称呼阿树")
         )

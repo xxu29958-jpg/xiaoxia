@@ -107,8 +107,10 @@ class ManagementApi:
             materials_error = ""
         except (ValueError, OSError, sqlite3.Error):
             materials, materials_error = [], "浏览笔记暂时无法读取。"
+        working = await p.dialogue.snapshot(p.target)
         data["conversation"] = {
-            "topics": p.dialogue.visible(p.target),
+            "topics": working.get("items", []),
+            "working_state": {k: v for k, v in working.items() if k != "items"},
             "topic_review": p.prompt.review.last,
             "materials": materials,
             "materials_error": materials_error,
@@ -183,20 +185,17 @@ class ManagementApi:
         p, action = self.plugin, data.get("action")
         scope = p.owner_memory.shared_scope
         if action == "topic_close":
-            topic = next(
-                (x for x in p.dialogue.visible(p.target) if x["id"] == data.get("id")),
-                None,
-            )
-            if topic is None or topic != data.get("expected"):
+            expected = data.get("expected")
+            if (
+                not isinstance(expected, dict)
+                or expected.get("id") != data.get("id")
+                or not expected.get("version")
+            ):
                 raise ValueError("这个话题已经更新，请刷新后再操作。")
-            result = p.dialogue.update(
-                p.target,
-                "在管理页选择不再追问这个话题",
-                action="resolve",
-                item_id=topic["id"],
-                evidence_quote="在管理页选择不再追问这个话题",
+            result = await p.dialogue.manage(
+                p.target, expected["id"], expected["version"]
             )
-            if not result.get("ok"):
+            if not result.get("ok") or not result.get("current"):
                 raise ValueError("话题未关闭，请检查状态后重试。")
             return "已结束这个话题，QQ 和微信共同生效。"
         if action == "material_dismiss":

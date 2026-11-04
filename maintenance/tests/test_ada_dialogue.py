@@ -1,23 +1,31 @@
-import sys
+"""Original callback behaviors now exercise the native database authority."""
+
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "data/plugins"))
 from astrbot_plugin_ada_companion.dialogue import DialogueState
+from astrbot_plugin_ada_companion.owner_memory import OwnerMemory
+from astrbot_plugin_memory_companion.core.working_state import WorkingState
+
+from maintenance.tests.working_state_support import incoming, native_dialogue, save
+
+QQ = "qq:FriendMessage:owner"
 
 
-class DialogueTests(unittest.TestCase):
+class DialogueTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.path = Path(self.temp.name) / "dialogue.json"
-        self.state = DialogueState(self.path)
+        owners = OwnerMemory(self.path.with_name("owners.json"), [QQ])
+        self.state = native_dialogue(self.path, self.addCleanup, owners)
 
-    def save(self, **kwargs):
-        return self.state.update(
-            "qq:owner",
+    async def save(self, **kwargs):
+        return await save(
+            self.state,
+            QQ,
             "这个梗以后就叫周日特种兵",
             action="save",
             kind="shared_joke",
@@ -28,69 +36,67 @@ class DialogueTests(unittest.TestCase):
             **kwargs,
         )
 
-    def test_callback_survives_reload_with_source_and_kind(self):
-        self.assertTrue(self.save()["ok"])
-        restored = DialogueState(self.path).visible("qq:owner", 200)
+    async def test_callback_survives_reload_with_source_and_kind(self):
+        self.assertTrue((await self.save())["ok"])
+        restored = await DialogueState(
+            self.path, self.state.owners, self.state.services
+        ).visible(QQ, 200)
         self.assertEqual(restored[0]["kind"], "shared_joke")
         self.assertEqual(restored[0]["evidence_quote"], "这个梗以后就叫周日特种兵")
+        self.assertEqual(restored[0]["source"]["kind"], "user_message")
 
-    def test_stranger_and_other_platform_cannot_read_or_close(self):
-        saved = self.save()
-        self.assertEqual(self.state.visible("wechat:owner", 200), [])
-        denied = self.state.update(
-            "qq:stranger",
-            "别再提这事",
+    async def test_stranger_and_other_platform_cannot_read_or_close(self):
+        saved = await self.save()
+        self.assertFalse(
+            (await self.state.snapshot("wechat:FriendMessage:owner"))["ok"]
+        )
+        denied = await self.state.update(
+            incoming(self.state, "qq:FriendMessage:stranger", "别再提这事"),
             action="resolve",
             item_id=saved["id"],
             evidence_quote="别再提这事",
             now=200,
         )
         self.assertFalse(denied["ok"])
-        self.assertEqual(len(self.state.visible("qq:owner", 200)), 1)
+        self.assertEqual(len(await self.state.visible(QQ, 200)), 1)
 
-    def test_invented_evidence_is_not_saved(self):
-        self.assertFalse(self.save(evidence_quote="用户当过兵")["ok"])
+    async def test_invented_evidence_is_not_saved(self):
+        self.assertFalse((await self.save(evidence_quote="用户当过兵"))["ok"])
+        self.assertEqual(await self.state.visible(QQ, 200), [])
         self.assertFalse(self.path.exists())
 
-    def test_resolution_removes_callback_from_future_context(self):
-        saved = self.save()
-        self.state.update(
-            "qq:owner",
+    async def test_resolution_removes_callback_from_future_context(self):
+        saved = await self.save()
+        result = await save(
+            self.state,
+            QQ,
             "这个梗别再提了",
             action="resolve",
             item_id=saved["id"],
             evidence_quote="这个梗别再提了",
             now=200,
         )
-        self.assertEqual(DialogueState(self.path).visible("qq:owner", 300), [])
+        self.assertTrue(result["ok"])
+        self.assertEqual(await self.state.visible(QQ, 300), [])
 
-    def test_expired_callback_is_not_revived_by_read(self):
-        self.save()
-        self.assertEqual(self.state.visible("qq:owner", 31 * 86400), [])
+    async def test_expired_callback_is_not_revived_by_read(self):
+        await self.save()
+        self.assertEqual(await self.state.visible(QQ, 31 * 86400), [])
 
-    def test_failed_persistence_does_not_claim_or_keep_memory(self):
-        with (
-            patch.object(Path, "replace", side_effect=OSError("disk failure")),
-            self.assertRaises(OSError),
-        ):
-            self.save()
-        self.assertEqual(self.state.visible("qq:owner", 200), [])
+    async def test_failed_persistence_does_not_claim_or_keep_memory(self):
+        with patch.object(WorkingState, "write", side_effect=OSError("disk failure")):
+            self.assertFalse((await self.save())["ok"])
+        self.assertEqual(await self.state.visible(QQ, 200), [])
 
-    def test_corrupt_file_is_preserved(self):
+    async def test_corrupt_file_is_preserved(self):
         self.path.write_text("broken", encoding="utf-8")
-        self.state = DialogueState(self.path)
-        self.assertFalse(self.save()["ok"])
+        self.assertFalse((await self.save())["ok"])
         self.assertEqual(self.path.read_text(encoding="utf-8"), "broken")
 
-    def test_valid_json_with_invalid_shape_is_preserved_and_disabled(self):
+    async def test_valid_json_with_invalid_shape_is_preserved_and_disabled(self):
         for contents in ("[]", '{"version":1,"sessions":{"qq:owner":[{}]}}'):
             with self.subTest(contents=contents):
                 self.path.write_text(contents, encoding="utf-8")
-                state = DialogueState(self.path)
-                self.assertFalse(state.healthy)
-                self.assertEqual(state.visible("qq:owner"), [])
+                self.assertFalse((await self.state.snapshot(QQ))["ok"])
+                self.assertFalse(self.state.healthy)
                 self.assertEqual(self.path.read_text(encoding="utf-8"), contents)
-
-
-if __name__ == "__main__":
-    unittest.main()

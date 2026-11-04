@@ -14,7 +14,7 @@ _PRIVATE_KEY = re.compile(
 )
 _BEARER = re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{8,}")
 _CREDENTIAL_ASSIGNMENT = re.compile(
-    r"(?i)\b(password|passwd|api[_-]?key|access[_-]?token|refresh[_-]?token|"
+    r"(?i)(?<![A-Za-z0-9_])(password|passwd|api[_-]?key|access[_-]?token|refresh[_-]?token|"
     r"authorization|client[_-]?secret|private[_-]?key)\b(\s*[:=]\s*)"
     r"(?:\"[^\"\r\n]*\"|'[^'\r\n]*'|[^\s,;\r\n]+)"
 )

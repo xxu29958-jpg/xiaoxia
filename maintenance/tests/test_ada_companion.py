@@ -6,17 +6,19 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "data/plugins"))
-from astrbot_plugin_ada_companion.dialogue import DialogueState
 from astrbot_plugin_ada_companion.policy import (
     LOCAL_TZ,
     DeliveryPolicy,
     speech_text,
     wants_voice,
 )
+
+from maintenance.tests.working_state_support import native_dialogue, save
 
 TARGET = "wechat-companion:FriendMessage:test-owner"
 NOW = datetime(2026, 10, 18, 12, tzinfo=LOCAL_TZ).timestamp()
@@ -156,7 +158,6 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.plugin = object.__new__(ProactiveChat)
-        self.plugin.target = TARGET
         self.plugin.config = {
             "proactive_enabled": True,
             "provider_id": "chatgpt-companion",
@@ -165,7 +166,6 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
             Path(self.temp.name) / "state.json", TARGET, NOW - 4 * 3600
         )
         self.plugin.proactive_lock = asyncio.Lock()
-        self.plugin.dialogue = DialogueState(Path(self.temp.name) / "dialogue.json")
         self.plugin.last_check = {}
         conv = SimpleNamespace(
             history=json.dumps([{"role": "user", "content": "Use English"}]),
@@ -213,6 +213,12 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
             "bot_id": "wechat-bot",
         }
         self.plugin.owner_memory.compose = AsyncMock(return_value={})
+        self.plugin.dialogue = native_dialogue(
+            Path(self.temp.name) / "dialogue.json",
+            self.addCleanup,
+            self.plugin.owner_memory,
+            self.bridge,
+        )
         self.plugin.contacts = ContactChannels(
             self.plugin.policy, self.plugin.owner_memory, self.context
         )
@@ -320,7 +326,8 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.context.send_message.assert_not_awaited()
 
     async def test_proactive_cannot_use_resolved_or_invented_thread(self):
-        result = self.plugin.dialogue.update(
+        result = await save(
+            self.plugin.dialogue,
             TARGET,
             "下次聊春游",
             action="save",
@@ -329,7 +336,8 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
             evidence_quote="下次聊春游",
             now=NOW,
         )
-        self.plugin.dialogue.update(
+        await save(
+            self.plugin.dialogue,
             TARGET,
             "春游取消了，别再聊了",
             action="resolve",
@@ -342,6 +350,47 @@ class ProactiveIntegrationTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertFalse((await self.plugin.proactive(preview=True))["send"])
         self.context.send_message.assert_not_awaited()
+
+    async def test_same_id_edited_during_candidate_generation_cannot_be_sent(self):
+        saved = await save(
+            self.plugin.dialogue,
+            TARGET,
+            "下次聊春游",
+            action="save",
+            title="春游",
+            content="一起讨论春游",
+            evidence_quote="下次聊春游",
+            now=NOW,
+        )
+
+        async def generated(**kwargs):
+            self.assertIn(saved["version"], kwargs["prompt"])
+            changed = await save(
+                self.plugin.dialogue,
+                TARGET,
+                "春游改去公园",
+                action="save",
+                item_id=saved["id"],
+                title="春游",
+                content="改去公园",
+                evidence_quote="春游改去公园",
+                now=NOW,
+            )
+            self.assertTrue(changed["ok"], changed)
+            return SimpleNamespace(
+                completion_text=json.dumps(
+                    {
+                        "send": True,
+                        "text": "春游路线准备好了吗？",
+                        "thread_id": saved["id"],
+                    }
+                )
+            )
+
+        self.context.llm_generate.side_effect = generated
+        self.assertEqual((await self.plugin.proactive())["reason"], "context_changed")
+        self.context.send_message.assert_not_awaited()
+        self.assertEqual(self.plugin.policy.data["deliveries"], [])
 
 
 class MobileControlTests(unittest.IsolatedAsyncioTestCase):
@@ -357,7 +406,7 @@ class MobileControlTests(unittest.IsolatedAsyncioTestCase):
             "proactive_enabled": True,
             "voice_enabled": False,
         }
-        context = SimpleNamespace(
+        context: Any = SimpleNamespace(
             get_provider_by_id=lambda _: object(),
             get_all_stars=lambda: [],
             conversation_manager=SimpleNamespace(
@@ -370,7 +419,7 @@ class MobileControlTests(unittest.IsolatedAsyncioTestCase):
         ):
             self.plugin = AdaCompanion(context, config)
         self.plugin.policy.data.update(last_user=NOW, next_due=NOW)
-        self.event = SimpleNamespace(
+        self.event: Any = SimpleNamespace(
             is_private_chat=lambda: True,
             unified_msg_origin=self.qq,
             get_message_str=Mock(return_value="暂停主动消息"),

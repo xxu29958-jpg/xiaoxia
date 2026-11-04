@@ -2,54 +2,39 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
+from collections.abc import Callable, Iterable
+from contextlib import AbstractContextManager
+from pathlib import Path
+from threading import RLock
 from typing import Any
 
 from .models import (
     clean_text,
 )
+from .store_erasure_domains import CLEAR_TABLES, validate_scope, working_scope
 
 
 class MemoryStoreScopeErasure:
     """Scope erasure; state and transaction ownership remain in the facade."""
+
+    _conn: sqlite3.Connection
+    _lock: RLock
+    backup: Callable[[str], Path]
+    _transaction_sync: Callable[[], AbstractContextManager]
+    clear_acl_projection_sync: Callable[[], object]
+    _timeline_reference_memories_sync: Callable[[set[str]], Iterable[tuple[str, dict]]]
+    _delete_memory_fts_row: Callable[[str], object]
+    _delete_memories_referencing_timeline_ids_sync: Callable[[list[str]], int]
 
     async def clear_all_memory_data(self) -> dict[str, Any]:
         return await asyncio.to_thread(self._clear_all_memory_data_sync)
 
     def _clear_all_memory_data_sync(self) -> dict[str, Any]:
         backup = self.backup(".before_clear_all")
-        tables = [
-            "memory_fts",
-            "emotion_event_deliveries",
-            "emotion_events",
-            "portrait_learning_queue",
-            "portrait_daily_runs",
-            "portrait_suppressions",
-            "portrait_facts",
-            "portrait_evidence",
-            "portrait_operations",
-            "portrait_people",
-            "review_queue",
-            "injection_logs",
-            "summary_failures",
-            "summary_batches",
-            "chat_import_segments",
-            "chat_import_batches",
-            "relationship_edges",
-            "knowledge_edges",
-            "knowledge_nodes",
-            "timeline",
-            "cross_window_threads",
-            "memory_acl_rules",
-            "memory_acl_policies",
-            "memory_embeddings",
-            "identities",
-            "memories",
-            "import_batches",
-        ]
         deleted: dict[str, int] = {}
         with self._lock:
             with self._transaction_sync():
-                for table in tables:
+                for table in CLEAR_TABLES:
                     try:
                         cur = self._conn.execute(f"DELETE FROM {table}")
                     except sqlite3.Error:
@@ -99,17 +84,7 @@ class MemoryStoreScopeErasure:
         user_id: str,
         execute: bool,
     ) -> dict[str, Any]:
-        target_type = clean_text(target_type, 40).lower()
-        group_id = clean_text(group_id, 120)
-        user_id = clean_text(user_id, 120)
-        if target_type not in {"group", "private", "group_member"}:
-            raise ValueError("target_type must be group, private or group_member")
-        if target_type == "group" and not group_id:
-            raise ValueError("group_id is required")
-        if target_type == "private" and not user_id:
-            raise ValueError("user_id is required")
-        if target_type == "group_member" and (not group_id or not user_id):
-            raise ValueError("group_id and user_id are required")
+        target_type, group_id, user_id = validate_scope(target_type, group_id, user_id)
 
         memory_where, memory_params = self._scoped_memory_where(
             target_type, group_id, user_id
@@ -155,6 +130,7 @@ class MemoryStoreScopeErasure:
             ]
             all_memory_ids = list(dict.fromkeys([*memory_ids, *linked_memory_ids]))
             counts = {
+                "working_objects": working_scope(self._conn, target_type, user_id),
                 "memories": len(all_memory_ids),
                 "timeline": len(timeline_ids),
                 "relationship_edges": self._count_relationship_edges_for_scope_or_memory_ids(
@@ -195,6 +171,9 @@ class MemoryStoreScopeErasure:
             backup = self.backup(f".before_clear_{target_type}")
             deleted: dict[str, int] = {}
             with self._transaction_sync():
+                deleted["working_objects"] = working_scope(
+                    self._conn, target_type, user_id, execute=True
+                )
                 if all_memory_ids:
                     self._delete_many_by_ids(
                         "review_queue", "memory_id", all_memory_ids, deleted

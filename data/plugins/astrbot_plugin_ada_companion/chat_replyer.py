@@ -13,9 +13,11 @@ REPLY_STYLE = """
 {"reply":"实际要发的话"}。
 reply 保留实际工具结果及选中的表情标记，可以包含代码或长回答。
 有近期未完事项需要延续时才加 topic_updates，最多两项：
-{"action":"save|resolve","item_id":"已有id或空","title":"主题",
+{"action":"save|resolve|cancel","kind":"topic|goal","item_id":"已有id或空","title":"主题",
 "content":"事情及进展，相对日期按当前时间记清","evidence_quote":"本轮对方原话"}。
-新事 save，更新沿用 id，办完、取消或不想再提则 resolve；普通感想不用记一项。
+新事 save，更新沿用 id，明确办完则 resolve，取消则 cancel；普通感想不用记一项。
+只有明确要持续推进的目标才用 goal；目标不因沉默到期。关闭只记录对方报告，不证明工具已经执行。
+确认已保存前优先调用 ada_threads 并检查 ok/current；不要把生成计划说成已执行。
 当下真想配一张表情时才加 reaction：
 {"action":"react|requested","shift":true,"evidence":"当前原话或回复的短引用","query":"表情想表达什么"}。
 react 表示本轮新出现的鲜明反应，requested 表示对方正在要图。
@@ -117,28 +119,13 @@ class ChatReplyer:
             event.set_extra(
                 "ada_reply_reaction", decision.get("reaction") or {"action": "skip"}
             )
-            updates = decision.get("topic_updates", [])
-            current = event.get_extra("turnflow_user_text") or event.get_message_str()
-            if isinstance(updates, list) and not event.is_stopped():
-                for update in updates[:2]:
-                    if not isinstance(update, dict):
-                        continue
-                    if update.get("action") not in {"save", "resolve"}:
-                        continue
-                    fields = ("item_id", "title", "content", "evidence_quote")
-                    if any(not isinstance(update.get(key, ""), str) for key in fields):
-                        continue
-                    try:
-                        self.dialogue.update(
-                            event.unified_msg_origin,
-                            current,
-                            action=update["action"],
-                            **{key: update.get(key, "") for key in fields},
-                        )
-                    except OSError as exc:
-                        logger.warning(
-                            "Ada topic update unavailable: %s", type(exc).__name__
-                        )
+            receipts = await self.dialogue.apply_updates(
+                event, decision.get("topic_updates", [])
+            )
+            if any(not r.get("ok") or not r.get("current") for r in receipts):
+                text += "\n这次后续事项没有保存成功，之后还需要重新确认。"
+                response.completion_text = text
+                event.set_extra("ada_spoken_reply", text)
             self.last = {
                 "ok": True,
                 "mode": "native_single_pass",
