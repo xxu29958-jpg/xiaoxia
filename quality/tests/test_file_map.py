@@ -55,6 +55,17 @@ class LineTests(unittest.TestCase):
 
     def test_scripts_sql_generated_and_binary_do_not_leak_into_production(self):
         self.assertEqual(line_counts.role("tools/build.py"), "tool_script_build")
+        self.assertEqual(
+            line_counts.role("plugins/memory/scripts/benchmark.py"),
+            "tool_script_build",
+        )
+        self.assertEqual(line_counts.role("plugins/memory/scripts/test_cli.py"), "test")
+        self.assertEqual(
+            line_counts.role("plugins/memory/core/scripts.py"), "production"
+        )
+        self.assertEqual(
+            line_counts.role("plugins/memory/core/tools/query.py"), "production"
+        )
         self.assertEqual(line_counts.role("core/sql/state.sql"), "schema_migration")
         self.assertEqual(line_counts.role("core/store_schema.py"), "production")
         self.assertEqual(line_counts.role("package-lock.json"), "generated_manifest")
@@ -63,6 +74,19 @@ class LineTests(unittest.TestCase):
             ("两行\n内容", "utf-16-bom"),
         )
         self.assertEqual(line_counts.decode(b"\x00\x01")[1], "binary")
+
+    def test_nested_script_keeps_local_upstream_responsibility_and_source_metrics(self):
+        path = "data/plugins/astrbot_plugin_memory_companion/scripts/benchmark.py"
+        source = b"def run():\n    return 1\n"
+        entry = Entry(path, "local", "blob", len(source))
+        record, parsed = file_record(entry, source, POLICY, {path: "upstream"})
+        self.assertEqual(record["category"], "upstream_modified/tool_script_build")
+        self.assertEqual(record["maintenance"], "self_maintained")
+        self.assertFalse(record["first_party_production"])
+        self.assertFalse(record["size_exempt"])
+        self.assertEqual(record["physical_lines"], 2)
+        self.assertEqual(record["code_lines"], 2)
+        self.assertEqual(parsed, source)
 
     def test_actual_ruff_measures_below_ten_and_above_fifteen_without_custom_formula(
         self,

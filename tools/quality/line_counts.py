@@ -79,6 +79,7 @@ def role(path: str) -> str:
         return (
             "tool_script_build"
             if item.parts[0] in {"tools", "scripts", "maintenance"}
+            or "scripts" in item.parts[:-1]
             or item.suffix in {".ps1", ".sh", ".bat", ".cmd"}
             else "production"
         )

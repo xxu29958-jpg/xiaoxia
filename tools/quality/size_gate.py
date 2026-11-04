@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime
 
+from .line_counts import role
 from .metrics import physical_lines, python_metrics
 from .ownership import file_kind, findings
 from .quality_exceptions import apply
@@ -40,10 +41,9 @@ def compare(
     old_by_identity = {value: key for key, value in old_ids.items()}
     carry_layout_findings(path, after, old, new, old_ids, new_ids)
     result = []
-    if (
-        before is not None
-        and file_kind(previous) == "production"
-        and file_kind(path) != "production"
+    if before is not None and (
+        (file_kind(previous) == "production" and file_kind(path) != "production")
+        or (role(previous) == "production" and role(path) != "production")
     ):
         result.append(
             {

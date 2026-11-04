@@ -74,19 +74,29 @@ class SizeRulesTests(unittest.TestCase):
         self.assertEqual(findings[0]["previous_symbol"], "old")
         self.assertEqual(findings[0]["state"], "unchanged")
 
-    def test_moving_production_code_into_tests_requires_explicit_review(self):
+    def test_moving_production_into_tests_or_scripts_requires_review(self):
+        for path in ("tests/moved.py", "tools/moved.py", "plugins/p/scripts/moved.py"):
+            with self.subTest(path=path):
+                findings = compare(
+                    path, "app/original.py", long_function(), long_function(), POLICY
+                )
+                self.assertTrue(
+                    any(
+                        f["metric"] == "maintenance_responsibility" and f["blocking"]
+                        for f in findings
+                    )
+                )
+
+    def test_tool_named_runtime_modules_keep_production_responsibility(self):
         findings = compare(
-            "tests/moved.py",
+            "plugins/p/core/tools/moved.py",
             "app/original.py",
             long_function(),
             long_function(),
             POLICY,
         )
-        self.assertTrue(
-            any(
-                f["metric"] == "maintenance_responsibility" and f["blocking"]
-                for f in findings
-            )
+        self.assertFalse(
+            any(f["metric"] == "maintenance_responsibility" for f in findings)
         )
 
     def test_complexity_does_not_mix_identically_named_methods(self):
