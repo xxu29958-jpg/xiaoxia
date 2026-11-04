@@ -36,10 +36,12 @@ def execute(
         status = "pass" if code == 0 else "fail"
     except subprocess.TimeoutExpired as error:
         code, status = 124, "timeout"
-        stdout = (error.stdout or b"").decode("utf-8", errors="replace")
-        stderr = (error.stderr or b"").decode(
-            "utf-8", errors="replace"
-        ) + "\nCommand timed out."
+        stdout, stderr = error.stdout or "", error.stderr or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode("utf-8", errors="replace")
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        stderr += "\nCommand timed out."
     except OSError as error:
         code, status, stdout, stderr = 127, "not_executed", "", str(error)
     return {
@@ -49,6 +51,7 @@ def execute(
         "stdout": stdout,
         "stderr": stderr,
         "elapsed_seconds": round(time.monotonic() - started, 3),
+        "timeout_seconds": timeout,
         "explicit_environment": extra_env or {},
     }
 

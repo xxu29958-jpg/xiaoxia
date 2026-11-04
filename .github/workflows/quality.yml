@@ -126,7 +126,7 @@ jobs:
       - run: python -m pip install -r requirements/quality.txt
       - name: Install this consumer's isolated dependencies
         run: python -B -m tools.quality.ci install --group '${{ matrix.group }}'
-      - run: npm ci --prefix quality --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix quality --ignore-scripts --no-audit --no-fund --logs-dir '${{ github.workspace }}/out/npm-logs'
       - name: Exercise affected consumers
         env:
           BASE_SHA: ${{ needs.plan.outputs.base }}
