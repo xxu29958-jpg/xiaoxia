@@ -20,6 +20,7 @@ from .external_checks import (
 )
 from .git_snapshot import BlobReader, entries
 from .ownership import TEXT
+from .reading_checks import reading_checks
 from .size_gate import compare, identities
 from .test_selection import required_tests
 
@@ -152,6 +153,8 @@ def contract_checks(repo: Path, tests: dict, runtimes: dict[str, str]) -> list[d
         checks.extend(bot_checks(repo, runtimes.get("bot", "")))
     if tests["cognition_contracts"]:
         checks.extend(cognition_checks(repo, runtimes.get("bot", "")))
+    if tests["reading_contracts"]:
+        checks.extend(reading_checks(repo, runtimes.get("bot", "")))
     return checks
 
 

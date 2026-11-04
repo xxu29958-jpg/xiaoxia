@@ -203,9 +203,11 @@ class ContextBuilder:
                 if discoveries:
                     social["实际阅读"] = discoveries
                     instructions += (
-                        "\n[你实际读过的内容和随手记]\n"
+                        "\n[阅读材料片段和随手记]\n"
                         + json.dumps(discoveries, ensure_ascii=False)
-                        + "\n聊到相关处可以接着说，挑一个你感兴趣的细节。\n"
+                        + "\n聊到相关处可以接着说。reading 标明实际取得的来源和范围；"
+                        "RSS／字幕片段不等于文章／视频全文，legacy_unknown 的范围未知。"
+                        "评论是自己的理解。可用 ada_web_notes 的 read 继续原版本，再形成判断。\n"
                     )
             bridge = self.services.memory()
             linked = await self.owner_memory.compose(

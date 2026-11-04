@@ -90,3 +90,37 @@ async def test_reading_chooses_a_detail_and_keeps_its_own_thought(discovery):
     assert notes[0]["comment"] == "它会自己改工具，这比只会用现成的有意思。"
     payload = json.loads(discovery.models.generate.await_args.kwargs["prompt"])
     assert len(payload) == 2
+
+
+@pytest.mark.asyncio
+async def test_feed_only_marks_presented_excerpt_and_resume_retains_source(discovery):
+    visible = "The crow bends a wire into a hook."
+    hidden = "The later trial failed, limiting that first interpretation."
+    text = visible + " A little more introductory information." * 140 + hidden
+    body = f"<rss><channel><item><title>Crow</title><link>https://example.org/crow</link><description>{text}</description></item></channel></rss>"
+    discovery.models.context = SimpleNamespace(
+        persona_manager=SimpleNamespace(
+            get_persona=AsyncMock(return_value=SimpleNamespace(system_prompt="Ada"))
+        )
+    )
+    discovery.models.generate.return_value.completion_text = json.dumps(
+        {"pick": 0, "quote": visible, "thought": "它还会改造工具。"}
+    )
+    transport = AsyncMock()
+    transport.load.return_value = ("https://example.org/feed", {"body": body})
+    with patch(
+        "astrbot_plugin_ada_companion.interest_discovery.PublicTransport"
+    ) as factory:
+        factory.return_value.__aenter__ = AsyncMock(return_value=transport)
+        factory.return_value.__aexit__ = AsyncMock(return_value=False)
+        report = await InterestDiscovery(discovery).read_feeds("owner")
+    assert report["ok"]
+    payload = json.loads(discovery.models.generate.await_args.kwargs["prompt"])[0]
+    assert hidden not in payload["text"]
+    note = discovery.store.notes("owner", "list")["notes"][0]
+    assert note["reading"]["provided_range"]["end"] == 4000
+    assert note["reading"]["source_total_chars"] == len(text)
+    assert note["reading"]["source_url"] == "https://example.org/feed"
+    continuation = discovery.store.read("owner", item_id=note["id"])
+    assert hidden in continuation["text"]
+    assert continuation["reading"]["provided_range"]["start"] == 4000

@@ -98,7 +98,10 @@ class ToolPolicy:
             tool: A tool selected by the model.
             tool_args: Current tool arguments, not interpreted here.
         """
-        if tool.name not in WEB_READ_TOOLS:
+        reading_saved_source = (
+            tool.name == "ada_web_notes" and (tool_args or {}).get("action") == "read"
+        )
+        if tool.name not in WEB_READ_TOOLS and not reading_saved_source:
             return
         event.set_extra("ada_web_read_active", True)
         req = event.get_extra("ada_current_request")

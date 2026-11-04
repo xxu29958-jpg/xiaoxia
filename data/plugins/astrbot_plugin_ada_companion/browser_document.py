@@ -21,6 +21,9 @@ PAGE_DATA = r"""() => {
     if (!images.some(e => e.url === link.url))
       images.push({url:link.url,alt:link.text,width:0,height:0,kind:'download_link'});
   }
+  const source = Array.from(root?.innerText || '');
   return {url:location.href,title:document.title,
-    text:(root?.innerText || '').slice(0,24000),links:links.slice(0,180),images:images.slice(0,100),scroll_y:scrollY};
+    text:source.slice(0,24000).join(''),_source_text:source.slice(0,200000).join(''),
+    source_total_chars:source.length,source_kind:'web_dom',
+    links:links.slice(0,180),images:images.slice(0,100),scroll_y:scrollY};
 }"""

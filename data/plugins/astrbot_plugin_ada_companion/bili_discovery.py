@@ -42,12 +42,12 @@ class BiliDiscovery:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def _run(self, scope, work, timeout):
+    async def _run(self, scope, work, budget_seconds):
         revision = self.stop_revisions.get(scope, 0)
         task = asyncio.create_task(work)
         self.active.setdefault(scope, set()).add(task)
         try:
-            return await asyncio.wait_for(task, timeout)
+            return await asyncio.wait_for(task, budget_seconds)
         except asyncio.CancelledError:
             if self.stop_revisions.get(scope, 0) != revision:
                 return {"ok": False, "reason": "stopped"}
@@ -302,25 +302,8 @@ class BiliDiscovery:
                                 and not self.config.get("bili_discovery_enabled", False)
                             ):
                                 return {"ok": False, "reason": "disabled"}
-                            page_id = "bili-" + uuid.uuid4().hex[:16]
-                            self.store.save_visit(
-                                scope,
-                                {
-                                    "page_id": page_id,
-                                    "url": source["url"],
-                                    "title": source["title"],
-                                    "text": source["transcript"],
-                                },
-                                "",
-                            )
-                            note = self.store.notes(
-                                scope,
-                                "save",
-                                page_id,
-                                source_quote=quote,
-                                comment=comment,
-                                next_step="仅阅读字幕片段，未观看画面或音频；讨论时附原视频链接，不把来源观点当作事实。",
-                                only_if_new=True,
+                            page_id, note = self._save_pick(
+                                scope, source, quote, comment
                             )
                             if note.get("ok"):
                                 report["saved"].append(
@@ -348,3 +331,29 @@ class BiliDiscovery:
                     ("bili-report:" + scope, json.dumps(report, ensure_ascii=False)),
                 )
             return report
+
+    def _save_pick(self, scope, source, quote, comment):
+        """Bind a selected subtitle quote to the exact source passed to the model."""
+        page_id = "bili-" + uuid.uuid4().hex[:16]
+        self.store.save_visit(
+            scope,
+            {
+                "page_id": page_id,
+                "url": source["url"],
+                "title": source["title"],
+                "text": source["transcript"],
+                "source_kind": "bilibili_subtitles",
+                "source_truncated": source.get("truncated", False),
+            },
+            "",
+        )
+        note = self.store.notes(
+            scope,
+            "save",
+            page_id,
+            source_quote=quote,
+            comment=comment,
+            next_step="仅阅读字幕片段，未观看画面或音频；讨论时附原视频链接，不把来源观点当作事实。",
+            only_if_new=True,
+        )
+        return page_id, note

@@ -113,6 +113,16 @@ class RuntimeCheckTests(unittest.TestCase):
         self.assertEqual(result["unmapped_code_changes"], [])
         self.assertEqual(runtime_group(paths[2]), "bot")
 
+    def test_reading_changes_require_native_source_and_browser_consumers(self):
+        paths = [
+            "data/plugins/astrbot_plugin_ada_companion/reading_store.py",
+            "data/plugins/astrbot_plugin_ada_companion/interest_discovery.py",
+            "maintenance/tests/reading_crash_support.py",
+        ]
+        result = required_tests([Change(path, None, "A") for path in paths])
+        self.assertTrue(result["reading_contracts"])
+        self.assertEqual(result["unmapped_code_changes"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

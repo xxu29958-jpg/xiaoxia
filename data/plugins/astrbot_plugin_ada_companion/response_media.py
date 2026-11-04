@@ -22,6 +22,35 @@ class ResponseMedia:
         self.voice_lock = asyncio.Lock()
         self.last_voice = {}
 
+    async def sing(self, event: AstrMessageEvent, lyrics: str):
+        """Render and attach original singing using the same audio resource owner."""
+        event.set_extra("ada_voice_done", True)
+        if not self.config.get("voice_enabled", False):
+            yield event.plain_result("语音现在停用了，开启后我再唱给你。")
+            return
+        try:
+            async with self.voice_lock:
+                audio = await self.voice.synthesize(lyrics, mode="singing")
+                component = await self.audio_files.create(
+                    audio, lyrics, event.get_platform_name()
+                )
+            self.last_voice = {
+                "state": "attached_to_reply",
+                "at": time.time(),
+                "platform": event.get_platform_name(),
+                "bytes": len(audio),
+                "mode": "singing",
+            }
+            yield event.chain_result([component])
+        except VoiceError as exc:
+            self.last_voice = {
+                "state": "failed",
+                "mode": "singing",
+                "error": str(exc),
+                "at": time.time(),
+            }
+            yield event.plain_result("这次歌声没生成出来，等我缓一下。")
+
     async def image_only_meme_reply(self, event: AstrMessageEvent, response):
         """Remove selection chatter only when a current valid meme was requested.
 

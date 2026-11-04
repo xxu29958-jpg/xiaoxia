@@ -6,6 +6,26 @@ from pathlib import Path
 from .ownership import SOURCE
 
 CONTRACTS = {
+    "reading_contracts": (
+        "data/plugins/astrbot_plugin_ada_companion/reading_*.py",
+        "data/plugins/astrbot_plugin_ada_companion/web_notebook.py",
+        "data/plugins/astrbot_plugin_ada_companion/web_tools.py",
+        "data/plugins/astrbot_plugin_ada_companion/browser_document.py",
+        "data/plugins/astrbot_plugin_ada_companion/interest_discovery.py",
+        "data/plugins/astrbot_plugin_ada_companion/bili_discovery.py",
+        "data/plugins/astrbot_plugin_ada_companion/initiative_materials.py",
+        "data/plugins/astrbot_plugin_ada_companion/tool_policy.py",
+        "data/plugins/astrbot_plugin_ada_companion/prompting.py",
+        "data/plugins/astrbot_plugin_ada_companion/main.py",
+        "maintenance/tests/test_reading_*.py",
+        "maintenance/tests/reading_crash_support.py",
+        "maintenance/tests/test_interest_discovery.py",
+        "maintenance/tests/test_initiative_materials.py",
+        "maintenance/tests/test_ada_web_backpack.py",
+        "maintenance/tests/test_bili_*.py",
+        "maintenance/tests/test_browser_*.py",
+        "maintenance/tests/test_sticker_request_routing.py",
+    ),
     "cognition_contracts": (
         "data/plugins/astrbot_plugin_memory_companion/core/core_state*.py",
         "data/plugins/astrbot_plugin_memory_companion/core/working_state*.py",
@@ -78,6 +98,7 @@ CONTRACTS = {
         "tests/media_pipeline/*",
     ),
     "performance_contracts": (
+        "data/plugins/astrbot_plugin_ada_companion/response_media.py",
         "data/plugins/astrbot_plugin_ada_companion/performance*.py",
         "data/plugins/astrbot_plugin_ada_companion/main.py",
         "data/plugins/astrbot_plugin_ada_companion/initiative.py",

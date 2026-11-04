@@ -68,6 +68,8 @@ class InterestMaterials:
                             :600
                         ],
                         "next_step": row.get("next_step", "")[:400],
+                        "reading": row.get("reading")
+                        or {"source_kind": "legacy_unknown", "coverage": "unknown"},
                         "updated_at": row["updated_at"],
                     }
                 )
