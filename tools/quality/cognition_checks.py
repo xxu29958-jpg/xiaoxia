@@ -36,6 +36,10 @@ def cognition_checks(repo: Path, interpreter: str) -> list[dict]:
             "-v",
             "--durations=10",
             "-p",
+            "tools.quality.pytest_progress",
+            "-o",
+            "faulthandler_timeout=60",
+            "-p",
             "no:cacheprovider",
             "maintenance/tests/test_companion_runtime.py",
             "maintenance/tests/test_thread_review.py",
@@ -62,6 +66,9 @@ def cognition_checks(repo: Path, interpreter: str) -> list[dict]:
                 execute(
                     repo,
                     command,
+                    # The full integration batch outgrew the generic command
+                    # budget; individual assertions/deadlines stay unchanged.
+                    timeout=300 if "pytest" in command else 180,
                     extra_env={
                         "ASTRBOT_ROOT": root,
                         "ASTRBOT_TEST_MODE": "true",

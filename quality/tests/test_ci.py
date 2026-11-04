@@ -116,6 +116,16 @@ class ResultTests(unittest.TestCase):
 
 
 class ImpactTests(unittest.TestCase):
+    def test_cognition_runner_changes_select_its_actual_consumer_group(self):
+        for path in (
+            "tools/quality/cognition_checks.py",
+            "tools/quality/pytest_progress.py",
+        ):
+            with self.subTest(path=path):
+                self.assertTrue(
+                    required_tests([Change(path, None, "M")])["cognition_contracts"]
+                )
+
     def test_overlapping_changes_keep_each_origins_real_consumer(self):
         state = "state.py"
         chat = "data/plugins/astrbot_plugin_ada_companion/appraisals.py"
